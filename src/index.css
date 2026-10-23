@@ -245,3 +245,75 @@ input[type="range"].studio-range:focus-visible {
   content-visibility: auto;
   contain-intrinsic-size: auto none auto 520px;
 }
+
+/* 4. Barra de pestañas Owayo con indicador deslizante por CSS Anchor Positioning */
+ul.owayo-tabs {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul.owayo-tabs::before {
+  content: '';
+  position: absolute;
+  position-anchor: --active-owayo-tab;
+  /* DO NOT use position-area, which can not be transitioned. */
+  inset-block-start: calc(anchor(bottom) - 3px);
+  inset-inline-start: anchor(left);
+  inset-inline-end: anchor(right);
+  block-size: 3px;
+  background: #fbbf24;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ul.owayo-tabs::before {
+    transition: inset 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+ul.owayo-tabs li.active {
+  anchor-name: --active-owayo-tab;
+}
+
+@supports not (position-anchor: auto) {
+  ul.owayo-tabs::before {
+    display: none;
+  }
+  ul.owayo-tabs li.active {
+    border-bottom: 3px solid #fbbf24;
+  }
+}
+
+/* 5. Controles Switch nativos progresivos (<input type="checkbox" switch>) */
+input[type="checkbox"][switch] {
+  accent-color: var(--accent-color, #fbbf24);
+  margin: 0;
+  cursor: pointer;
+}
+
+input[type="checkbox"][switch]:focus-visible {
+  outline: 3px solid var(--focus-color, #38bdf8);
+  outline-offset: 4px;
+}
+
+/* 6. Backdrop unificado para diálogos modales (<dialog closedby="any">) */
+dialog::backdrop {
+  background-color: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+/* 7. Cuadrícula de transparencia para previsualización de PNG/SVG y mesa de patronaje */
+.checkered-preview {
+  background-color: #1e293b;
+  background-image:
+    linear-gradient(45deg, #0f172a 25%, transparent 25%),
+    linear-gradient(-45deg, #0f172a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #0f172a 75%),
+    linear-gradient(-45deg, transparent 75%, #0f172a 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}

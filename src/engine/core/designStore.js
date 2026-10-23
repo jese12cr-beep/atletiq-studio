@@ -1,73 +1,121 @@
 /**
- * ATLETIQ Engine v4.0 — Catálogo 3D Exacto (`.mirl` + `.fish` Owayo v6),
- * Sistema Cromático de 167 Colores Pantone® / CM5, Fuentes Atléticas y Estado Maestro Multi-Pieza
+ * ATLETIQ Engine v5.0 — Catálogo 3D Exacto de 4 Moldes `.mirl` + 52 Plantillas `.fish` (Fútbol & Baloncesto: Camisetas + Shorts),
+ * Sistema Cromático de 167 Colores Pantone® / CM5, Fuentes Atléticas y Estado Multi-Prenda (Kit Sincronizable)
  */
 
 import {
   PANTONE_CM5_PALETTE,
   FOOTBALL_FISH_DESIGNS,
+  FOOTBALL_SHORTS_FISH_DESIGNS,
   BASKETBALL_FISH_DESIGNS,
+  BASKETBALL_SHORTS_FISH_DESIGNS,
 } from './palette152';
 
-export { PANTONE_CM5_PALETTE, FOOTBALL_FISH_DESIGNS, BASKETBALL_FISH_DESIGNS };
+export {
+  PANTONE_CM5_PALETTE,
+  FOOTBALL_FISH_DESIGNS,
+  FOOTBALL_SHORTS_FISH_DESIGNS,
+  BASKETBALL_FISH_DESIGNS,
+  BASKETBALL_SHORTS_FISH_DESIGNS,
+};
 
 export const ENGINE_PRODUCTS = [
   {
     id: 'futbol_jersey_pro_vneck',
-    name: 'Camiseta Fútbol F3 Pro (204m-KA)',
+    name: 'Camiseta Fútbol F3 Basic',
+    shortName: 'Camiseta Fútbol',
     sport: 'Fútbol',
+    garmentCategory: 'jersey',
+    pairedProductId: 'football_shorts_fp3',
     renderMode: 'WEBGL_3D_PBR',
     garmentShape: 'jersey_short',
     mirlUrl: '/models/football_f3_ka.mirl',
     mirlKey: 'football_f3_ka',
     owayoCutCode: '204m_Basic_KA',
+    defaultFabricId: 'ts_tex_football',
+    defaultDesignId: 'tackle',
     basePrice: 34.0,
     shopifyVariantBase: 44901234567001,
-    badge: 'Malla Real 38,319 Verts • 15 Diseños',
+    badge: '38,319 Vértices • 16 Diseños .fish',
+  },
+  {
+    id: 'football_shorts_fp3',
+    name: 'Short Fútbol FP3 Basic',
+    shortName: 'Short Fútbol',
+    sport: 'Fútbol',
+    garmentCategory: 'shorts',
+    pairedProductId: 'futbol_jersey_pro_vneck',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'football_shorts',
+    mirlUrl: '/models/football_shorts_fp3.mirl',
+    mirlKey: 'football_shorts_fp3',
+    owayoCutCode: '303m_Basic',
+    defaultFabricId: 'sr_tex_shorts',
+    defaultDesignId: 'city',
+    basePrice: 22.0,
+    shopifyVariantBase: 44901234567101,
+    badge: '9,045 Vértices • 10 Diseños .fish',
   },
   {
     id: 'basketball_b6_hero',
-    name: 'Camiseta Basket B6 Hero (222m)',
+    name: 'Camiseta Basket B6 Hero',
+    shortName: 'Camiseta Basket',
     sport: 'Baloncesto',
+    garmentCategory: 'jersey',
+    pairedProductId: 'basketball_shorts_bp6',
     renderMode: 'WEBGL_3D_PBR',
     garmentShape: 'basketball_tank',
     mirlUrl: '/models/basketball_b6_hero.mirl',
     mirlKey: 'basketball_b6_hero',
     owayoCutCode: '222m-Hero',
+    defaultFabricId: 'cooldry_hex',
+    defaultDesignId: 'legend',
     basePrice: 32.5,
     shopifyVariantBase: 44901234567007,
-    badge: 'Malla Real 31,204 Verts • 9 Diseños',
+    badge: '31,204 Vértices • 20 Diseños .fish',
+  },
+  {
+    id: 'basketball_shorts_bp6',
+    name: 'Short Basket BP6 Hero',
+    shortName: 'Short Basket',
+    sport: 'Baloncesto',
+    garmentCategory: 'shorts',
+    pairedProductId: 'basketball_b6_hero',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'basketball_shorts',
+    mirlUrl: '/models/basketball_shorts_bp6.mirl',
+    mirlKey: 'basketball_shorts_bp6',
+    owayoCutCode: '313m-ENB',
+    defaultFabricId: 'cooldry_hex',
+    defaultDesignId: 'legend',
+    basePrice: 26.5,
+    shopifyVariantBase: 44901234567201,
+    badge: '55,791 Vértices • 6 Diseños .fish',
   },
   {
     id: 'esports_pro_jersey',
-    name: 'Jersey E-Sports Pro Arena (KA)',
+    name: 'Jersey E-Sports Pro Arena',
+    shortName: 'Jersey E-Sports',
     sport: 'E-Sports',
+    garmentCategory: 'jersey',
+    pairedProductId: 'football_shorts_fp3',
     renderMode: 'WEBGL_3D_PBR',
     garmentShape: 'jersey_crew',
     mirlUrl: '/models/football_f3_ka.mirl',
     mirlKey: 'football_f3_ka',
     owayoCutCode: '204m_Basic_KA',
+    defaultFabricId: 'ts_tex_football',
+    defaultDesignId: 'gladiator',
     basePrice: 36.0,
     shopifyVariantBase: 44901234567003,
-    badge: 'Malla Real 38,319 Verts • Sublimación Full',
-  },
-  {
-    id: 'cycling_aero_maillot',
-    name: 'Jersey Entrenamiento / Club Pro (KA)',
-    sport: 'Multideporte',
-    renderMode: 'WEBGL_3D_PBR',
-    garmentShape: 'cycling_aero',
-    mirlUrl: '/models/football_f3_ka.mirl',
-    mirlKey: 'football_f3_ka',
-    owayoCutCode: '204m_Basic_KA',
-    basePrice: 38.0,
-    shopifyVariantBase: 44901234567002,
-    badge: 'Malla Real 38,319 Verts • TS-Tex',
+    badge: '38,319 Vértices • Sublimación Full',
   },
   {
     id: 'cap_snapback_6panel',
     name: 'Gorra Snapback 6-Panel Club',
+    shortName: 'Gorra Club',
     sport: 'Accesorios',
+    garmentCategory: 'accessory',
     renderMode: 'FAUX_3D_LAYERED_WEBP',
     accessoryType: 'cap',
     basePrice: 21.0,
@@ -77,7 +125,9 @@ export const ENGINE_PRODUCTS = [
   {
     id: 'bottle_inox_laser_750',
     name: 'Termo Inox 750ml Grabado Láser',
+    shortName: 'Termo 750ml',
     sport: 'Accesorios',
+    garmentCategory: 'accessory',
     renderMode: 'FAUX_3D_LAYERED_WEBP',
     accessoryType: 'bottle',
     basePrice: 18.5,
@@ -87,7 +137,9 @@ export const ENGINE_PRODUCTS = [
   {
     id: 'shinguards_carbon_pro',
     name: 'Espinilleras Carbon Shield Pro',
-    sport: 'Fútbol',
+    shortName: 'Espinilleras',
+    sport: 'Accesorios',
+    garmentCategory: 'accessory',
     renderMode: 'FAUX_3D_LAYERED_WEBP',
     accessoryType: 'shinguards',
     basePrice: 25.0,
@@ -97,19 +149,24 @@ export const ENGINE_PRODUCTS = [
 ];
 
 export function getDesignsForProduct(productModelId = 'futbol_jersey_pro_vneck') {
-  if (productModelId === 'basketball_b6_hero') {
-    return BASKETBALL_FISH_DESIGNS;
+  switch (productModelId) {
+    case 'basketball_b6_hero':
+      return BASKETBALL_FISH_DESIGNS;
+    case 'basketball_shorts_bp6':
+      return BASKETBALL_SHORTS_FISH_DESIGNS;
+    case 'football_shorts_fp3':
+      return FOOTBALL_SHORTS_FISH_DESIGNS;
+    default:
+      return FOOTBALL_FISH_DESIGNS;
   }
-  return FOOTBALL_FISH_DESIGNS;
 }
 
-// Selección rápida de colores destacados + acceso total a PANTONE_CM5_PALETTE (167 tonos)
 export const TEXTILE_COLORS = PANTONE_CM5_PALETTE;
 
 export const VECTOR_PATTERNS = FOOTBALL_FISH_DESIGNS.map((d) => ({
   id: d.id,
   name: d.name,
-  subtitle: `Zonas ${d.baseColors.join('+')} • 5 Piezas HD`,
+  subtitle: `Zonas ${d.baseColors.join('+')} • HD`,
 }));
 
 export const ZONE_SURFACE_PATTERNS = [
@@ -125,9 +182,9 @@ export const VECTOR_CREST_PRESETS = [
   { id: 'royal_shield', name: 'Escudo Club Pro', category: 'Escudos' },
   { id: 'eagle_hex', name: 'Emblema Hexagonal', category: 'Escudos' },
   { id: 'circle_badge', name: 'Sello Redondo FC', category: 'Escudos' },
-  { id: 'league_patch', name: 'Parche Oficial Manga', category: 'Mangas' },
+  { id: 'league_patch', name: 'Parche Oficial Liga', category: 'Parches' },
   { id: 'three_stars', name: '3 Estrellas Campeón', category: 'Insignias' },
-  { id: 'esports_bolt', name: 'Rayo Pro Gaming', category: 'E-Sports' },
+  { id: 'esports_bolt', name: 'Rayo Pro Arena', category: 'E-Sports' },
   { id: 'crown_crest', name: 'Corona Real Oro', category: 'Insignias' },
   { id: 'wing_emblem', name: 'Alas Velocidad', category: 'Sponsor' },
 ];
@@ -141,17 +198,27 @@ export const FABRIC_WEAVES = [
     normalScale: 0.34,
     bumpScale: -0.004,
     roughness: 0.52,
-    desc: 'Tejido oficial Owayo TS-Tex extraído de camisetas F3 (scaleStoff 0.50×0.60)',
+    desc: 'Tejido técnico transpirable de camiseta F3 Basic (scaleStoff 0.50×0.60)',
   },
   {
     id: 'cooldry_hex',
-    name: 'K-Tex 2™ Micromesh 155g',
+    name: 'K-Tex 2™ Basket Micromesh 155g',
     bumpUrl: '/fabrics/k-tex2.png',
     uvRepeat: 44,
     normalScale: 0.42,
     bumpScale: -0.0075,
     roughness: 0.56,
-    desc: 'Malla transpirable oficial Owayo K-Tex 2 (scaleStoff 0.35×0.50)',
+    desc: 'Malla abierta de alto flujo de aire para camisetas B6 Hero y shorts BP6 Hero',
+  },
+  {
+    id: 'sr_tex_shorts',
+    name: 'SR-Tex™ Anti-Fricción Shorts 160g',
+    bumpUrl: '/fabrics/sr-tex.png',
+    uvRepeat: 38,
+    normalScale: 0.38,
+    bumpScale: -0.004,
+    roughness: 0.50,
+    desc: 'Poliéster elástico resistente al deslizamiento extraído de pantalones FP3 Basic',
   },
   {
     id: 'pique_heavy',
@@ -161,7 +228,7 @@ export const FABRIC_WEAVES = [
     normalScale: 0.52,
     bumpScale: -0.009,
     roughness: 0.65,
-    desc: 'Trama acanalada de alta resistencia para cuellos, puños y contacto',
+    desc: 'Trama acanalada elástica para cuellos, sisas de 48mm y refuerzos',
   },
 ];
 
@@ -176,6 +243,75 @@ export const SPORT_FONTS = [
   { id: 'F-108', label: 'Heavy Impact (Archivo)', family: "'Archivo Black', sans-serif" },
   { id: 'F-109', label: 'Arena Tech (Play)', family: "'Play', sans-serif" },
   { id: 'F-110', label: 'Pro Sans Clean (Outfit)', family: "'Outfit', sans-serif" },
+];
+
+export const COLOR_HARMONY_SUGGESTIONS = [
+  {
+    name: 'Azul Real & Oro',
+    zones: {
+      primary: { hex: '#0033a0', pantone: 'PMS 286 C', code: 'Royal 4', owayoCode: 'A' },
+      secondary: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'B' },
+      accents: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'C' },
+      quaternary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'D' },
+      collar: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'K' },
+      sleeves: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'SLL/SLR' },
+    },
+  },
+  {
+    name: 'Carmesí & Ónix',
+    zones: {
+      primary: { hex: '#c8102e', pantone: 'PMS 186 C', code: 'Red 4', owayoCode: 'A' },
+      secondary: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'B' },
+      accents: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'C' },
+      quaternary: { hex: '#ffc72c', pantone: 'PMS 135 C', code: 'Gold 3', owayoCode: 'D' },
+      collar: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'K' },
+      sleeves: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'SLL/SLR' },
+    },
+  },
+  {
+    name: 'Menta Pro & Carbón',
+    zones: {
+      primary: { hex: '#00bfb3', pantone: 'PMS 3262 C', code: 'Mint 3', owayoCode: 'A' },
+      secondary: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'B' },
+      accents: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'C' },
+      quaternary: { hex: '#5bd1c5', pantone: 'PMS 3252 C', code: 'Mint 2', owayoCode: 'D' },
+      collar: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'K' },
+      sleeves: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'SLL/SLR' },
+    },
+  },
+  {
+    name: 'Lakers Púrpura & Oro',
+    zones: {
+      primary: { hex: '#330072', pantone: 'PMS 2685 C', code: 'Purple 5', owayoCode: 'A' },
+      secondary: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'B' },
+      accents: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'C' },
+      quaternary: { hex: '#753bbd', pantone: 'PMS 266 C', code: 'Violet 4', owayoCode: 'D' },
+      collar: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'K' },
+      sleeves: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'SLL/SLR' },
+    },
+  },
+  {
+    name: 'Blanco Real & Marino',
+    zones: {
+      primary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'A' },
+      secondary: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'B' },
+      accents: { hex: '#00a3e0', pantone: 'PMS 299 C', code: 'Cyan 3', owayoCode: 'C' },
+      quaternary: { hex: '#b9975b', pantone: 'PMS 465 C', code: 'Gold 4', owayoCode: 'D' },
+      collar: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'K' },
+      sleeves: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'SLL/SLR' },
+    },
+  },
+  {
+    name: 'Verde Neón & Antracita',
+    zones: {
+      primary: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'A' },
+      secondary: { hex: '#44d62c', pantone: 'PMS 802 C (Flúor)', code: 'Neon Green', owayoCode: 'B' },
+      accents: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'C' },
+      quaternary: { hex: '#53565a', pantone: 'PMS Cool Gray 11 C', code: 'Grey 4', owayoCode: 'D' },
+      collar: { hex: '#44d62c', pantone: 'PMS 802 C (Flúor)', code: 'Neon Green', owayoCode: 'K' },
+      sleeves: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'SLL/SLR' },
+    },
+  },
 ];
 
 export const VOLUME_TIERS = [
@@ -205,27 +341,114 @@ export function generateDesignId() {
   return `des_${token}`;
 }
 
-export function createInitialMasterDesign() {
-  return {
-    designId: generateDesignId(),
-    engineVersion: '4.0.0',
-    productModelId: 'futbol_jersey_pro_vneck',
-    collarStyle: 'v-neck',
-    patternId: 'tackle', // Diseño oficial .fish de 5 piezas (Front, Back, LeftArm, RightArm, Collar)
-    surfacePatternId: 'none', // Textura opcional sublimada sobre Zona A
-    surfacePatternOpacity: 0.16,
-    fabricWeaveId: 'ts_tex_football',
-    bleedEnforcement: 'SOFT_WARN', // 'SOFT_WARN' | 'HARD_CLAMP' | 'ALL_OVER'
-    autoContrastHF: true,
-    colorZones: {
-      primary: { hex: '#0033a0', pantone: 'PMS 286 C', code: 'Royal 4', owayoCode: 'A' },
-      secondary: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'B' },
-      accents: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'C' },
-      quaternary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'D' },
-      collar: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'K' },
-      sleeves: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'SLL/SLR' },
-    },
-    decals: [
+export function createDefaultDesignForProduct(productModelId = 'futbol_jersey_pro_vneck', inheritedColorZones = null) {
+  const prod = ENGINE_PRODUCTS.find((p) => p.id === productModelId) || ENGINE_PRODUCTS[0];
+  const isBasketJersey = productModelId === 'basketball_b6_hero';
+  const isBasketShorts = productModelId === 'basketball_shorts_bp6';
+  const isFootballShorts = productModelId === 'football_shorts_fp3';
+  const isShorts = isBasketShorts || isFootballShorts;
+
+  const baseColors = inheritedColorZones
+    ? structuredClone(inheritedColorZones)
+    : isBasketJersey || isBasketShorts
+    ? {
+        primary: { hex: '#c8102e', pantone: 'PMS 186 C', code: 'Red 4', owayoCode: 'A' },
+        secondary: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'B' },
+        accents: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'C' },
+        quaternary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'D' },
+        collar: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'K' },
+        sleeves: { hex: '#101820', pantone: 'PMS Black 6 C', code: 'Black 5', owayoCode: 'SLL/SLR' },
+      }
+    : {
+        primary: { hex: '#0033a0', pantone: 'PMS 286 C', code: 'Royal 4', owayoCode: 'A' },
+        secondary: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'B' },
+        accents: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'C' },
+        quaternary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'D' },
+        collar: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'K' },
+        sleeves: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'SLL/SLR' },
+      };
+
+  let decals = [];
+  if (isFootballShorts) {
+    decals = [
+      {
+        id: 'decal_short_crest',
+        type: 'PRESET_CREST',
+        presetId: 'royal_shield',
+        label: 'Escudo Muslo Izq.',
+        panel: 'left_leg',
+        centerMm: { x: 201, y: 425 },
+        sizeMm: { width: 62, height: 68 },
+        scale: 1,
+        rotationDeg: 0,
+        opacity: 1,
+        blendMode: 'source-over',
+        clampToZone: 'ALL',
+        pinned: false,
+        flipX: false,
+        flipY: false,
+        removeWhiteBg: false,
+        tintHex: '',
+        zIndex: 10,
+        isVector: true,
+        widthPx: 3200,
+      },
+    ];
+  } else if (isBasketShorts) {
+    decals = [
+      {
+        id: 'decal_bshort_crest',
+        type: 'PRESET_CREST',
+        presetId: 'eagle_hex',
+        label: 'Emblema Lateral Der.',
+        panel: 'right_leg',
+        centerMm: { x: 432, y: 410 },
+        sizeMm: { width: 78, height: 78 },
+        scale: 1,
+        rotationDeg: 0,
+        opacity: 1,
+        blendMode: 'source-over',
+        clampToZone: 'ALL',
+        pinned: false,
+        flipX: false,
+        flipY: false,
+        removeWhiteBg: false,
+        tintHex: '',
+        zIndex: 10,
+        isVector: true,
+        widthPx: 3200,
+      },
+    ];
+  } else if (isBasketJersey) {
+    decals = [
+      {
+        id: 'decal_bball_team',
+        type: 'STATIC_TEXT',
+        text: 'BULLS PRO',
+        isFixed: true,
+        fontFamily: "'Bebas Neue', sans-serif",
+        fillHex: '#ffffff',
+        outlineHex: '#101820',
+        outlineWidthMm: 3.0,
+        archDeg: 38,
+        letterSpacingMm: 1.5,
+        label: 'Nombre Equipo Pecho',
+        panel: 'front',
+        centerMm: { x: 316.2, y: 270 },
+        sizeMm: { width: 250, height: 64 },
+        scale: 1,
+        rotationDeg: 0,
+        opacity: 1,
+        blendMode: 'source-over',
+        clampToZone: 'ALL',
+        pinned: false,
+        zIndex: 20,
+        isVector: true,
+        widthPx: 3200,
+      },
+    ];
+  } else {
+    decals = [
       {
         id: 'decal_club_crest',
         type: 'PRESET_CREST',
@@ -238,6 +461,8 @@ export function createInitialMasterDesign() {
         rotationDeg: 0,
         opacity: 1,
         blendMode: 'source-over',
+        clampToZone: 'ALL',
+        pinned: false,
         flipX: false,
         flipY: false,
         removeWhiteBg: false,
@@ -250,11 +475,11 @@ export function createInitialMasterDesign() {
         id: 'decal_main_sponsor',
         type: 'STATIC_TEXT',
         text: 'ATLETIQ AIRWAYS',
+        isFixed: true,
         fontFamily: "'Chakra Petch', sans-serif",
         fillHex: '#ffffff',
         outlineHex: '#0c2340',
         outlineWidthMm: 2.2,
-        outline2Hex: '',
         archDeg: 0,
         letterSpacingMm: 1.2,
         label: 'Sponsor Pecho',
@@ -265,6 +490,8 @@ export function createInitialMasterDesign() {
         rotationDeg: 0,
         opacity: 1,
         blendMode: 'source-over',
+        clampToZone: 'ALL',
+        pinned: false,
         zIndex: 20,
         isVector: true,
         widthPx: 3200,
@@ -281,6 +508,8 @@ export function createInitialMasterDesign() {
         rotationDeg: 0,
         opacity: 1,
         blendMode: 'source-over',
+        clampToZone: 'ALL',
+        pinned: false,
         flipX: false,
         flipY: false,
         removeWhiteBg: false,
@@ -289,46 +518,62 @@ export function createInitialMasterDesign() {
         isVector: true,
         widthPx: 3200,
       },
-    ],
+    ];
+  }
+
+  return {
+    designId: generateDesignId(),
+    engineVersion: '5.0.0',
+    productModelId: prod.id,
+    collarStyle: 'v-neck',
+    patternId: prod.defaultDesignId || 'pure',
+    surfacePatternId: 'none',
+    surfacePatternOpacity: 0.16,
+    fabricWeaveId: prod.defaultFabricId || 'ts_tex_football',
+    bleedEnforcement: 'SOFT_WARN',
+    autoContrastHF: true,
+    colorZones: baseColors,
+    decals,
     variableSlots: {
       playerNameBack: {
         textObjectUUID: 'uuid-slot-name-back',
         masterID: null,
-        enabled: true,
+        enabled: !isShorts,
         panel: 'back',
-        centerMm: { x: 316.6, y: 158 },
-        maxWidthMm: 295,
-        capHeightMm: 52,
-        archDeg: 0,
+        centerMm: { x: isBasketJersey ? 222.3 : 316.6, y: isBasketJersey ? 185 : 158 },
+        maxWidthMm: isBasketJersey ? 250 : 295,
+        capHeightMm: isBasketJersey ? 50 : 52,
+        archDeg: isBasketJersey ? 18 : 0,
         autoCondense: true,
         fontFamily: "'Bebas Neue', sans-serif",
         fillHex: '#ffffff',
-        outlineHex: '#0c2340',
+        outlineHex: '#101820',
         outlineWidthMm: 3.0,
       },
       playerNumberBack: {
         textObjectUUID: 'uuid-slot-num-back',
         masterID: null,
-        enabled: true,
+        enabled: !isShorts,
         panel: 'back',
-        centerMm: { x: 316.6, y: 332 },
-        heightMm: 225,
+        centerMm: { x: isBasketJersey ? 222.3 : 316.6, y: isBasketJersey ? 360 : 332 },
+        heightMm: isBasketJersey ? 215 : 225,
         fontFamily: "'Bebas Neue', sans-serif",
         fillHex: '#ffffff',
-        outlineHex: '#0c2340',
+        outlineHex: '#101820',
         inlineHex: '#ffcd00',
         outlineWidthMm: 4.8,
       },
       playerNumberFront: {
         textObjectUUID: 'uuid-slot-num-front',
         masterID: 'uuid-slot-num-back',
-        enabled: true,
+        enabled: !isShorts,
         panel: 'front',
-        centerMm: { x: 185, y: 188 },
-        heightMm: 48,
+        centerMm: { x: isBasketJersey ? 316.2 : 185, y: isBasketJersey ? 410 : 188 },
+        heightMm: isBasketJersey ? 135 : 48,
         fontFamily: "'Bebas Neue', sans-serif",
-        fillHex: '#ffcd00',
-        outlineHex: '#0c2340',
+        fillHex: isBasketJersey ? '#ffffff' : '#ffcd00',
+        outlineHex: '#101820',
+        outlineWidthMm: isBasketJersey ? 3.8 : 2.2,
       },
       playerNumberSleeve: {
         textObjectUUID: 'uuid-slot-num-sleeve',
@@ -339,17 +584,33 @@ export function createInitialMasterDesign() {
         heightMm: 44,
         fontFamily: "'Bebas Neue', sans-serif",
         fillHex: '#ffffff',
-        outlineHex: '#0c2340',
+        outlineHex: '#101820',
+      },
+      playerNumberShorts: {
+        textObjectUUID: 'uuid-slot-num-shorts',
+        masterID: 'uuid-slot-num-back',
+        enabled: isShorts,
+        panel: 'right_leg',
+        centerMm: { x: isBasketShorts ? 611 : 599, y: isBasketShorts ? 425 : 430 },
+        heightMm: 68,
+        fontFamily: "'Bebas Neue', sans-serif",
+        fillHex: '#ffffff',
+        outlineHex: '#101820',
+        outlineWidthMm: 2.8,
       },
     },
   };
 }
 
+export function createInitialMasterDesign() {
+  return createDefaultDesignForProduct('futbol_jersey_pro_vneck');
+}
+
 export const INITIAL_TEAM_ROSTER = [
   { id: 'r1', cut: 'MEN_PRO_SLIM', size: 'L', qty: 1, name: 'RODRÍGUEZ', number: '10', role: 'Capitán' },
-  { id: 'r2', cut: 'MEN_PRO_SLIM', size: 'M', qty: 1, name: 'FERNÁNDEZ-GARCÍA', number: '7', role: 'Extremo (Prueba Nombre Largo)' },
-  { id: 'r3', cut: 'WOMEN_FIT', size: 'S', qty: 1, name: 'VALERIA M.', number: '9', role: 'Delantera' },
-  { id: 'r4', cut: 'MEN_CLASSIC', size: 'XL', qty: 1, name: 'SANTOS', number: '1', role: 'Portero' },
+  { id: 'r2', cut: 'MEN_PRO_SLIM', size: 'M', qty: 1, name: 'FERNÁNDEZ-GARCÍA', number: '7', role: 'Titular (Nombre Largo)' },
+  { id: 'r3', cut: 'WOMEN_FIT', size: 'S', qty: 1, name: 'VALERIA M.', number: '9', role: 'Titular' },
+  { id: 'r4', cut: 'MEN_CLASSIC', size: 'XL', qty: 1, name: 'SANTOS', number: '1', role: 'Portero / Pivot' },
   { id: 'r5', cut: 'YOUTH_KIDS', size: '152', qty: 2, name: 'MATEO', number: '14', role: 'Cantera' },
-  { id: 'r6', cut: 'MEN_PRO_SLIM', size: 'L', qty: 1, name: 'K. MBAPPÉ', number: '11', role: 'Delantero' },
+  { id: 'r6', cut: 'MEN_PRO_SLIM', size: 'L', qty: 1, name: 'JORDAN', number: '23', role: 'Escolta' },
 ];

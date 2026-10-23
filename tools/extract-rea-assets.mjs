@@ -2,10 +2,14 @@
  * tools/extract-rea-assets.mjs
  *
  * Extrae desde las capturas HAR (gitignored en `rea-captures/owayo/`):
- *  1. Modelos binarios 3D exactos `.mirl` v1.1 (`football_f3_ka.mirl` 38,319 vértices y `basketball_b6_hero.mirl` 31,204 vértices).
- *  2. Los 15 diseños `.fish` de Fútbol + 9 diseños `.fish` de Baloncesto, limpiando quirúrgicamente por BFS
- *     cualquier índice de marca de fabricante (`190 <= R < 255`: OOF, OOL, OOB, HF, Tec) para dejar moldes 100% white-label.
- *  3. Mapas reales de micro-relieve textil (`ts-tex.png`, `k-tex2.png`, `bandstoff-rtex3.png`).
+ *  1. Los 4 modelos binarios 3D exactos `.mirl` v1.1:
+ *     - `football_f3_ka.mirl` (`204m_Basic_KA` — Camiseta Fútbol F3 Basic: 38,319 vértices / 74,898 triángulos)
+ *     - `football_shorts_fp3.mirl` (`303m_Basic` — Short Fútbol FP3 Basic: 9,045 vértices / 17,476 triángulos)
+ *     - `basketball_b6_hero.mirl` (`222m-Hero` — Camiseta Baloncesto B6 Hero: 31,204 vértices / 60,593 triángulos)
+ *     - `basketball_shorts_bp6.mirl` (`313m-ENB` — Short Baloncesto BP6 Hero: 55,791 vértices / 110,341 triángulos)
+ *  2. Todas las plantillas `.fish` reales de las 4 prendas combinando `v1`, `v2` y `v3`, limpiando quirúrgicamente por BFS
+ *     cualquier índice de marca de tercero (`190 <= R < 255`: OOF, OOL, OOB, HF, Tec) y soportando PNG RGB, Grayscale y PLTE.
+ *  3. Los 4 mapas reales de micro-relieve textil (`ts-tex.png`, `k-tex2.png`, `bandstoff-rtex3.png`, `sr-tex.png`).
  *  4. Sistema completo de 167 colores textiles (`152 CM5` + `15 Flúor/Especiales`) con equivalencia Pantone® PMS (`src/engine/core/palette152.js`).
  */
 
@@ -14,8 +18,11 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 
 const ROOT = 'C:/Users/crja_/.gemini/antigravity/scratch/sport-custom-studio';
-const HAR_V2 = path.join(ROOT, 'rea-captures/owayo/www.owayo.es_v2.har');
-const HAR_V1 = path.join(ROOT, 'rea-captures/owayo/www.owayo.es.har');
+const HAR_PATHS = [
+  path.join(ROOT, 'rea-captures/owayo/www.owayo.es_v3.har'),
+  path.join(ROOT, 'rea-captures/owayo/www.owayo.es_v2.har'),
+  path.join(ROOT, 'rea-captures/owayo/www.owayo.es.har'),
+].filter((p) => fs.existsSync(p));
 
 // ---------------- CRC32 & Minimal Clean PNG Codec ----------------
 const CRC_TABLE = new Uint32Array(256);
@@ -50,13 +57,14 @@ function paethPredictor(a, b, c) {
 }
 
 /**
- * Decodifica un PNG de máscara `.fish`, elimina cualquier píxel con `190 <= R < 255`
- * rellenándolo por BFS con la zona de color adyacente (`R < 190`), y lo re-codifica como PNG Grayscale (colorType=0, 8-bit)
- * ¡reduciendo además su tamaño casi a la tercera parte sin perder ni un bit de índice `0..255`!
+ * Decodifica un PNG de máscara `.fish` (soporta Grayscale=0, RGB=2, Indexed PLTE=3, GrayAlpha=4, RGBA=6),
+ * elimina cualquier píxel con `190 <= R < 255` rellenándolo por BFS con la zona de color adyacente (`R < 190`),
+ * y lo re-codifica como PNG Grayscale (colorType=0, 8-bit) preservando `255` intacto para el recorte exacto del molde 2D.
  */
 function scrubFishMaskPng(pngBuf) {
   let pos = 8;
   let width = 0, height = 0, bitDepth = 8, colorType = 2;
+  let plteChunk = null;
   const idatParts = [];
   while (pos < pngBuf.length) {
     const len = pngBuf.readUInt32BE(pos);
@@ -67,6 +75,8 @@ function scrubFishMaskPng(pngBuf) {
       height = chunkData.readUInt32BE(4);
       bitDepth = chunkData[8];
       colorType = chunkData[9];
+    } else if (type === 'PLTE') {
+      plteChunk = chunkData;
     } else if (type === 'IDAT') {
       idatParts.push(chunkData);
     } else if (type === 'IEND') {
@@ -100,21 +110,21 @@ function scrubFishMaskPng(pngBuf) {
     }
   }
 
-  // Extraer canal R (índice de zona `ColorCodeNr`)
   const totalPx = width * height;
   const zoneGrid = new Uint8Array(totalPx);
   let watermarkCount = 0;
   for (let p = 0; p < totalPx; p++) {
-    const r = recon[p * bpp];
+    const r =
+      colorType === 3 && plteChunk
+        ? plteChunk[recon[p] * 3]
+        : recon[p * bpp];
     zoneGrid[p] = r;
     if (r >= 190 && r < 255) watermarkCount++;
   }
 
   if (watermarkCount > 0) {
-    // BFS multi-origen desde los píxeles de borde válidos (`r < 190`) adyacentes a la marca `190..254`
     const queue = new Int32Array(watermarkCount + width * 4);
     let qHead = 0, qTail = 0;
-    const dirs = [-1, 1, -width, width];
 
     for (let y = 0; y < height; y++) {
       const row = y * width;
@@ -122,7 +132,6 @@ function scrubFishMaskPng(pngBuf) {
         const idx = row + x;
         const z = zoneGrid[idx];
         if (z >= 190 && z < 255) {
-          // Revisar si tiene vecino directo `< 190`
           let seedZone = 0;
           if (x > 0 && zoneGrid[idx - 1] < 190) seedZone = zoneGrid[idx - 1];
           else if (x + 1 < width && zoneGrid[idx + 1] < 190) seedZone = zoneGrid[idx + 1];
@@ -159,20 +168,16 @@ function scrubFishMaskPng(pngBuf) {
       }
     }
 
-    // Fallback por seguridad si algún islote estaba aislado en padding 255
     for (let p = 0; p < totalPx; p++) {
       if (zoneGrid[p] >= 190 && zoneGrid[p] < 255) zoneGrid[p] = 1;
     }
   }
 
-  // Re-codificar como PNG RGB (colorType=2, igual que el original pero limpio y con filtro Up/Sub ligero)
-  // Usamos RGB (R=G=B=zoneGrid[p]) para que incluso si algún navegador aplica curva gamma sin colorSpaceConversion:'none',
-  // R, G y B sean idénticos, o mejor aún: Grayscale (colorType=0) ocupa 3x menos y R=G=B=gray en Canvas 2D!
   const outRaw = Buffer.alloc(height * (width + 1));
   for (let y = 0; y < height; y++) {
     const outRow = y * (width + 1);
     const inRow = y * width;
-    outRaw[outRow] = 2; // PNG Filter 2 (Up): ideal para máscaras de bloques verticales/horizontales
+    outRaw[outRow] = 2; // PNG Filter Up
     for (let x = 0; x < width; x++) {
       const cur = zoneGrid[inRow + x];
       const up = y > 0 ? zoneGrid[inRow - width + x] : 0;
@@ -183,8 +188,8 @@ function scrubFishMaskPng(pngBuf) {
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8; // 8-bit
-  ihdr[9] = 0; // Grayscale (R=G=B=zoneIndex)
+  ihdr[8] = 8;
+  ihdr[9] = 0; // Grayscale 8-bit
   ihdr[10] = 0;
   ihdr[11] = 0;
   ihdr[12] = 0;
@@ -200,9 +205,6 @@ function scrubFishMaskPng(pngBuf) {
   return { pngBuf: cleanPng, scrubbedCount: watermarkCount };
 }
 
-/**
- * Desempaqueta un archivo `.fish` (ZIP Store/Deflate), limpia cada PNG y re-empaqueta un `.fish` limpio (ZIP Store).
- */
 function cleanFishArchive(fishBuf, designName) {
   let offset = 0;
   const entries = [];
@@ -223,15 +225,17 @@ function cleanFishArchive(fishBuf, designName) {
     if (fileName.toLowerCase().endsWith('.png') && !fileName.includes('_shadow')) {
       const { pngBuf, scrubbedCount } = scrubFishMaskPng(rawData);
       totalScrubbed += scrubbedCount;
-      // Normalizamos el nombre interno a `<Part>.png` (ej. `Front.png`, `LeftArm.png`) para carga directa
-      const prefixRegex = new RegExp('^' + designName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '_');
-      const partCleanName = fileName.replace(prefixRegex, '');
+      const prefixRegex = new RegExp('^' + designName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '_', 'i');
+      // Fallback: si el archivo interno se llama p.ej. `Simple_Front.png` cuando el diseño es `Pure`, extraemos el sufijo tras el último `_`
+      let partCleanName = fileName.replace(prefixRegex, '');
+      if (partCleanName === fileName && fileName.includes('_')) {
+        partCleanName = fileName.slice(fileName.lastIndexOf('_') + 1);
+      }
       entries.push({ name: partCleanName, data: pngBuf });
     }
     offset = dataStart + compSize;
   }
 
-  // Construir ZIP Store (`method=0`) compacto
   const localParts = [];
   const centralParts = [];
   let localOffset = 0;
@@ -243,7 +247,7 @@ function cleanFishArchive(fishBuf, designName) {
     localHdr.writeUInt32LE(0x04034b50, 0);
     localHdr.writeUInt16LE(20, 4);
     localHdr.writeUInt16LE(0, 6);
-    localHdr.writeUInt16LE(0, 8); // Store
+    localHdr.writeUInt16LE(0, 8);
     localHdr.writeUInt32LE(crc, 14);
     localHdr.writeUInt32LE(entry.data.length, 18);
     localHdr.writeUInt32LE(entry.data.length, 22);
@@ -285,7 +289,6 @@ function slugifyDesign(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 }
 
-// ---------------- Referencia Pantone® Solid Coated para Match Automático ----------------
 const PANTONE_REF = [
   ['PMS Bright White', '#ffffff'], ['PMS Black 6 C', '#101820'], ['PMS Cool Gray 2 C', '#d0d0ce'],
   ['PMS Cool Gray 5 C', '#b1b3b3'], ['PMS Cool Gray 8 C', '#888b8d'], ['PMS Cool Gray 11 C', '#53565a'],
@@ -322,7 +325,6 @@ function findClosestPantone(hex, nameHint = '') {
   let bestDist = Infinity;
   for (const [code, pHex] of PANTONE_REF) {
     const [r2, g2, b2] = hexToRgb(pHex);
-    // Distancia perceptual ponderada redmean
     const rMean = (r1 + r2) / 2;
     const dr = r1 - r2, dg = g1 - g2, db = b1 - b2;
     const dist = (2 + rMean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rMean) / 256) * db * db;
@@ -355,87 +357,148 @@ function translateColorName(enName = '') {
   return out;
 }
 
-// ---------------- Ejecución Principal ----------------
-console.log('Cargando capturas HAR...');
-const harV2 = JSON.parse(fs.readFileSync(HAR_V2, 'utf8'));
-const harV1 = JSON.parse(fs.readFileSync(HAR_V1, 'utf8'));
+// ---------------- Carga combinada de entradas HTTP desde v3 + v2 + v1 ----------------
+console.log(`Cargando ${HAR_PATHS.length} capturas HAR...`);
+const allEntries = [];
+for (const p of HAR_PATHS) {
+  const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+  if (j.log?.entries) allEntries.push(...j.log.entries);
+}
+console.log(`Total entradas HTTP combinadas: ${allEntries.length}`);
+
+function decodeEntryBuffer(e) {
+  const c = e?.response?.content;
+  if (!c?.text) return null;
+  return Buffer.from(c.text, c.encoding || 'utf8');
+}
+
+const MODEL_TARGETS = [
+  { remoteModel: '204m_Basic_KA', mirlFile: '204m_Basic_KA.mirl', outMirl: 'football_f3_ka.mirl', designDir: 'football_f3_ka', exportConst: 'FOOTBALL_FISH_DESIGNS' },
+  { remoteModel: '303m_Basic', mirlFile: '303m_Basic.mirl', outMirl: 'football_shorts_fp3.mirl', designDir: 'football_shorts_fp3', exportConst: 'FOOTBALL_SHORTS_FISH_DESIGNS' },
+  { remoteModel: '222m-Hero', mirlFile: '222m-Hero.mirl', outMirl: 'basketball_b6_hero.mirl', designDir: 'basketball_b6_hero', exportConst: 'BASKETBALL_FISH_DESIGNS' },
+  { remoteModel: '313m-ENB', mirlFile: '313m-ENB.mirl', outMirl: 'basketball_shorts_bp6.mirl', designDir: 'basketball_shorts_bp6', exportConst: 'BASKETBALL_SHORTS_FISH_DESIGNS' },
+];
 
 fs.mkdirSync(path.join(ROOT, 'public/models'), { recursive: true });
-fs.mkdirSync(path.join(ROOT, 'public/designs/football_f3_ka'), { recursive: true });
-fs.mkdirSync(path.join(ROOT, 'public/designs/basketball_b6_hero'), { recursive: true });
 fs.mkdirSync(path.join(ROOT, 'public/fabrics'), { recursive: true });
+for (const t of MODEL_TARGETS) {
+  fs.mkdirSync(path.join(ROOT, `public/designs/${t.designDir}`), { recursive: true });
+}
 
-// 1. Extraer modelos .mirl
-const mirlFootball = harV2.log.entries.find((e) => e.request.url.endsWith('204m_Basic_KA.mirl'));
-const bufFootball = Buffer.from(mirlFootball.response.content.text, mirlFootball.response.content.encoding || 'utf8');
-fs.writeFileSync(path.join(ROOT, 'public/models/football_f3_ka.mirl'), bufFootball);
-console.log(`✔ Modelo 3D Fútbol extraído: football_f3_ka.mirl (${(bufFootball.length / 1024).toFixed(1)} KB)`);
+// 1. Extraer los 4 modelos .mirl
+for (const t of MODEL_TARGETS) {
+  const entry = allEntries.find((e) => e.request.url.split('?')[0].endsWith(`/${t.mirlFile}`) && e.response?.content?.text);
+  const buf = decodeEntryBuffer(entry);
+  if (!buf || buf.length < 1000) {
+    throw new Error(`No se encontró modelo binario ${t.mirlFile}`);
+  }
+  fs.writeFileSync(path.join(ROOT, 'public/models', t.outMirl), buf);
+  console.log(`✔ Modelo 3D extraído: ${t.outMirl} (${(buf.length / 1024).toFixed(1)} KB)`);
+}
 
-const mirlBasket = harV1.log.entries.find((e) => e.request.url.endsWith('222m-Hero.mirl'));
-const bufBasket = Buffer.from(mirlBasket.response.content.text, mirlBasket.response.content.encoding || 'utf8');
-fs.writeFileSync(path.join(ROOT, 'public/models/basketball_b6_hero.mirl'), bufBasket);
-console.log(`✔ Modelo 3D Baloncesto extraído: basketball_b6_hero.mirl (${(bufBasket.length / 1024).toFixed(1)} KB)`);
+// 2. Mapear metadatos de `produkt.php` por `model`
+const designMetaByModel = new Map();
+for (const e of allEntries) {
+  if (!e.request.url.includes('auswahlmodul/produkt.php') || !e.response?.content?.text) continue;
+  const txt = decodeEntryBuffer(e)?.toString('utf8') || '';
+  if (!txt.startsWith('{')) continue;
+  try {
+    const j = JSON.parse(txt);
+    if (j.model && Array.isArray(j.Designs) && !designMetaByModel.has(j.model)) {
+      const m = new Map();
+      for (const d of j.Designs) {
+        m.set(d.Design, d);
+        if (d.Realdesign) m.set(d.Realdesign, d);
+      }
+      designMetaByModel.set(j.model, m);
+    }
+  } catch {}
+}
 
-// 2. Extraer y limpiar diseños .fish (Fútbol + Baloncesto)
-function extractFishSet(har, prodFolder) {
-  const prodEntry = har.log.entries.find((e) => e.request.url.includes('auswahlmodul/produkt.php') && e.response?.content?.text?.startsWith('{'));
-  const prodJson = JSON.parse(prodEntry.response.content.text);
-  const designMetaMap = new Map((prodJson.Designs || []).map((d) => [d.Design, d]));
+// 3. Extraer y limpiar todos los `.fish` por cada modelo
+const extractedCatalogs = {};
+for (const t of MODEL_TARGETS) {
+  const metaMap = designMetaByModel.get(t.remoteModel) || new Map();
+  const seenSlugs = new Set();
+  const list = [];
 
-  const seen = new Set();
-  const catalogDesigns = [];
+  for (const e of allEntries) {
+    const cleanUrl = e.request.url.split('?')[0];
+    if (!cleanUrl.includes(`/${t.remoteModel}/designs/`) || !cleanUrl.endsWith('.fish')) continue;
+    const rawBuf = decodeEntryBuffer(e);
+    if (!rawBuf || rawBuf.length < 500) continue;
 
-  for (const e of har.log.entries) {
-    if (!e.request.url.endsWith('.fish') || !e.response?.content?.text) continue;
-    const rawName = decodeURIComponent(e.request.url.split('/').pop().replace(/\.fish$/i, ''));
-    if (seen.has(rawName)) continue;
-    seen.add(rawName);
-
+    let rawName = decodeURIComponent(cleanUrl.split('/').pop().replace(/\.fish$/i, ''));
+    if (rawName === 'Simple') rawName = 'Pure';
     const slug = slugifyDesign(rawName);
-    const rawBuf = Buffer.from(e.response.content.text, e.response.content.encoding || 'utf8');
-    const { cleanZip, parts, totalScrubbed } = cleanFishArchive(rawBuf, rawName);
+    if (seenSlugs.has(slug)) continue;
+    seenSlugs.add(slug);
 
-    const outPath = path.join(ROOT, `public/designs/${prodFolder}/${slug}.fish`);
+    const { cleanZip, parts, totalScrubbed } = cleanFishArchive(rawBuf, rawName);
+    const outPath = path.join(ROOT, `public/designs/${t.designDir}/${slug}.fish`);
     fs.writeFileSync(outPath, cleanZip);
 
-    const meta = designMetaMap.get(rawName) || {};
-    catalogDesigns.push({
+    const meta = metaMap.get(rawName) || {};
+    list.push({
       id: slug,
       name: rawName,
-      fileUrl: `/designs/${prodFolder}/${slug}.fish`,
-      baseColors: meta.baseColors || ['A', 'B', 'C'],
+      fileUrl: `/designs/${t.designDir}/${slug}.fish`,
+      baseColors: meta.baseColors || (slug === 'pure' ? ['A'] : ['A', 'B', 'C']),
       outlineZones: meta.ColorCodesWithOutline ? meta.ColorCodesWithOutline.split(',').filter(Boolean) : [],
       parts,
       sizeKB: +(cleanZip.length / 1024).toFixed(1),
     });
-    console.log(`  ✔ Diseño limpio [${prodFolder}] ${rawName.padEnd(12)} -> ${slug}.fish (${(cleanZip.length / 1024).toFixed(1)} KB, ${totalScrubbed} px marca removidos)`);
+    console.log(`  ✔ [${t.designDir}] ${rawName.padEnd(12)} -> ${slug}.fish (${(cleanZip.length / 1024).toFixed(1)} KB, ${totalScrubbed} px marca removidos)`);
   }
-  return catalogDesigns;
+
+  // Si un corte usa `Pure` como relleno base `A` sin descargar `Pure.fish`, añadimos la entrada sintética `pure` (soportada nativamente en fishPartCompositor)
+  if (!seenSlugs.has('pure')) {
+    list.unshift({
+      id: 'pure',
+      name: 'Pure',
+      fileUrl: null,
+      baseColors: ['A'],
+      outlineZones: [],
+      parts: [],
+      sizeKB: 0,
+    });
+  }
+
+  extractedCatalogs[t.exportConst] = list;
 }
 
-const footballDesigns = extractFishSet(harV2, 'football_f3_ka');
-const basketballDesigns = extractFishSet(harV1, 'basketball_b6_hero');
-
-// 3. Extraer bumpMaps textiles reales
-function extractFabricBump(har, stoffName, outFile) {
-  const entry = har.log.entries.find((e) => e.request.url.toLowerCase().endsWith(stoffName.toLowerCase()) && e.response?.content?.text);
+// 4. Extraer los 4 mapas textiles reales (`ts-tex`, `k-tex2`, `bandstoff-rtex3`, `sr-tex`)
+function extractFabricBump(stoffName, outFile) {
+  const entry = allEntries.find((e) => e.request.url.split('?')[0].toLowerCase().endsWith(stoffName.toLowerCase()) && e.response?.content?.text);
   if (!entry) return;
-  const j = JSON.parse(entry.response.content.text);
-  if (j.bumpMap) {
-    const b64 = j.bumpMap.includes(',') ? j.bumpMap.split(',')[1] : j.bumpMap;
-    fs.writeFileSync(path.join(ROOT, 'public/fabrics', outFile), Buffer.from(b64, 'base64'));
-    console.log(`✔ Mapa textil extraído: ${outFile} (bumpScale=${j.bumpScale}, scaleStoff=${JSON.stringify(j.scaleStoff)})`);
-  }
+  const txt = decodeEntryBuffer(entry)?.toString('utf8') || '';
+  try {
+    const j = JSON.parse(txt);
+    if (j.bumpMap) {
+      const b64 = j.bumpMap.includes(',') ? j.bumpMap.split(',')[1] : j.bumpMap;
+      fs.writeFileSync(path.join(ROOT, 'public/fabrics', outFile), Buffer.from(b64, 'base64'));
+      console.log(`✔ Mapa textil extraído: ${outFile} (bumpScale=${j.bumpScale}, scaleStoff=${JSON.stringify(j.scaleStoff)})`);
+    }
+  } catch {}
 }
-extractFabricBump(harV2, 'ts-tex.json', 'ts-tex.png');
-extractFabricBump(harV1, 'k-tex2.json', 'k-tex2.png');
-extractFabricBump(harV1, 'bandstoff_r-tex-3_48mm.json', 'bandstoff-rtex3.png');
+extractFabricBump('ts-tex.json', 'ts-tex.png');
+extractFabricBump('k-tex2.json', 'k-tex2.png');
+extractFabricBump('bandstoff_r-tex-3_48mm.json', 'bandstoff-rtex3.png');
+extractFabricBump('sr-tex.json', 'sr-tex.png');
 
-// 4. Extraer paleta completa CM5 (152 colores) + FB Especiales/Flúor (15 colores) = 167 colores Pantone
-const palEntry = harV2.log.entries.find((e) => e.request.url.includes('loadPalettenCluster.php') && e.response?.content?.text);
-const palJson = JSON.parse(palEntry.response.content.text);
-const cm5Main = palJson['CM5 Bedruckbar']?.['CM5 owayo Farbsystem'] || [];
-const cm5Special = palJson['CM5 Bedruckbar']?.['CM5 owayo Farbsystem - FB'] || [];
+// 5. Extraer paleta completa CM5 (152 colores) + FB Especiales/Flúor (15 colores) = 167 colores Pantone
+let cm5Main = [];
+let cm5Special = [];
+for (const e of allEntries) {
+  if (!e.request.url.includes('loadPalettenCluster.php') || !e.response?.content?.text) continue;
+  try {
+    const palJson = JSON.parse(decodeEntryBuffer(e).toString('utf8'));
+    const m = palJson['CM5 Bedruckbar']?.['CM5 owayo Farbsystem'] || [];
+    const s = palJson['CM5 Bedruckbar']?.['CM5 owayo Farbsystem - FB'] || [];
+    if (m.length > cm5Main.length) cm5Main = m;
+    if (s.length > cm5Special.length) cm5Special = s;
+  } catch {}
+}
 
 const formatColorItem = (item, isSpecial = false) => {
   const hex = `#${String(item.RGBHex).padStart(6, '0').toLowerCase()}`;
@@ -459,15 +522,21 @@ const fullPalette = [
 const paletteModuleCode = `/**
  * AUTO-GENERATED BY tools/extract-rea-assets.mjs
  * Sistema Cromático Oficial de Sublimación Textil CM5 (152 colores en matriz de 5 tonos + 15 Flúor/Especiales)
- * emparejado con equivalencias Pantone® Solid Coated (PMS).
+ * emparejado con equivalencias Pantone® Solid Coated (PMS), y catálogos .fish de las 4 prendas 3D reales.
  */
 
 export const PANTONE_CM5_PALETTE = ${JSON.stringify(fullPalette, null, 2)};
 
-export const FOOTBALL_FISH_DESIGNS = ${JSON.stringify(footballDesigns, null, 2)};
+export const FOOTBALL_FISH_DESIGNS = ${JSON.stringify(extractedCatalogs.FOOTBALL_FISH_DESIGNS, null, 2)};
 
-export const BASKETBALL_FISH_DESIGNS = ${JSON.stringify(basketballDesigns, null, 2)};
+export const FOOTBALL_SHORTS_FISH_DESIGNS = ${JSON.stringify(extractedCatalogs.FOOTBALL_SHORTS_FISH_DESIGNS, null, 2)};
+
+export const BASKETBALL_FISH_DESIGNS = ${JSON.stringify(extractedCatalogs.BASKETBALL_FISH_DESIGNS, null, 2)};
+
+export const BASKETBALL_SHORTS_FISH_DESIGNS = ${JSON.stringify(extractedCatalogs.BASKETBALL_SHORTS_FISH_DESIGNS, null, 2)};
 `;
 
 fs.writeFileSync(path.join(ROOT, 'src/engine/core/palette152.js'), paletteModuleCode, 'utf8');
-console.log(`✔ Paleta generada en src/engine/core/palette152.js con ${fullPalette.length} colores Pantone/CM5, ${footballDesigns.length} diseños Fútbol y ${basketballDesigns.length} diseños Basket!`);
+console.log(
+  `✔ Catálogo v5.0 generado: ${fullPalette.length} colores Pantone/CM5 | Fútbol Camiseta=${extractedCatalogs.FOOTBALL_FISH_DESIGNS.length}, Fútbol Short=${extractedCatalogs.FOOTBALL_SHORTS_FISH_DESIGNS.length}, Basket Camiseta=${extractedCatalogs.BASKETBALL_FISH_DESIGNS.length}, Basket Short=${extractedCatalogs.BASKETBALL_SHORTS_FISH_DESIGNS.length}!`
+);

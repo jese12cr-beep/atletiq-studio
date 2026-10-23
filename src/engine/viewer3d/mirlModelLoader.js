@@ -1,16 +1,21 @@
 /**
- * ATLETIQ Engine v4.0 — Decodificador Binario Nativo `.mirl` v1.1 (Owayo 3D Exact Mesh Loader)
+ * ATLETIQ Engine v5.0 — Decodificador Binario Nativo `.mirl` v1.1 + Extractor 2D de Patronaje Sastre Real
  *
- * Carga y descomprime en GPU los escaneos textiles reales de alta densidad:
- *  - `football_f3_ka.mirl`: 38,319 vértices / 74,898 triángulos (7 piezas: Front, Back, LeftArm, RightArm, Collar, Etikett, EtikettFahne)
- *  - `basketball_b6_hero.mirl`: 31,204 vértices / 60,593 triángulos (7 piezas: Front, Back, Krageneinfass, Aermelbandlinks, Aermelbandrechts, Etikett, EtikettFahne)
+ * Carga y descomprime en GPU los 4 escaneos textiles reales de alta densidad:
+ *  - `football_f3_ka.mirl`: 38,319 vértices / 74,898 triángulos (Camiseta Fútbol F3 Basic)
+ *  - `football_shorts_fp3.mirl`: 9,045 vértices / 17,476 triángulos (Short Fútbol FP3 Basic)
+ *  - `basketball_b6_hero.mirl`: 31,204 vértices / 60,593 triángulos (Camiseta Baloncesto B6 Hero)
+ *  - `basketball_shorts_bp6.mirl`: 55,791 vértices / 110,341 triángulos (Short Baloncesto BP6 Hero)
+ *
+ * Además extrae directamente desde la topología UV de cada pieza la silueta exacta de sastrería 2D
+ * (`silhouetteCanvas`) y las aristas reales de costura/corte (`boundaryPath`) para el Laboratorio de Moldes 2D.
  */
 
 import * as THREE from 'three';
 import { mapMeshPartNameToPanel } from '../core/boundingBoxMath';
 
-const MIRL_WORLD_SCALE = 0.345;
 const parsedMirlCache = new Map();
+const patternMask2DCache = new Map();
 
 async function gunzipIfNeeded(arrayBuffer) {
   const head = new Uint8Array(arrayBuffer, 0, Math.min(2, arrayBuffer.byteLength));
@@ -25,7 +30,7 @@ async function gunzipIfNeeded(arrayBuffer) {
   return new Uint8Array(arrayBuffer);
 }
 
-function parseMirlBytes(bytes) {
+function parseMirlBytes(bytes, mirlUrl = '') {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   let idx = 0;
 
@@ -133,18 +138,20 @@ function parseMirlBytes(bytes) {
     rawParts.push({ name, anzVertices, anzFaces, positions, indices, uvs });
   }
 
-  // Centrar el grupo completo sobre el origen (moveObjectGroupOverOrigin) y escalar a unidades de estudio Three.js
+  // Escala armónica de estudio: mantiene camisetas (~7.5 dm) y shorts (~5.0 dm) encuadrados con presencia heroica
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
   const cz = (minZ + maxZ) / 2;
+  const spanMax = Math.max(maxX - minX, maxY - minY, 5.4);
+  const worldScale = 2.62 / spanMax;
 
   const geometries = rawParts.map((part) => {
     const pos = part.positions;
     for (let i = 0; i < part.anzVertices; i++) {
       const p = i * 3;
-      pos[p] = (pos[p] - cx) * MIRL_WORLD_SCALE;
-      pos[p + 1] = (pos[p + 1] - cy) * MIRL_WORLD_SCALE;
-      pos[p + 2] = (pos[p + 2] - cz) * MIRL_WORLD_SCALE;
+      pos[p] = (pos[p] - cx) * worldScale;
+      pos[p + 1] = (pos[p + 1] - cy) * worldScale;
+      pos[p + 2] = (pos[p + 2] - cz) * worldScale;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -159,18 +166,21 @@ function parseMirlBytes(bytes) {
       name: part.name,
       anzVertices: part.anzVertices,
       anzFaces: part.anzFaces,
+      uvs: part.uvs,
+      indices: part.indices,
       geometry: geo,
     };
   });
 
   return {
+    mirlUrl,
     version,
     totalVertices,
     totalFaces,
     dimensions: {
-      x: (maxX - minX) * MIRL_WORLD_SCALE,
-      y: (maxY - minY) * MIRL_WORLD_SCALE,
-      z: (maxZ - minZ) * MIRL_WORLD_SCALE,
+      x: (maxX - minX) * worldScale,
+      y: (maxY - minY) * worldScale,
+      z: (maxZ - minZ) * worldScale,
     },
     parts: geometries,
   };
@@ -188,7 +198,7 @@ export async function loadMirlModelTemplate(mirlUrl = '/models/football_f3_ka.mi
     }
     const rawBuf = await resp.arrayBuffer();
     const gunzipped = await gunzipIfNeeded(rawBuf);
-    return parseMirlBytes(gunzipped);
+    return parseMirlBytes(gunzipped, mirlUrl);
   })();
 
   parsedMirlCache.set(mirlUrl, pending);
@@ -196,7 +206,110 @@ export async function loadMirlModelTemplate(mirlUrl = '/models/football_f3_ka.mi
 }
 
 /**
- * Construye una textura tejida personalizada ATLETIQ PRO™ para la etiqueta interior de cuello (`Etikett`).
+ * Extrae y almacena en caché la silueta 2D exacta de patronaje (`silhouetteCanvas`) y las aristas reales
+ * de borde de costura (`boundaryPath`) a partir de los triángulos UV del archivo `.mirl`.
+ */
+export function getMirlPartPatternMask2D(template, partName, width = 768, height = 768) {
+  if (!template) return null;
+  const cacheKey = `${template.mirlUrl}|${partName}|${width}x${height}`;
+  if (patternMask2DCache.has(cacheKey)) {
+    return patternMask2DCache.get(cacheKey);
+  }
+
+  const part = template.parts.find((p) => p.name === partName);
+  if (!part) return null;
+
+  const maskCanvas = document.createElement('canvas');
+  maskCanvas.width = width;
+  maskCanvas.height = height;
+  const mCtx = maskCanvas.getContext('2d');
+  mCtx.fillStyle = '#ffffff';
+
+  const { uvs, indices, anzFaces } = part;
+
+  // 1. Rasterizar por lotes todos los triángulos UV para obtener la máscara exacta sin huecos
+  const BATCH = 1500;
+  let minU = 1, maxU = 0, minV = 1, maxV = 0;
+
+  for (let start = 0; start < anzFaces; start += BATCH) {
+    const end = Math.min(anzFaces, start + BATCH);
+    mCtx.beginPath();
+    for (let f = start; f < end; f++) {
+      const i0 = indices[f * 3] * 2;
+      const i1 = indices[f * 3 + 1] * 2;
+      const i2 = indices[f * 3 + 2] * 2;
+
+      const u0 = uvs[i0], v0 = 1 - uvs[i0 + 1];
+      const u1 = uvs[i1], v1 = 1 - uvs[i1 + 1];
+      const u2 = uvs[i2], v2 = 1 - uvs[i2 + 1];
+
+      if (u0 < minU) minU = u0; if (u0 > maxU) maxU = u0;
+      if (v0 < minV) minV = v0; if (v0 > maxV) maxV = v0;
+
+      mCtx.moveTo(u0 * width, v0 * height);
+      mCtx.lineTo(u1 * width, v1 * height);
+      mCtx.lineTo(u2 * width, v2 * height);
+      mCtx.closePath();
+    }
+    mCtx.fill();
+    // Sellado sub-píxel de costuras internas entre triángulos UV
+    mCtx.lineWidth = 1.25;
+    mCtx.strokeStyle = '#ffffff';
+    mCtx.stroke();
+  }
+
+  // 2. Detectar las aristas exteriores reales de corte (aristas pertenecientes a 1 solo triángulo UV)
+  const edgeCounts = new Map();
+  const edgeCoords = new Map();
+  const q = (val) => Math.round(val * 8192);
+
+  const registerEdge = (uA, vA, uB, vB) => {
+    const xA = q(uA), yA = q(vA);
+    const xB = q(uB), yB = q(vB);
+    if (xA === xB && yA === yB) return;
+    const forward = xA < xB || (xA === xB && yA < yB);
+    const key = forward ? `${xA},${yA}:${xB},${yB}` : `${xB},${yB}:${xA},${yA}`;
+    const c = edgeCounts.get(key) || 0;
+    edgeCounts.set(key, c + 1);
+    if (c === 0) {
+      edgeCoords.set(key, [uA * width, vA * height, uB * width, vB * height]);
+    }
+  };
+
+  for (let f = 0; f < anzFaces; f++) {
+    const i0 = indices[f * 3] * 2;
+    const i1 = indices[f * 3 + 1] * 2;
+    const i2 = indices[f * 3 + 2] * 2;
+    const u0 = uvs[i0], v0 = 1 - uvs[i0 + 1];
+    const u1 = uvs[i1], v1 = 1 - uvs[i1 + 1];
+    const u2 = uvs[i2], v2 = 1 - uvs[i2 + 1];
+    registerEdge(u0, v0, u1, v1);
+    registerEdge(u1, v1, u2, v2);
+    registerEdge(u2, v2, u0, v0);
+  }
+
+  const boundaryPath = new Path2D();
+  for (const [key, count] of edgeCounts) {
+    if (count === 1) {
+      const seg = edgeCoords.get(key);
+      boundaryPath.moveTo(seg[0], seg[1]);
+      boundaryPath.lineTo(seg[2], seg[3]);
+    }
+  }
+
+  const result = {
+    maskCanvas,
+    boundaryPath,
+    uvBounds: { minU, maxU, minV, maxV },
+    width,
+    height,
+  };
+  patternMask2DCache.set(cacheKey, result);
+  return result;
+}
+
+/**
+ * Construye una textura tejida personalizada ATLETIQ PRO™ para la etiqueta interior de cuello/cintura (`Etikett`).
  */
 export function buildNeckLabelCanvasTexture(sizeText = 'L') {
   const c = document.createElement('canvas');
@@ -236,6 +349,12 @@ export function instantiateMirlGarmentGroup(template, partMaterialsMap, neckLabe
   const group = new THREE.Group();
   group.name = 'OwayoMirlGarmentGroup';
 
+  const fallbackMat =
+    partMaterialsMap.Front ||
+    partMaterialsMap.RightLeg ||
+    partMaterialsMap.LeftLeg ||
+    partMaterialsMap.Collar;
+
   for (const part of template.parts) {
     let mat = partMaterialsMap[part.name];
     const panel = mapMeshPartNameToPanel(part.name);
@@ -248,7 +367,7 @@ export function instantiateMirlGarmentGroup(template, partMaterialsMap, neckLabe
       mat = hemFlagMat;
       isDroppable = false;
     } else if (!mat) {
-      mat = partMaterialsMap.Collar || partMaterialsMap.Front;
+      mat = fallbackMat;
     }
 
     const mesh = new THREE.Mesh(part.geometry, mat);

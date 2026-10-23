@@ -39,15 +39,63 @@ function shiftHexBrightness(hex = '#0033a0', delta = 18) {
 }
 
 function targetResolutionForPart(partName) {
-  if (partName === 'Front' || partName === 'Back') return [1536, 1536];
+  if (
+    partName === 'Front' ||
+    partName === 'Back' ||
+    partName === 'LeftLeg' ||
+    partName === 'RightLeg'
+  ) {
+    return [1536, 1536];
+  }
   if (partName === 'LeftArm' || partName === 'RightArm') return [1024, 512];
   return [1024, 128];
+}
+
+// Caché de máscaras binarias por zona para `clampToZone` (`Mostrar solo` de Owayo)
+const zoneClipCanvasCache = new Map();
+let sharedDecalScratchCanvas = null;
+
+function getZoneClipMaskCanvas(fishUrl, partName, maskEntry, zoneLetter) {
+  if (!maskEntry?.zones || !zoneLetter || zoneLetter === 'ALL') return null;
+  const key = `${fishUrl || 'solid'}|${partName}|${zoneLetter}`;
+  if (zoneClipCanvasCache.has(key)) return zoneClipCanvasCache.get(key);
+
+  const { width, height, zones } = maskEntry;
+  const c = document.createElement('canvas');
+  c.width = width;
+  c.height = height;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(width, height);
+  const out32 = new Uint32Array(img.data.buffer);
+
+  const matchCodes =
+    zoneLetter === 'A'
+      ? [1, 44, 50]
+      : zoneLetter === 'B'
+      ? [2, 45, 53]
+      : zoneLetter === 'C'
+      ? [3, 5, 51]
+      : zoneLetter === 'D'
+      ? [4, 52]
+      : [];
+
+  for (let i = 0; i < zones.length; i++) {
+    if (matchCodes.includes(zones[i])) {
+      out32[i] = 0xffffffff;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  zoneClipCanvasCache.set(key, c);
+  return c;
 }
 
 /**
  * Desempaqueta un archivo `.fish` (ZIP Store `method=0`) en el navegador y extrae los índices de zona `0..255` por pieza.
  */
 export async function loadFishDesignMasks(fishUrl) {
+  if (!fishUrl) {
+    return new Map();
+  }
   if (decodedFishCache.has(fishUrl)) {
     return decodedFishCache.get(fishUrl);
   }
@@ -284,7 +332,14 @@ function getOrRenderBasePartCanvas(mirlKey, partName, maskEntry, design) {
     ctx.fillRect(0, 0, w, h);
   }
 
-  if (partName === 'Front' || partName === 'Back' || partName === 'LeftArm' || partName === 'RightArm') {
+  if (
+    partName === 'Front' ||
+    partName === 'Back' ||
+    partName === 'LeftArm' ||
+    partName === 'RightArm' ||
+    partName === 'LeftLeg' ||
+    partName === 'RightLeg'
+  ) {
     drawSurfacePatternOverlay(ctx, w, h, design.surfacePatternId, design.surfacePatternOpacity ?? 0.16);
   }
 
@@ -543,13 +598,15 @@ export function composeGarmentPartCanvas(
   ctx.clearRect(0, 0, W, H);
   ctx.drawImage(baseCanvas, 0, 0);
 
-  // Mapear partName -> panel lógico ('front' | 'back' | 'left_arm' | 'right_arm' | 'collar')
+  // Mapear partName -> panel lógico ('front' | 'back' | 'left_arm' | 'right_arm' | 'collar' | 'left_leg' | 'right_leg')
   const panelMap = {
     Front: 'front',
     Back: 'back',
     LeftArm: 'left_arm',
     RightArm: 'right_arm',
     Collar: 'collar',
+    LeftLeg: 'left_leg',
+    RightLeg: 'right_leg',
   };
   const panel = panelMap[partName];
   if (!panel) return;
@@ -557,6 +614,7 @@ export function composeGarmentPartCanvas(
   const spec = getPartSpec(design.productModelId, panel);
   const pxPerMmX = W / spec.widthMm;
   const pxPerMmY = H / spec.heightMm;
+  const activeFishMeta = resolveActiveFishDesignMeta(design);
 
   // 1. Ordenar y pintar todos los Decals (PNGs, SVGs, Escudos y Textos Libres) asignados a esta pieza por zIndex
   const partDecals = (design.decals || [])
@@ -569,18 +627,34 @@ export function composeGarmentPartCanvas(
     const wMm = decal.sizeMm.width * scale;
     const hMm = decal.sizeMm.height * scale;
 
-    ctx.save();
-    ctx.globalAlpha = Math.max(0.03, Math.min(1, decal.opacity ?? 1));
-    ctx.globalCompositeOperation = decal.blendMode || 'source-over';
-    ctx.translate(decal.centerMm.x * pxPerMmX, decal.centerMm.y * pxPerMmY);
-    ctx.scale(pxPerMmX, pxPerMmY); // Espacio físico 1:1 en milímetros — CERO deformación al rotar en mangas o cuello
-    ctx.rotate(((decal.rotationDeg || 0) * Math.PI) / 180);
-    ctx.scale(decal.flipX ? -1 : 1, decal.flipY ? -1 : 1);
+    const clipZoneMask =
+      decal.clampToZone && decal.clampToZone !== 'ALL'
+        ? getZoneClipMaskCanvas(activeFishMeta?.fileUrl, partName, maskEntry, decal.clampToZone)
+        : null;
+
+    let drawCtx = ctx;
+    if (clipZoneMask) {
+      if (!sharedDecalScratchCanvas) sharedDecalScratchCanvas = document.createElement('canvas');
+      if (sharedDecalScratchCanvas.width !== W || sharedDecalScratchCanvas.height !== H) {
+        sharedDecalScratchCanvas.width = W;
+        sharedDecalScratchCanvas.height = H;
+      }
+      drawCtx = sharedDecalScratchCanvas.getContext('2d');
+      drawCtx.clearRect(0, 0, W, H);
+    }
+
+    drawCtx.save();
+    drawCtx.globalAlpha = Math.max(0.03, Math.min(1, decal.opacity ?? 1));
+    drawCtx.globalCompositeOperation = clipZoneMask ? 'source-over' : decal.blendMode || 'source-over';
+    drawCtx.translate(decal.centerMm.x * pxPerMmX, decal.centerMm.y * pxPerMmY);
+    drawCtx.scale(pxPerMmX, pxPerMmY); // Espacio físico 1:1 en milímetros — CERO deformación al rotar en mangas, cuello o piernas
+    drawCtx.rotate(((decal.rotationDeg || 0) * Math.PI) / 180);
+    drawCtx.scale(decal.flipX ? -1 : 1, decal.flipY ? -1 : 1);
 
     if (decal.type === 'PRESET_CREST') {
-      drawPresetVectorCrestMm(ctx, decal.presetId, wMm, hMm, design, decal.tintHex);
+      drawPresetVectorCrestMm(drawCtx, decal.presetId, wMm, hMm, design, decal.tintHex);
     } else if (decal.type === 'STATIC_TEXT') {
-      drawStyledTextMm(ctx, {
+      drawStyledTextMm(drawCtx, {
         text: decal.text || '',
         fontFamily: decal.fontFamily || "'Chakra Petch', sans-serif",
         fontSizeMm: decal.sizeMm.height * scale * 0.86,
@@ -600,24 +674,53 @@ export function composeGarmentPartCanvas(
         invertImage: Boolean(decal.invertImage),
       });
       if (drawable) {
-        ctx.drawImage(drawable, -wMm / 2, -hMm / 2, wMm, hMm);
+        drawCtx.drawImage(drawable, -wMm / 2, -hMm / 2, wMm, hMm);
       }
     }
+    drawCtx.restore();
 
-    // Marco sutil de selección cuando el usuario arrastra este elemento en 3D/2D
-    if (overlayOptions?.selectedDecalId === decal.id && overlayOptions?.showSelectionBox) {
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 1.8;
-      ctx.setLineDash([5, 4]);
-      ctx.strokeRect(-wMm / 2 - 3, -hMm / 2 - 3, wMm + 6, hMm + 6);
+    if (clipZoneMask) {
+      drawCtx.save();
+      drawCtx.globalCompositeOperation = 'destination-in';
+      drawCtx.drawImage(clipZoneMask, 0, 0, W, H);
+      drawCtx.restore();
+
+      ctx.save();
+      ctx.globalCompositeOperation = decal.blendMode || 'source-over';
+      ctx.drawImage(sharedDecalScratchCanvas, 0, 0);
+      ctx.restore();
     }
 
-    ctx.restore();
+    // Marco sutil en UV cuando este elemento está seleccionado en 3D
+    if (overlayOptions?.selectedDecalId === decal.id && overlayOptions?.showSelectionBox) {
+      ctx.save();
+      ctx.translate(decal.centerMm.x * pxPerMmX, decal.centerMm.y * pxPerMmY);
+      ctx.scale(pxPerMmX, pxPerMmY);
+      ctx.rotate(((decal.rotationDeg || 0) * Math.PI) / 180);
+      ctx.strokeStyle = decal.pinned ? '#fbbf24' : '#38bdf8';
+      ctx.lineWidth = 2.0;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(-wMm / 2 - 3, -hMm / 2 - 3, wMm + 6, hMm + 6);
+      ctx.restore();
+    }
   }
 
   // 2. Renderizar Slots Variables del Jugador Activo (`einzelexemplare`)
   const slots = design.variableSlots || {};
   const player = activePlayer || { name: 'RODRÍGUEZ', number: '10' };
+
+  const drawSlotHighlightIfSelected = (slotKey, centerMm, wMm, hMm) => {
+    if (overlayOptions?.selectedSlotKey === slotKey && overlayOptions?.showSelectionBox) {
+      ctx.save();
+      ctx.translate(centerMm.x * pxPerMmX, centerMm.y * pxPerMmY);
+      ctx.scale(pxPerMmX, pxPerMmY);
+      ctx.strokeStyle = '#4ade80';
+      ctx.lineWidth = 2.0;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(-wMm / 2 - 4, -hMm / 2 - 4, wMm + 8, hMm + 8);
+      ctx.restore();
+    }
+  };
 
   if (panel === 'back') {
     const nameSlot = slots.playerNameBack;
@@ -639,6 +742,7 @@ export function composeGarmentPartCanvas(
         scaleX: condenseX,
       });
       ctx.restore();
+      drawSlotHighlightIfSelected('playerNameBack', nameSlot.centerMm, nameSlot.maxWidthMm || 260, (nameSlot.capHeightMm || 52) * 1.15);
     }
 
     const numSlot = slots.playerNumberBack;
@@ -656,6 +760,7 @@ export function composeGarmentPartCanvas(
         outline2Hex: numSlot.inlineHex || '',
       });
       ctx.restore();
+      drawSlotHighlightIfSelected('playerNumberBack', numSlot.centerMm, (numSlot.heightMm || 225) * 0.85, (numSlot.heightMm || 225) * 0.92);
     }
   }
 
@@ -671,9 +776,10 @@ export function composeGarmentPartCanvas(
         fontSizeMm: frontNum.heightMm || 48,
         fillHex: frontNum.fillHex || '#ffcd00',
         outlineHex: frontNum.outlineHex || '#0c2340',
-        outlineWidthMm: 2.2,
+        outlineWidthMm: frontNum.outlineWidthMm ?? 2.2,
       });
       ctx.restore();
+      drawSlotHighlightIfSelected('playerNumberFront', frontNum.centerMm, (frontNum.heightMm || 48) * 1.1, (frontNum.heightMm || 48) * 1.0);
     }
   }
 
@@ -691,17 +797,35 @@ export function composeGarmentPartCanvas(
       outlineWidthMm: 2.0,
     });
     ctx.restore();
+    drawSlotHighlightIfSelected('playerNumberSleeve', slvNum.centerMm, (slvNum.heightMm || 44) * 1.1, (slvNum.heightMm || 44) * 1.0);
   }
 
-  // 3. Guías Magnéticas Owayo (`SnapLines` + `sperrbezirk`) activas sólo durante el arrastre o en Molde 2D
+  if (slots.playerNumberShorts?.enabled && slots.playerNumberShorts.panel === panel && player.number) {
+    const shNum = slots.playerNumberShorts;
+    ctx.save();
+    ctx.translate(shNum.centerMm.x * pxPerMmX, shNum.centerMm.y * pxPerMmY);
+    ctx.scale(pxPerMmX, pxPerMmY);
+    drawStyledTextMm(ctx, {
+      text: String(player.number),
+      fontFamily: shNum.fontFamily || "'Bebas Neue', sans-serif",
+      fontSizeMm: shNum.heightMm || 68,
+      fillHex: shNum.fillHex || '#ffffff',
+      outlineHex: shNum.outlineHex || '#101820',
+      outlineWidthMm: shNum.outlineWidthMm ?? 2.8,
+    });
+    ctx.restore();
+    drawSlotHighlightIfSelected('playerNumberShorts', shNum.centerMm, (shNum.heightMm || 68) * 1.1, (shNum.heightMm || 68) * 1.0);
+  }
+
+  // 3. Guías Magnéticas Owayo (`SnapLines` verde neón `#4ade80` + `sperrbezirk`) activas durante el arrastre
   if (overlayOptions?.showGuides && overlayOptions?.panel === panel) {
     ctx.save();
     if (design.bleedEnforcement !== 'ALL_OVER') {
       const sperrTopPx = (spec.heightMm - spec.sperrbezirkMm) * pxPerMmY;
-      ctx.fillStyle = 'rgba(244, 63, 94, 0.20)';
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.22)';
       ctx.fillRect(0, sperrTopPx, W, H - sperrTopPx);
-      ctx.strokeStyle = 'rgba(251, 113, 133, 0.85)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(251, 113, 133, 0.9)';
+      ctx.lineWidth = 2.5;
       ctx.setLineDash([8, 6]);
       ctx.beginPath();
       ctx.moveTo(0, sperrTopPx);
@@ -710,19 +834,22 @@ export function composeGarmentPartCanvas(
     }
 
     if (overlayOptions.snapGuides?.verticalCenter) {
-      const snapX = spec.snapCenterU * W;
-      ctx.strokeStyle = '#22d3ee';
-      ctx.lineWidth = 3;
+      const snapX = (overlayOptions.snapGuides.snapCenterX ?? spec.snapCenterU * spec.widthMm) * pxPerMmX;
+      ctx.strokeStyle = '#4ade80'; // HELPER_COLOR: lightgreen exacto de Owayo viewer-CmBNa226.js
+      ctx.lineWidth = 3.5;
       ctx.setLineDash([10, 6]);
       ctx.beginPath();
       ctx.moveTo(snapX, 0);
       ctx.lineTo(snapX, H);
       ctx.stroke();
     }
-    if (overlayOptions.snapGuides?.horizontalChest) {
-      const snapY = (overlayOptions.snapGuides.chestLineY || spec.heightMm * 0.255) * pxPerMmY;
-      ctx.strokeStyle = '#fbbf24';
-      ctx.lineWidth = 2.5;
+    if (overlayOptions.snapGuides?.horizontalChest || overlayOptions.snapGuides?.horizontalSponsor) {
+      const lineMm = overlayOptions.snapGuides.horizontalChest
+        ? overlayOptions.snapGuides.chestLineY || spec.heightMm * 0.255
+        : overlayOptions.snapGuides.sponsorLineY || spec.heightMm * 0.385;
+      const snapY = lineMm * pxPerMmY;
+      ctx.strokeStyle = '#4ade80';
+      ctx.lineWidth = 3;
       ctx.setLineDash([8, 6]);
       ctx.beginPath();
       ctx.moveTo(0, snapY);
