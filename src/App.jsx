@@ -20,17 +20,25 @@ import {
 
 function createInitialKitSnapshot() {
   const fbJersey = createInitialMasterDesign();
-  const fbShorts = createDefaultDesignForProduct('futbol_shorts_fp3', fbJersey.colorZones);
-  const bkJersey = createDefaultDesignForProduct('basketball_jersey_b6_hero');
+  const fbShorts = createDefaultDesignForProduct('football_shorts_fp3', fbJersey.colorZones);
+  const bkJersey = createDefaultDesignForProduct('basketball_b6_hero', fbJersey.colorZones);
   const bkShorts = createDefaultDesignForProduct('basketball_shorts_bp6', bkJersey.colorZones);
+  const bkWJersey = createDefaultDesignForProduct('basketball_b7w_epic_women', fbJersey.colorZones);
+  const bkWShorts = createDefaultDesignForProduct('basketball_shorts_bp7w_women', bkWJersey.colorZones);
+  const jktMen = createDefaultDesignForProduct('jacket_softshell_601m_men', fbJersey.colorZones);
+  const jktWomen = createDefaultDesignForProduct('jacket_softshell_601w_women', jktMen.colorZones);
 
   return {
-    activeProductId: 'basketball_jersey_b6_hero',
+    activeProductId: 'basketball_b6_hero',
     designsByProduct: {
       futbol_jersey_pro_vneck: fbJersey,
-      futbol_shorts_fp3: fbShorts,
-      basketball_jersey_b6_hero: bkJersey,
+      football_shorts_fp3: fbShorts,
+      basketball_b6_hero: bkJersey,
       basketball_shorts_bp6: bkShorts,
+      basketball_b7w_epic_women: bkWJersey,
+      basketball_shorts_bp7w_women: bkWShorts,
+      jacket_softshell_601m_men: jktMen,
+      jacket_softshell_601w_women: jktWomen,
     },
   };
 }

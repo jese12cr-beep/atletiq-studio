@@ -38,17 +38,40 @@ function shiftHexBrightness(hex = '#0033a0', delta = 18) {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
-function targetResolutionForPart(partName) {
+function targetResolutionForPart(partName, nativeW = 0, nativeH = 0) {
+  if (nativeW > 0 && nativeH > 0) {
+    const maxDim = Math.max(nativeW, nativeH);
+    if (maxDim > 2048) {
+      const scale = 2048 / maxDim;
+      return [Math.round(nativeW * scale), Math.round(nativeH * scale)];
+    }
+    return [nativeW, nativeH];
+  }
   if (
     partName === 'Front' ||
     partName === 'Back' ||
+    partName === 'FrontLeftPart' ||
+    partName === 'FrontRightPart' ||
     partName === 'LeftLeg' ||
-    partName === 'RightLeg'
+    partName === 'RightLeg' ||
+    partName === 'LinkesBeinvorne' ||
+    partName === 'RechtesBeinvorne' ||
+    partName === 'LinkesBeinhinten' ||
+    partName === 'RechtesBeinhinten'
   ) {
     return [1536, 1536];
   }
-  if (partName === 'LeftArm' || partName === 'RightArm') return [1024, 512];
-  return [1024, 128];
+  if (partName === 'LeftArm' || partName === 'RightArm') return [1024, 1024];
+  if (partName.includes('Seitenteil') || partName.includes('Seitenstreifen') || partName.includes('Unterarm')) {
+    return [512, 1536];
+  }
+  if (partName.includes('Collar') || partName.includes('Krageneinfass')) {
+    return [1024, 256];
+  }
+  if (partName.includes('Aermelband')) {
+    return [1024, 128];
+  }
+  return [512, 512];
 }
 
 // Caché de máscaras binarias por zona para `clampToZone` (`Mostrar solo` de Owayo)
@@ -124,7 +147,6 @@ export async function loadFishDesignMasks(fishUrl) {
 
       if (!rawName.toLowerCase().endsWith('.png')) continue;
       const partName = rawName.replace(/\.png$/i, '');
-      const [targetW, targetH] = targetResolutionForPart(partName);
 
       const blob = new Blob([pngSlice], { type: 'image/png' });
       let drawable;
@@ -147,6 +169,8 @@ export async function loadFishDesignMasks(fishUrl) {
         });
         URL.revokeObjectURL(url);
       }
+
+      const [targetW, targetH] = targetResolutionForPart(partName, drawable.width, drawable.height);
 
       const tmpCanvas = document.createElement('canvas');
       tmpCanvas.width = targetW;
@@ -322,23 +346,51 @@ function getOrRenderBasePartCanvas(mirlKey, partName, maskEntry, design) {
     ctx.putImageData(imgData, 0, 0);
   } else {
     // Fallback sólido inmediato mientras termina la descarga asíncrona de .fish (<15ms)
-    const isTrim = partName === 'Collar' || partName === 'Krageneinfass';
-    const isArmBand = partName === 'Aermelbandlinks' || partName === 'Aermelbandrechts';
-    ctx.fillStyle = isTrim
-      ? design.colorZones.collar?.hex || '#ffcd00'
+    const isZipper =
+      partName === 'RV' ||
+      partName === 'RVPL' ||
+      partName === 'RVPR' ||
+      partName === 'Toothmesh' ||
+      partName === 'Toothmesh_BG' ||
+      partName === 'GU';
+    const isTrim =
+      partName === 'Collar' ||
+      partName === 'Krageneinfass' ||
+      partName === 'CollarOutside' ||
+      partName === 'CollarInside';
+    const isArmBand =
+      partName === 'Aermelbandlinks' ||
+      partName === 'Aermelbandrechts' ||
+      partName.includes('Unterarm');
+    const isSidePanel =
+      partName.includes('Seitenteil') ||
+      partName.includes('Seitenstreifen');
+
+    ctx.fillStyle = isZipper
+      ? (design.colorZones.accents?.hex || '#1f2937')
+      : isTrim
+      ? (design.colorZones.collar?.hex || '#ffcd00')
       : isArmBand
-      ? design.colorZones.sleeves?.hex || '#0c2340'
-      : design.colorZones.primary?.hex || '#0033a0';
+      ? (design.colorZones.sleeves?.hex || '#0c2340')
+      : isSidePanel
+      ? (design.colorZones.secondary?.hex || '#0c2340')
+      : (design.colorZones.primary?.hex || '#0033a0');
     ctx.fillRect(0, 0, w, h);
   }
 
   if (
     partName === 'Front' ||
     partName === 'Back' ||
+    partName === 'FrontLeftPart' ||
+    partName === 'FrontRightPart' ||
     partName === 'LeftArm' ||
     partName === 'RightArm' ||
     partName === 'LeftLeg' ||
-    partName === 'RightLeg'
+    partName === 'RightLeg' ||
+    partName === 'LinkesBeinvorne' ||
+    partName === 'RechtesBeinvorne' ||
+    partName === 'LinkesBeinhinten' ||
+    partName === 'RechtesBeinhinten'
   ) {
     drawSurfacePatternOverlay(ctx, w, h, design.surfacePatternId, design.surfacePatternOpacity ?? 0.16);
   }
@@ -598,15 +650,24 @@ export function composeGarmentPartCanvas(
   ctx.clearRect(0, 0, W, H);
   ctx.drawImage(baseCanvas, 0, 0);
 
-  // Mapear partName -> panel lógico ('front' | 'back' | 'left_arm' | 'right_arm' | 'collar' | 'left_leg' | 'right_leg')
+  // Mapear partName -> panel lógico ('front' | 'back' | 'left_arm' | 'right_arm' | 'collar' | 'left_leg' | 'right_leg' | etc.)
   const panelMap = {
     Front: 'front',
     Back: 'back',
     LeftArm: 'left_arm',
     RightArm: 'right_arm',
     Collar: 'collar',
+    CollarOutside: 'collar',
     LeftLeg: 'left_leg',
     RightLeg: 'right_leg',
+    Seitenteillinks: 'side_left',
+    Seitenteilrechts: 'side_right',
+    LinkesBeinvorne: 'left_leg',
+    RechtesBeinvorne: 'right_leg',
+    Seitenstreifenrechts: 'side_right',
+    Seitenstreifenlinks: 'side_left',
+    FrontLeftPart: 'front_left',
+    FrontRightPart: 'front_right',
   };
   const panel = panelMap[partName];
   if (!panel) return;
@@ -618,7 +679,15 @@ export function composeGarmentPartCanvas(
 
   // 1. Ordenar y pintar todos los Decals (PNGs, SVGs, Escudos y Textos Libres) asignados a esta pieza por zIndex
   const partDecals = (design.decals || [])
-    .filter((d) => (d.panel || 'front') === panel)
+    .filter((d) => {
+      const dp = d.panel || 'front';
+      if (dp === panel) return true;
+      // Compatibilidad si un decal tiene panel 'front' en una chaqueta con 'front_left' o 'front_right'
+      if (dp === 'front' && (panel === 'front_left' || panel === 'front_right')) {
+        return panel === 'front_left';
+      }
+      return false;
+    })
     .slice()
     .sort((a, b) => (a.zIndex ?? 10) - (b.zIndex ?? 10));
 

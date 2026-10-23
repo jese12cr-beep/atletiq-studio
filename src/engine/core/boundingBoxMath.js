@@ -201,59 +201,387 @@ export const MODEL_PARTS_CATALOG = {
     },
   },
 
-  basketball_shorts_bp6: {
-    right_leg: {
-      panelId: 'right_leg',
-      partName: 'RightLeg',
-      label: 'Pierna Derecha (Costado & Muslo)',
-      shortLabel: 'Pierna Der.',
+  basketball_b7w_epic_women: {
+    front: {
+      panelId: 'front',
+      partName: 'Front',
+      label: 'Frente / Pecho Dama',
+      shortLabel: 'Frente Dama',
       groesseX: 1536,
       groesseY: 1536,
-      widthMm: 778.44,
-      heightMm: 642.64,
-      hoehenfaktor: 0.82554,
+      widthMm: 534.96,
+      heightMm: 801.58,
+      hoehenfaktor: 1.4984,
       sperrbezirkMm: 50,
-      snapCenterU: 0.555, // Banda lateral derecha exacta de getSnapLines.php
-      snapAxesU: [
-        { u: 0.785, label: 'Muslo Frontal Der.' },
-        { u: 0.555, label: 'Banda Lateral Der.' },
-      ],
-      defaultPlaceU: 0.785,
-      defaultPlaceV: 0.65,
-      safeMarginMm: { left: 60, right: 60, top: 85, bottom: 55 },
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Centro Pecho Dama' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.35,
+      safeMarginMm: { left: 70, right: 70, top: 110, bottom: 55 },
+    },
+    back: {
+      panelId: 'back',
+      partName: 'Back',
+      label: 'Espalda / Dorsal Dama',
+      shortLabel: 'Espalda Dama',
+      groesseX: 1536,
+      groesseY: 1536,
+      widthMm: 401.33,
+      heightMm: 713.29,
+      hoehenfaktor: 1.7773,
+      sperrbezirkMm: 50,
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Centro Espalda Dama' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.36,
+      safeMarginMm: { left: 65, right: 65, top: 98, bottom: 55 },
+    },
+    side_left: {
+      panelId: 'side_left',
+      partName: 'Seitenteillinks',
+      label: 'Costado Izquierdo Dama',
+      shortLabel: 'Costado Izq.',
+      groesseX: 512,
+      groesseY: 1536,
+      widthMm: 136.75,
+      heightMm: 547.53,
+      hoehenfaktor: 4.0038,
+      sperrbezirkMm: 35,
+      snapCenterU: 0.5,
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.5,
+      safeMarginMm: { left: 15, right: 15, top: 40, bottom: 40 },
+    },
+    side_right: {
+      panelId: 'side_right',
+      partName: 'Seitenteilrechts',
+      label: 'Costado Derecho Dama',
+      shortLabel: 'Costado Der.',
+      groesseX: 512,
+      groesseY: 1536,
+      widthMm: 136.75,
+      heightMm: 547.53,
+      hoehenfaktor: 4.0038,
+      sperrbezirkMm: 35,
+      snapCenterU: 0.5,
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.5,
+      safeMarginMm: { left: 15, right: 15, top: 40, bottom: 40 },
+    },
+  },
+
+  basketball_shorts_bp7w_women: {
+    right_leg: {
+      panelId: 'right_leg',
+      partName: 'RechtesBeinvorne',
+      label: 'Pierna Derecha Dama (Muslo Frontal)',
+      shortLabel: 'Pierna Der. Dama',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 331.71,
+      heightMm: 549.64,
+      hoehenfaktor: 1.657,
+      sperrbezirkMm: 45,
+      snapCenterU: 0.527,
+      snapAxesU: [{ u: 0.527, label: 'Eje Muslo Der.' }],
+      defaultPlaceU: 0.527,
+      defaultPlaceV: 0.62,
+      safeMarginMm: { left: 45, right: 45, top: 60, bottom: 45 },
     },
     left_leg: {
       panelId: 'left_leg',
-      partName: 'LeftLeg',
-      label: 'Pierna Izquierda (Costado & Muslo)',
-      shortLabel: 'Pierna Izq.',
+      partName: 'LinkesBeinvorne',
+      label: 'Pierna Izquierda Dama (Muslo Frontal)',
+      shortLabel: 'Pierna Izq. Dama',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 331.88,
+      heightMm: 549.56,
+      hoehenfaktor: 1.656,
+      sperrbezirkMm: 45,
+      snapCenterU: 0.473,
+      snapAxesU: [{ u: 0.473, label: 'Eje Muslo Izq.' }],
+      defaultPlaceU: 0.473,
+      defaultPlaceV: 0.62,
+      safeMarginMm: { left: 45, right: 45, top: 60, bottom: 45 },
+    },
+    side_right: {
+      panelId: 'side_right',
+      partName: 'Seitenstreifenrechts',
+      label: 'Banda Lateral Derecha Dama',
+      shortLabel: 'Banda Der.',
+      groesseX: 512,
+      groesseY: 1536,
+      widthMm: 165.27,
+      heightMm: 548.16,
+      hoehenfaktor: 3.317,
+      sperrbezirkMm: 40,
+      snapCenterU: 0.5,
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.65,
+      safeMarginMm: { left: 15, right: 15, top: 40, bottom: 40 },
+    },
+    side_left: {
+      panelId: 'side_left',
+      partName: 'Seitenstreifenlinks',
+      label: 'Banda Lateral Izquierda Dama',
+      shortLabel: 'Banda Izq.',
+      groesseX: 512,
+      groesseY: 1536,
+      widthMm: 165.27,
+      heightMm: 548.16,
+      hoehenfaktor: 3.317,
+      sperrbezirkMm: 40,
+      snapCenterU: 0.5,
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.65,
+      safeMarginMm: { left: 15, right: 15, top: 40, bottom: 40 },
+    },
+  },
+
+  jacket_softshell_601m_men: {
+    front_left: {
+      panelId: 'front_left',
+      partName: 'FrontLeftPart',
+      label: 'Pecho Izquierdo (Escudo)',
+      shortLabel: 'Pecho Izq.',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 284.75,
+      heightMm: 777.93,
+      hoehenfaktor: 2.732,
+      sperrbezirkMm: 45,
+      snapCenterU: 0.45,
+      snapAxesU: [{ u: 0.45, label: 'Eje Pecho Izquierdo' }],
+      defaultPlaceU: 0.45,
+      defaultPlaceV: 0.32,
+      safeMarginMm: { left: 35, right: 25, top: 90, bottom: 50 },
+    },
+    front_right: {
+      panelId: 'front_right',
+      partName: 'FrontRightPart',
+      label: 'Pecho Derecho (Patrocinador / Logo)',
+      shortLabel: 'Pecho Der.',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 284.75,
+      heightMm: 777.93,
+      hoehenfaktor: 2.732,
+      sperrbezirkMm: 45,
+      snapCenterU: 0.55,
+      snapAxesU: [{ u: 0.55, label: 'Eje Pecho Derecho' }],
+      defaultPlaceU: 0.55,
+      defaultPlaceV: 0.32,
+      safeMarginMm: { left: 25, right: 35, top: 90, bottom: 50 },
+    },
+    back: {
+      panelId: 'back',
+      partName: 'Back',
+      label: 'Espalda / Dorsal Chaqueta',
+      shortLabel: 'Espalda',
       groesseX: 1536,
       groesseY: 1536,
-      widthMm: 778.44,
-      heightMm: 642.64,
-      hoehenfaktor: 0.82554,
+      widthMm: 528.88,
+      heightMm: 725.80,
+      hoehenfaktor: 1.372,
       sperrbezirkMm: 50,
-      snapCenterU: 0.445, // Banda lateral izquierda exacta de getSnapLines.php
-      snapAxesU: [
-        { u: 0.215, label: 'Muslo Frontal Izq.' },
-        { u: 0.445, label: 'Banda Lateral Izq.' },
-      ],
-      defaultPlaceU: 0.215,
-      defaultPlaceV: 0.65,
-      safeMarginMm: { left: 60, right: 60, top: 85, bottom: 55 },
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Centro Espalda' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.36,
+      safeMarginMm: { left: 75, right: 75, top: 85, bottom: 55 },
+    },
+    left_arm: {
+      panelId: 'left_arm',
+      partName: 'LeftArm',
+      label: 'Manga Izquierda Chaqueta',
+      shortLabel: 'Manga Izq.',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 306.55,
+      heightMm: 731.68,
+      hoehenfaktor: 2.387,
+      sperrbezirkMm: 40,
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Eje Manga Izq.' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.45,
+      safeMarginMm: { left: 45, right: 45, top: 80, bottom: 45 },
+    },
+    right_arm: {
+      panelId: 'right_arm',
+      partName: 'RightArm',
+      label: 'Manga Derecha Chaqueta',
+      shortLabel: 'Manga Der.',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 306.55,
+      heightMm: 731.68,
+      hoehenfaktor: 2.387,
+      sperrbezirkMm: 40,
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Eje Manga Der.' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.45,
+      safeMarginMm: { left: 45, right: 45, top: 80, bottom: 45 },
+    },
+    collar: {
+      panelId: 'collar',
+      partName: 'CollarOutside',
+      label: 'Cuello Alto Chaqueta',
+      shortLabel: 'Cuello',
+      groesseX: 512,
+      groesseY: 1536,
+      widthMm: 121.40,
+      heightMm: 467.78,
+      hoehenfaktor: 3.853,
+      sperrbezirkMm: 12,
+      snapCenterU: 0.5,
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.5,
+      safeMarginMm: { left: 15, right: 15, top: 20, bottom: 20 },
+    },
+  },
+
+  jacket_softshell_601w_women: {
+    front_left: {
+      panelId: 'front_left',
+      partName: 'FrontLeftPart',
+      label: 'Pecho Izquierdo Dama',
+      shortLabel: 'Pecho Izq. Dama',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 297.03,
+      heightMm: 722.35,
+      hoehenfaktor: 2.432,
+      sperrbezirkMm: 45,
+      snapCenterU: 0.45,
+      snapAxesU: [{ u: 0.45, label: 'Eje Pecho Izquierdo Dama' }],
+      defaultPlaceU: 0.45,
+      defaultPlaceV: 0.32,
+      safeMarginMm: { left: 35, right: 25, top: 85, bottom: 50 },
+    },
+    front_right: {
+      panelId: 'front_right',
+      partName: 'FrontRightPart',
+      label: 'Pecho Derecho Dama',
+      shortLabel: 'Pecho Der. Dama',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 297.03,
+      heightMm: 722.35,
+      hoehenfaktor: 2.432,
+      sperrbezirkMm: 45,
+      snapCenterU: 0.55,
+      snapAxesU: [{ u: 0.55, label: 'Eje Pecho Derecho Dama' }],
+      defaultPlaceU: 0.55,
+      defaultPlaceV: 0.32,
+      safeMarginMm: { left: 25, right: 35, top: 85, bottom: 50 },
+    },
+    back: {
+      panelId: 'back',
+      partName: 'Back',
+      label: 'Espalda Dama Entallada',
+      shortLabel: 'Espalda Dama',
+      groesseX: 1536,
+      groesseY: 1536,
+      widthMm: 462.88,
+      heightMm: 669.23,
+      hoehenfaktor: 1.446,
+      sperrbezirkMm: 50,
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Centro Espalda Dama' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.36,
+      safeMarginMm: { left: 65, right: 65, top: 80, bottom: 50 },
+    },
+    left_arm: {
+      panelId: 'left_arm',
+      partName: 'LeftArm',
+      label: 'Manga Izquierda Dama',
+      shortLabel: 'Manga Izq. Dama',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 277.78,
+      heightMm: 667.63,
+      hoehenfaktor: 2.404,
+      sperrbezirkMm: 40,
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Eje Manga Izq. Dama' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.45,
+      safeMarginMm: { left: 40, right: 40, top: 75, bottom: 40 },
+    },
+    right_arm: {
+      panelId: 'right_arm',
+      partName: 'RightArm',
+      label: 'Manga Derecha Dama',
+      shortLabel: 'Manga Der. Dama',
+      groesseX: 1024,
+      groesseY: 1536,
+      widthMm: 277.75,
+      heightMm: 667.63,
+      hoehenfaktor: 2.404,
+      sperrbezirkMm: 40,
+      snapCenterU: 0.5,
+      snapAxesU: [{ u: 0.5, label: 'Eje Manga Der. Dama' }],
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.45,
+      safeMarginMm: { left: 40, right: 40, top: 75, bottom: 40 },
+    },
+    collar: {
+      panelId: 'collar',
+      partName: 'CollarOutside',
+      label: 'Cuello Alto Dama',
+      shortLabel: 'Cuello Dama',
+      groesseX: 512,
+      groesseY: 1536,
+      widthMm: 121.40,
+      heightMm: 467.78,
+      hoehenfaktor: 3.853,
+      sperrbezirkMm: 12,
+      snapCenterU: 0.5,
+      defaultPlaceU: 0.5,
+      defaultPlaceV: 0.5,
+      safeMarginMm: { left: 15, right: 15, top: 20, bottom: 20 },
     },
   },
 };
 
 export function resolveMirlKeyForProduct(productModelId = 'futbol_jersey_pro_vneck') {
-  if (productModelId === 'basketball_b6_hero') return 'basketball_b6_hero';
-  if (productModelId === 'basketball_shorts_bp6') return 'basketball_shorts_bp6';
-  if (productModelId === 'football_shorts_fp3') return 'football_shorts_fp3';
-  return 'football_f3_ka';
+  switch (productModelId) {
+    case 'basketball_b6_hero':
+      return 'basketball_b6_hero';
+    case 'basketball_shorts_bp6':
+      return 'basketball_shorts_bp6';
+    case 'football_shorts_fp3':
+      return 'football_shorts_fp3';
+    case 'basketball_b7w_epic_women':
+      return 'basketball_b7w_epic_women';
+    case 'basketball_shorts_bp7w_women':
+      return 'basketball_shorts_bp7w_women';
+    case 'jacket_softshell_601m_men':
+      return 'jacket_softshell_601m_men';
+    case 'jacket_softshell_601w_women':
+      return 'jacket_softshell_601w_women';
+    default:
+      return 'football_f3_ka';
+  }
 }
 
 export function isShortsProduct(productModelId = '') {
-  return productModelId === 'basketball_shorts_bp6' || productModelId === 'football_shorts_fp3';
+  return (
+    productModelId === 'basketball_shorts_bp6' ||
+    productModelId === 'football_shorts_fp3' ||
+    productModelId === 'basketball_shorts_bp7w_women'
+  );
+}
+
+export function isJacketProduct(productModelId = '') {
+  return (
+    productModelId === 'jacket_softshell_601m_men' ||
+    productModelId === 'jacket_softshell_601w_women'
+  );
 }
 
 export function getDroppablePanelsForProduct(productModelId = 'futbol_jersey_pro_vneck') {
@@ -288,6 +616,24 @@ export function mapMeshPartNameToPanel(partName = '') {
       return 'left_leg';
     case 'RightLeg':
       return 'right_leg';
+    case 'FrontLeftPart':
+      return 'front_left';
+    case 'FrontRightPart':
+      return 'front_right';
+    case 'CollarOutside':
+      return 'collar';
+    case 'Seitenteillinks':
+      return 'side_left';
+    case 'Seitenteilrechts':
+      return 'side_right';
+    case 'LinkesBeinvorne':
+      return 'left_leg';
+    case 'RechtesBeinvorne':
+      return 'right_leg';
+    case 'Seitenstreifenlinks':
+      return 'side_left';
+    case 'Seitenstreifenrechts':
+      return 'side_right';
     default:
       return null;
   }
@@ -295,6 +641,34 @@ export function mapMeshPartNameToPanel(partName = '') {
 
 export function getMirrorSymmetryTarget(productModelId, decal) {
   if (!decal) return null;
+  if (decal.panel === 'front_left' || decal.panel === 'front_right') {
+    const targetPanel = decal.panel === 'front_left' ? 'front_right' : 'front_left';
+    const srcSpec = getPartSpec(productModelId, decal.panel);
+    const dstSpec = getPartSpec(productModelId, targetPanel);
+    const u = decal.centerMm.x / srcSpec.widthMm;
+    return {
+      panel: targetPanel,
+      label: `${decal.label} (${dstSpec.shortLabel})`,
+      centerMm: {
+        x: Math.round((1 - u) * dstSpec.widthMm * 10) / 10,
+        y: decal.centerMm.y,
+      },
+    };
+  }
+  if (decal.panel === 'side_left' || decal.panel === 'side_right') {
+    const targetPanel = decal.panel === 'side_left' ? 'side_right' : 'side_left';
+    const srcSpec = getPartSpec(productModelId, decal.panel);
+    const dstSpec = getPartSpec(productModelId, targetPanel);
+    const u = decal.centerMm.x / srcSpec.widthMm;
+    return {
+      panel: targetPanel,
+      label: `${decal.label} (${dstSpec.shortLabel})`,
+      centerMm: {
+        x: Math.round((1 - u) * dstSpec.widthMm * 10) / 10,
+        y: decal.centerMm.y,
+      },
+    };
+  }
   if (decal.panel === 'left_arm' || decal.panel === 'right_arm') {
     const targetPanel = decal.panel === 'left_arm' ? 'right_arm' : 'left_arm';
     const srcSpec = getPartSpec(productModelId, decal.panel);

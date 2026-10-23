@@ -37,6 +37,10 @@ const PANEL_TO_PARTNAME = {
   right_leg: 'RightLeg',
   left_leg: 'LeftLeg',
   collar: 'Collar',
+  front_left: 'FrontLeftPart',
+  front_right: 'FrontRightPart',
+  side_left: 'Seitenteillinks',
+  side_right: 'Seitenteilrechts',
 };
 
 /**
@@ -56,10 +60,11 @@ function renderAnatomicalPatternToCanvas({
 }) {
   if (!outCanvas) return null;
 
-  const isWideStrip = partName === 'Collar';
+  const isWideStrip = partName === 'Collar' || partName === 'CollarOutside' || partName.includes('Krageneinfass');
   const isSleeve = partName === 'LeftArm' || partName === 'RightArm';
+  const isNarrowStrip = partName.includes('Seitenteil') || partName.includes('Seitenstreifen') || partName.includes('Unterarm');
   const W = 1024;
-  const H = isWideStrip ? 220 : isSleeve ? 560 : 1024;
+  const H = isWideStrip ? 220 : isSleeve ? 560 : isNarrowStrip ? 1536 : 1024;
 
   if (outCanvas.width !== W) outCanvas.width = W;
   if (outCanvas.height !== H) outCanvas.height = H;
@@ -154,7 +159,7 @@ function MiniPieceCard({
   onSelect,
 }) {
   const miniCanvasRef = useRef(null);
-  const partName = PANEL_TO_PARTNAME[panelMeta.panelId] || 'Front';
+  const partName = panelMeta.partName || PANEL_TO_PARTNAME[panelMeta.panelId] || 'Front';
 
   useEffect(() => {
     if (!miniCanvasRef.current) return;
@@ -240,7 +245,7 @@ export default function Interactive2DLab({
     : droppablePanels[0]?.panelId || 'front';
 
   const spec = getPartSpec(design.productModelId, safePanel);
-  const partName = PANEL_TO_PARTNAME[safePanel] || 'Front';
+  const partName = spec?.partName || PANEL_TO_PARTNAME[safePanel] || 'Front';
   const panelDecals = (design.decals || []).filter((d) => (d.panel || 'front') === safePanel);
   const activeDecal =
     (selectedDecalId && panelDecals.find((d) => d.id === selectedDecalId)) || null;

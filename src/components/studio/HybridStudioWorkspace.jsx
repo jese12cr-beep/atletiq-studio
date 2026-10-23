@@ -245,6 +245,15 @@ export default function HybridStudioWorkspace({
     : null;
   const isFaux3DAccessory = currentProduct.renderMode === 'FAUX_3D_LAYERED_WEBP';
   const isShorts = isShortsProduct(design.productModelId);
+  const isJacket = currentProduct.garmentCategory === 'jacket';
+
+  const [genderModule, setGenderModule] = useState(() => currentProduct.gender || 'men');
+
+  useEffect(() => {
+    if (currentProduct.gender && currentProduct.gender !== genderModule) {
+      setGenderModule(currentProduct.gender);
+    }
+  }, [currentProduct.gender]);
 
   const availableFishDesigns = useMemo(
     () => getDesignsForProduct(design.productModelId),
@@ -271,9 +280,19 @@ export default function HybridStudioWorkspace({
     if (isShorts) {
       return [
         { id: 'primary', label: 'Zona A • Cuerpo Principal', short: 'A' },
-        { id: 'secondary', label: 'Zona B • Franja Secundaria', short: 'B' },
+        { id: 'secondary', label: 'Zona B • Franja / Lateral', short: 'B' },
         { id: 'accents', label: 'Zona C • Filete / Ribete', short: 'C' },
         { id: 'quaternary', label: 'Zona D • Cuarto Tono', short: 'D' },
+      ];
+    }
+    if (isJacket) {
+      return [
+        { id: 'primary', label: 'Zona A • Cuerpo Chaqueta', short: 'A' },
+        { id: 'secondary', label: 'Zona B • Paneles / Costados', short: 'B' },
+        { id: 'accents', label: 'Zona C • Cremallera / Detalles', short: 'C' },
+        { id: 'quaternary', label: 'Zona D • Cuarto Tono', short: 'D' },
+        { id: 'collar', label: 'Cuello Alto', short: 'K' },
+        { id: 'sleeves', label: 'Mangas / Bajomanga', short: 'SL' },
       ];
     }
     return [
@@ -281,7 +300,7 @@ export default function HybridStudioWorkspace({
       { id: 'secondary', label: 'Zona B • Bloque Secundario', short: 'B' },
       { id: 'accents', label: 'Zona C • Acentos / Filetes', short: 'C' },
       { id: 'quaternary', label: 'Zona D • Cuarto Tono', short: 'D' },
-      { id: 'collar', label: 'Cuello (Krageneinfass)', short: 'K' },
+      { id: 'collar', label: 'Cuello (Collar)', short: 'K' },
       {
         id: 'sleeves',
         label:
@@ -291,7 +310,7 @@ export default function HybridStudioWorkspace({
         short: 'SL',
       },
     ];
-  }, [isShorts, currentProduct.garmentShape]);
+  }, [isShorts, isJacket, currentProduct.garmentShape]);
 
   const filteredPalette = useMemo(() => {
     const q = colorSearch.trim().toLowerCase();
@@ -335,6 +354,8 @@ export default function HybridStudioWorkspace({
 
   const variableSlotKeysForProduct = isShorts
     ? ['playerNumberShorts']
+    : isJacket
+    ? ['playerNameBack', 'playerNumberBack']
     : currentProduct.garmentShape === 'basketball_tank'
     ? ['playerNameBack', 'playerNumberBack', 'playerNumberFront']
     : ['playerNameBack', 'playerNumberBack', 'playerNumberFront', 'playerNumberSleeve'];
@@ -745,14 +766,44 @@ export default function HybridStudioWorkspace({
     return { checks, hasWarnings };
   }, [allDecals, design.productModelId, roster.length, totalUnits, currentTier.label, unitPrice]);
 
-  // Agrupación de prendas principales (Baloncesto & Fútbol) + Accesorios
-  const basketballKit = ENGINE_PRODUCTS.filter((p) => p.sport === 'Baloncesto');
-  const footballKit = ENGINE_PRODUCTS.filter((p) => p.sport === 'Fútbol');
+  const handleGenderSwitch = (targetGender) => {
+    if (targetGender === genderModule) return;
+    setGenderModule(targetGender);
+
+    if (targetGender === 'women') {
+      if (design.productModelId === 'basketball_b6_hero') {
+        onSwitchProduct('basketball_b7w_epic_women');
+      } else if (design.productModelId === 'basketball_shorts_bp6') {
+        onSwitchProduct('basketball_shorts_bp7w_women');
+      } else if (design.productModelId === 'jacket_softshell_601m_men') {
+        onSwitchProduct('jacket_softshell_601w_women');
+      } else {
+        onSwitchProduct('basketball_b7w_epic_women');
+      }
+    } else {
+      if (design.productModelId === 'basketball_b7w_epic_women') {
+        onSwitchProduct('basketball_b6_hero');
+      } else if (design.productModelId === 'basketball_shorts_bp7w_women') {
+        onSwitchProduct('basketball_shorts_bp6');
+      } else if (design.productModelId === 'jacket_softshell_601w_women') {
+        onSwitchProduct('jacket_softshell_601m_men');
+      } else {
+        onSwitchProduct('futbol_jersey_pro_vneck');
+      }
+    }
+  };
+
+  const menBasketball = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Baloncesto');
+  const menFootball = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Fútbol');
+  const menJackets = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Chaquetas');
+
+  const womenBasketball = ENGINE_PRODUCTS.filter((p) => p.gender === 'women' && p.sport === 'Baloncesto');
+  const womenJackets = ENGINE_PRODUCTS.filter((p) => p.gender === 'women' && p.sport === 'Chaquetas');
   const accessoryProducts = ENGINE_PRODUCTS.filter((p) => p.renderMode === 'FAUX_3D_LAYERED_WEBP');
 
   return (
     <div className="h-dvh flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
-      {/* 1. CABECERA COMPACTA DE KIT DEPORTIVO (BALONCESTO: CAMISA + SHORT | FÚTBOL: CAMISA + SHORT) */}
+      {/* 1. CABECERA MULTI-PRENDA (MÓDULOS CABALLERO & DAMA: BALONCESTO, FÚTBOL, CHAQUETAS SOFTSHELL) */}
       <header className="shrink-0 px-3 sm:px-5 py-2.5 bg-slate-900/95 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -765,47 +816,150 @@ export default function HybridStudioWorkspace({
             <span className="hidden sm:inline">Vitrina</span>
           </button>
 
-          {/* Grupo Kit Baloncesto */}
-          <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
-            <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-orange-400">
-              Baloncesto
-            </span>
-            {basketballKit.map((prod) => (
-              <button
-                key={prod.id}
-                type="button"
-                onClick={() => onSwitchProduct(prod.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                  design.productModelId === prod.id
-                    ? 'bg-amber-400 text-slate-950 shadow'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                }`}
-              >
-                {prod.id.includes('shorts') ? 'Short BP6' : 'Camisa B6'}
-              </button>
-            ))}
+          {/* Selector de Módulo: ♂ Caballero vs ♀ Dama */}
+          <div className="flex items-center p-0.5 bg-slate-950 rounded-xl border border-slate-800 shadow-inner">
+            <button
+              type="button"
+              onClick={() => handleGenderSwitch('men')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+                genderModule === 'men'
+                  ? 'bg-blue-600 text-white shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>♂ Caballero</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGenderSwitch('women')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+                genderModule === 'women'
+                  ? 'bg-fuchsia-600 text-white shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>♀ Dama</span>
+            </button>
           </div>
 
-          {/* Grupo Kit Fútbol */}
-          <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
-            <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">
-              Fútbol
-            </span>
-            {footballKit.map((prod) => (
-              <button
-                key={prod.id}
-                type="button"
-                onClick={() => onSwitchProduct(prod.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                  design.productModelId === prod.id
-                    ? 'bg-amber-400 text-slate-950 shadow'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                }`}
-              >
-                {prod.id.includes('shorts') ? 'Short FP3' : 'Camisa F3'}
-              </button>
-            ))}
-          </div>
+          {/* Módulo Caballero */}
+          {genderModule === 'men' && (
+            <>
+              {/* Kit Baloncesto Caballero */}
+              <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
+                <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-orange-400">
+                  Basket
+                </span>
+                {menBasketball.map((prod) => (
+                  <button
+                    key={prod.id}
+                    type="button"
+                    onClick={() => onSwitchProduct(prod.id)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                      design.productModelId === prod.id
+                        ? 'bg-amber-400 text-slate-950 shadow'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {prod.id.includes('shorts') ? 'Short BP6' : 'Camisa B6'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Kit Fútbol Caballero */}
+              <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
+                <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                  Fútbol
+                </span>
+                {menFootball.map((prod) => (
+                  <button
+                    key={prod.id}
+                    type="button"
+                    onClick={() => onSwitchProduct(prod.id)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                      design.productModelId === prod.id
+                        ? 'bg-amber-400 text-slate-950 shadow'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {prod.id.includes('shorts') ? 'Short FP3' : 'Camisa F3'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Chaqueta Softshell Caballero */}
+              {menJackets.length > 0 && (
+                <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
+                  <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-sky-400">
+                    Chaqueta
+                  </span>
+                  {menJackets.map((prod) => (
+                    <button
+                      key={prod.id}
+                      type="button"
+                      onClick={() => onSwitchProduct(prod.id)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                        design.productModelId === prod.id
+                          ? 'bg-amber-400 text-slate-950 shadow'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      J5 Softshell
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Módulo Dama */}
+          {genderModule === 'women' && (
+            <>
+              {/* Kit Baloncesto Dama */}
+              <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
+                <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-fuchsia-400">
+                  Basket Dama
+                </span>
+                {womenBasketball.map((prod) => (
+                  <button
+                    key={prod.id}
+                    type="button"
+                    onClick={() => onSwitchProduct(prod.id)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                      design.productModelId === prod.id
+                        ? 'bg-amber-400 text-slate-950 shadow'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {prod.id.includes('shorts') ? 'Short BP7W' : 'Camisa B7W Epic'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Chaqueta Softshell Dama */}
+              {womenJackets.length > 0 && (
+                <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
+                  <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-rose-400">
+                    Chaqueta Dama
+                  </span>
+                  {womenJackets.map((prod) => (
+                    <button
+                      key={prod.id}
+                      type="button"
+                      onClick={() => onSwitchProduct(prod.id)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                        design.productModelId === prod.id
+                          ? 'bg-amber-400 text-slate-950 shadow'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      J5W Dama
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
 
           {/* Sincronizador 1-clic Camiseta ↔ Short */}
           {pairedProduct && (

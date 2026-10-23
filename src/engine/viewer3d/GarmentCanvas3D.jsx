@@ -60,6 +60,30 @@ const ALL_POSSIBLE_MESH_PARTS = [
   'Krageneinfass',
   'Aermelbandlinks',
   'Aermelbandrechts',
+  // Dama Baloncesto
+  'Seitenteillinks',
+  'Seitenteilrechts',
+  // Dama Shorts Baloncesto
+  'RechtesBeinvorne',
+  'LinkesBeinvorne',
+  'RechtesBeinhinten',
+  'LinkesBeinhinten',
+  'Seitenstreifenrechts',
+  'Seitenstreifenlinks',
+  'Aufnaeher',
+  // Chaquetas Softshell Hombre & Dama
+  'FrontLeftPart',
+  'FrontRightPart',
+  'CollarOutside',
+  'CollarInside',
+  'Unterarmstreifenlinks',
+  'Unterarmstreifenrechts',
+  'RV',
+  'RVPL',
+  'RVPR',
+  'Toothmesh',
+  'Toothmesh_BG',
+  'GU',
 ];
 
 const PANEL_TO_PARTNAME = {
@@ -70,6 +94,10 @@ const PANEL_TO_PARTNAME = {
   right_leg: 'RightLeg',
   left_leg: 'LeftLeg',
   collar: 'Collar',
+  front_left: 'FrontLeftPart',
+  front_right: 'FrontRightPart',
+  side_left: 'Seitenteillinks',
+  side_right: 'Seitenteilrechts',
 };
 
 /**
@@ -1039,6 +1067,7 @@ export default function GarmentCanvas3D({
     ? (design.decals || []).find((d) => d.id === selectedDecalId) || null
     : null;
 
+  const isTank = !isShorts && (design.productModelId.includes('basketball') || design.productModelId.includes('tank'));
   const quickCameraButtons = isShorts
     ? [
         { id: 'three_quarter', label: '3/4' },
@@ -1046,6 +1075,15 @@ export default function GarmentCanvas3D({
         { id: 'back', label: 'Atrás' },
         { id: 'right_leg', label: 'Pierna Der.' },
         { id: 'left_leg', label: 'Pierna Izq.' },
+        { id: 'interior_tag', label: 'Interior' },
+      ]
+    : isTank
+    ? [
+        { id: 'three_quarter', label: '3/4' },
+        { id: 'front', label: 'Frente' },
+        { id: 'back', label: 'Espalda' },
+        { id: 'right_sleeve', label: 'Costado Der.' },
+        { id: 'left_sleeve', label: 'Costado Izq.' },
         { id: 'interior_tag', label: 'Interior' },
       ]
     : [

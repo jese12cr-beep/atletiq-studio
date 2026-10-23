@@ -9,6 +9,10 @@ import {
   FOOTBALL_SHORTS_FISH_DESIGNS,
   BASKETBALL_FISH_DESIGNS,
   BASKETBALL_SHORTS_FISH_DESIGNS,
+  BASKETBALL_WOMEN_FISH_DESIGNS,
+  BASKETBALL_SHORTS_WOMEN_FISH_DESIGNS,
+  JACKET_MEN_FISH_DESIGNS,
+  JACKET_WOMEN_FISH_DESIGNS,
 } from './palette152';
 
 export {
@@ -17,6 +21,10 @@ export {
   FOOTBALL_SHORTS_FISH_DESIGNS,
   BASKETBALL_FISH_DESIGNS,
   BASKETBALL_SHORTS_FISH_DESIGNS,
+  BASKETBALL_WOMEN_FISH_DESIGNS,
+  BASKETBALL_SHORTS_WOMEN_FISH_DESIGNS,
+  JACKET_MEN_FISH_DESIGNS,
+  JACKET_WOMEN_FISH_DESIGNS,
 };
 
 export const ENGINE_PRODUCTS = [
@@ -25,6 +33,7 @@ export const ENGINE_PRODUCTS = [
     name: 'Camiseta Fútbol F3 Basic',
     shortName: 'Camiseta Fútbol',
     sport: 'Fútbol',
+    gender: 'men',
     garmentCategory: 'jersey',
     pairedProductId: 'football_shorts_fp3',
     renderMode: 'WEBGL_3D_PBR',
@@ -43,6 +52,7 @@ export const ENGINE_PRODUCTS = [
     name: 'Short Fútbol FP3 Basic',
     shortName: 'Short Fútbol',
     sport: 'Fútbol',
+    gender: 'men',
     garmentCategory: 'shorts',
     pairedProductId: 'futbol_jersey_pro_vneck',
     renderMode: 'WEBGL_3D_PBR',
@@ -61,6 +71,7 @@ export const ENGINE_PRODUCTS = [
     name: 'Camiseta Basket B6 Hero',
     shortName: 'Camiseta Basket',
     sport: 'Baloncesto',
+    gender: 'men',
     garmentCategory: 'jersey',
     pairedProductId: 'basketball_shorts_bp6',
     renderMode: 'WEBGL_3D_PBR',
@@ -79,6 +90,7 @@ export const ENGINE_PRODUCTS = [
     name: 'Short Basket BP6 Hero',
     shortName: 'Short Basket',
     sport: 'Baloncesto',
+    gender: 'men',
     garmentCategory: 'shorts',
     pairedProductId: 'basketball_b6_hero',
     renderMode: 'WEBGL_3D_PBR',
@@ -93,10 +105,87 @@ export const ENGINE_PRODUCTS = [
     badge: '55,791 Vértices • 6 Diseños .fish',
   },
   {
+    id: 'basketball_b7w_epic_women',
+    name: 'Camiseta Basket B7W Epic Dama',
+    shortName: 'Camiseta Dama B7W',
+    sport: 'Baloncesto',
+    gender: 'women',
+    garmentCategory: 'jersey',
+    pairedProductId: 'basketball_shorts_bp7w_women',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'basketball_tank',
+    mirlUrl: '/models/basketball_b7w_epic_women.mirl',
+    mirlKey: 'basketball_b7w_epic_women',
+    owayoCutCode: '222w-Epic',
+    defaultFabricId: 'cooldry_hex',
+    defaultDesignId: 'legend',
+    basePrice: 33.5,
+    shopifyVariantBase: 44901234567301,
+    badge: '94,947 Vértices • Corte Mujer Dama • 10 Diseños .fish',
+  },
+  {
+    id: 'basketball_shorts_bp7w_women',
+    name: 'Short Basket BP7W Epic Dama',
+    shortName: 'Short Dama BP7W',
+    sport: 'Baloncesto',
+    gender: 'women',
+    garmentCategory: 'shorts',
+    pairedProductId: 'basketball_b7w_epic_women',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'basketball_shorts',
+    mirlUrl: '/models/basketball_shorts_bp7w_women.mirl',
+    mirlKey: 'basketball_shorts_bp7w_women',
+    owayoCutCode: '313w-STS',
+    defaultFabricId: 'cooldry_hex',
+    defaultDesignId: 'pure',
+    basePrice: 27.5,
+    shopifyVariantBase: 44901234567401,
+    badge: '66,282 Vértices • Corte Mujer Dama • 9 Diseños .fish',
+  },
+  {
+    id: 'jacket_softshell_601m_men',
+    name: 'Chaqueta Softshell J5 Pro Caballero',
+    shortName: 'Chaqueta J5 Hombre',
+    sport: 'Chaquetas',
+    gender: 'men',
+    garmentCategory: 'jacket',
+    pairedProductId: 'jacket_softshell_601w_women',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'jacket_zipper',
+    mirlUrl: '/models/jacket_softshell_601m_men.mirl',
+    mirlKey: 'jacket_softshell_601m_men',
+    owayoCutCode: 'CUT_601M',
+    defaultFabricId: 'k_tex_wind',
+    defaultDesignId: 'velo',
+    basePrice: 68.0,
+    shopifyVariantBase: 44901234567501,
+    badge: '31,753 Vértices • Cremallera Frontal • 12 Diseños .fish',
+  },
+  {
+    id: 'jacket_softshell_601w_women',
+    name: 'Chaqueta Softshell J5W Pro Dama',
+    shortName: 'Chaqueta J5W Dama',
+    sport: 'Chaquetas',
+    gender: 'women',
+    garmentCategory: 'jacket',
+    pairedProductId: 'jacket_softshell_601m_men',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'jacket_zipper',
+    mirlUrl: '/models/jacket_softshell_601w_women.mirl',
+    mirlKey: 'jacket_softshell_601w_women',
+    owayoCutCode: 'CUT_601W',
+    defaultFabricId: 'k_tex_wind',
+    defaultDesignId: 'peloton',
+    basePrice: 68.0,
+    shopifyVariantBase: 44901234567601,
+    badge: '20,529 Vértices • Corte Entallado Mujer • 9 Diseños .fish',
+  },
+  {
     id: 'esports_pro_jersey',
     name: 'Jersey E-Sports Pro Arena',
     shortName: 'Jersey E-Sports',
     sport: 'E-Sports',
+    gender: 'men',
     garmentCategory: 'jersey',
     pairedProductId: 'football_shorts_fp3',
     renderMode: 'WEBGL_3D_PBR',
@@ -154,6 +243,14 @@ export function getDesignsForProduct(productModelId = 'futbol_jersey_pro_vneck')
       return BASKETBALL_FISH_DESIGNS;
     case 'basketball_shorts_bp6':
       return BASKETBALL_SHORTS_FISH_DESIGNS;
+    case 'basketball_b7w_epic_women':
+      return BASKETBALL_WOMEN_FISH_DESIGNS;
+    case 'basketball_shorts_bp7w_women':
+      return BASKETBALL_SHORTS_WOMEN_FISH_DESIGNS;
+    case 'jacket_softshell_601m_men':
+      return JACKET_MEN_FISH_DESIGNS;
+    case 'jacket_softshell_601w_women':
+      return JACKET_WOMEN_FISH_DESIGNS;
     case 'football_shorts_fp3':
       return FOOTBALL_SHORTS_FISH_DESIGNS;
     default:
