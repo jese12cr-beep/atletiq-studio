@@ -1,0 +1,8 @@
+# Logs & Dependencies
+node_modules
+dist
+dist-ssr
+*.local
+
+# Ignorar archivos .har crudos por si contienen cookies de sesión, pero versionar los reportes limpios (.report.json)
+rea-captures/**/*.har

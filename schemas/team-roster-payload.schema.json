@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atletiq.pro/schemas/team-roster-payload.schema.json",
+  "title": "AtletiqTeamRosterPayload",
+  "description": "Estructura relacional estilo Owayo para agrupar N jugadores, tallas y patronajes bajo un único designId sin duplicar texturas.",
+  "type": "object",
+  "required": ["designId", "currency", "rosterLines"],
+  "properties": {
+    "designId": {
+      "type": "string",
+      "description": "Referencia al documento maestro único de diseño."
+    },
+    "currency": {
+      "type": "string",
+      "examples": ["USD", "MXN", "EUR", "COP"]
+    },
+    "discountTierApplied": {
+      "type": "object",
+      "properties": {
+        "tierCode": { "type": "string" },
+        "discountPercent": { "type": "number" },
+        "totalUnits": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "rosterLines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["lineIndex", "garmentCut", "sizeCode", "quantity"],
+        "properties": {
+          "lineIndex": { "type": "integer", "minimum": 1 },
+          "garmentCut": {
+            "type": "string",
+            "enum": ["MEN_PRO_SLIM", "MEN_CLASSIC", "WOMEN_FIT", "YOUTH_KIDS", "GOALKEEPER_LONG"]
+          },
+          "sizeCode": {
+            "type": "string",
+            "examples": ["128", "140", "152", "XS", "S", "M", "L", "XL", "2XL", "3XL"]
+          },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "slotValues": {
+            "type": "object",
+            "properties": {
+              "playerNameBack": { "type": "string", "maxLength": 22 },
+              "playerNumberBack": { "type": "string", "maxLength": 3 },
+              "playerNumberFront": { "type": "string", "maxLength": 3 },
+              "initialsSleeve": { "type": "string", "maxLength": 4 }
+            }
+          },
+          "roleTag": {
+            "type": "string",
+            "examples": ["CAPTAIN", "GOALKEEPER", "FIELD_PLAYER", "STAFF"]
+          }
+        }
+      }
+    }
+  }
+}

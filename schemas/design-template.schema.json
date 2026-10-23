@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atletiq.pro/schemas/design-template.schema.json",
+  "title": "AtletiqMasterDesignDocument",
+  "description": "Documento maestro único de diseño (combina UV 3D de Owayo/KitBuilder, Bounding Boxes de CustomInk y capas 2.5D de Nike).",
+  "type": "object",
+  "required": ["designId", "engineVersion", "productModelId", "renderMode", "colorZones", "decals", "variableSlots"],
+  "properties": {
+    "designId": {
+      "type": "string",
+      "pattern": "^des_[a-zA-Z0-9]{8,24}$"
+    },
+    "engineVersion": {
+      "type": "string",
+      "const": "3.0.0"
+    },
+    "productModelId": {
+      "type": "string",
+      "examples": ["futbol_jersey_pro_vneck", "cycling_aero_maillot", "cap_snapback_6panel"]
+    },
+    "renderMode": {
+      "type": "string",
+      "enum": ["WEBGL_3D_PBR", "FAUX_3D_LAYERED_WEBP"]
+    },
+    "patternTemplateId": {
+      "type": "string",
+      "description": "ID del archivo SVG paramétrico de patrón que alimenta el Albedo UV."
+    },
+    "fabricSpec": {
+      "type": "object",
+      "required": ["weaveTileId", "uvRepeat", "normalScale", "roughness"],
+      "properties": {
+        "weaveTileId": { "type": "string", "examples": ["cooldry_hex_mesh_256", "interlock_smooth_256"] },
+        "uvRepeat": { "type": "number", "minimum": 1, "maximum": 120 },
+        "normalScale": { "type": "number", "minimum": 0, "maximum": 2 },
+        "roughness": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "colorZones": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["hex"],
+        "properties": {
+          "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "pantoneCode": { "type": "string" }
+        }
+      }
+    },
+    "decals": {
+      "type": "array",
+      "description": "Logos, patrocinadores o textos fijos con validación OBB/AABB de CustomInk.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "safeZoneId", "centerMm", "sizeMm", "rotationDeg"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["UPLOADED_RASTER", "UPLOADED_VECTOR", "PRESET_CREST", "STATIC_TEXT"] },
+          "artworkId": { "type": "string", "description": "Puntero ligero en CDN (nunca Base64)." },
+          "safeZoneId": { "type": "string", "examples": ["front_chest_full", "left_chest_crest", "left_sleeve"] },
+          "uvCoords": {
+            "type": "object",
+            "properties": {
+              "u": { "type": "number", "minimum": 0, "maximum": 1 },
+              "v": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          },
+          "centerMm": {
+            "type": "object",
+            "required": ["x", "y"],
+            "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+          },
+          "sizeMm": {
+            "type": "object",
+            "required": ["width", "height"],
+            "properties": { "width": { "type": "number" }, "height": { "type": "number" } }
+          },
+          "rotationDeg": { "type": "number", "minimum": -180, "maximum": 180 },
+          "effectiveDpi": { "type": "number" },
+          "bleedMode": { "type": "string", "enum": ["STRICT_SAFE_BOX", "FULL_SUBLIMATION_BLEED"] }
+        }
+      }
+    },
+    "variableSlots": {
+      "type": "object",
+      "description": "Placeholders dinámicos por jugador (estilo Owayo) que NO duplican imágenes.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["enabled", "panelId", "uvAnchor", "maxWidthMm", "heightMm", "fontId", "fillHex"],
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "panelId": { "type": "string" },
+          "uvAnchor": {
+            "type": "object",
+            "properties": { "u": { "type": "number" }, "v": { "type": "number" } }
+          },
+          "maxWidthMm": { "type": "number" },
+          "heightMm": { "type": "number" },
+          "autoCondense": { "type": "boolean", "default": true },
+          "fontId": { "type": "string" },
+          "fillHex": { "type": "string" },
+          "outlineHex": { "type": "string" },
+          "outlineWidthMm": { "type": "number" }
+        }
+      }
+    },
+    "previews": {
+      "type": "object",
+      "properties": {
+        "frontWebpUrl": { "type": "string", "format": "uri" },
+        "backWebpUrl": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}

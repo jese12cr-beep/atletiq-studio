@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atletiq.pro/schemas/shopify-production-payload.schema.json",
+  "title": "AtletiqShopifyAndPrintReadyPayload",
+  "description": "Puente de datos estilo Zakeke entre el carrito AJAX de Shopify (/cart/add.js) y el generador Print-Ready de taller textil.",
+  "type": "object",
+  "required": ["shopifyCartPayload", "manufacturingManifest"],
+  "properties": {
+    "shopifyCartPayload": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "quantity", "properties"],
+            "properties": {
+              "id": { "type": "integer", "description": "Shopify Variant ID correspondiente al producto y talla." },
+              "quantity": { "type": "integer", "minimum": 1 },
+              "properties": {
+                "type": "object",
+                "required": ["_atletiq_design_id", "_atletiq_preview_front"],
+                "properties": {
+                  "Resumen Diseño": { "type": "string" },
+                  "Jugadores": { "type": "string" },
+                  "_atletiq_design_id": { "type": "string" },
+                  "_atletiq_preview_front": { "type": "string", "format": "uri" },
+                  "_atletiq_preview_back": { "type": "string", "format": "uri" },
+                  "_atletiq_roster_ref": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "manufacturingManifest": {
+      "type": "object",
+      "description": "Manifiesto generado en el Webhook orders/paid para el plotter de sublimación o bordadora.",
+      "required": ["designId", "dpiTarget", "colorProfile", "bleedMm", "cutPieces"],
+      "properties": {
+        "designId": { "type": "string" },
+        "dpiTarget": { "type": "integer", "const": 300 },
+        "colorProfile": { "type": "string", "enum": ["SRGB_SUBLIMATION", "CMYK_FOGRA39"] },
+        "bleedMm": { "type": "number", "default": 15 },
+        "outlineFontsToPaths": { "type": "boolean", "const": true },
+        "cutPieces": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pieceId", "svgPatternUrl", "outputPdfUrl"],
+            "properties": {
+              "pieceId": { "type": "string", "enum": ["FRONT_PANEL", "BACK_PANEL", "SLEEVE_LEFT", "SLEEVE_RIGHT", "COLLAR_RIB"] },
+              "svgPatternUrl": { "type": "string", "format": "uri" },
+              "outputPdfUrl": { "type": "string", "format": "uri" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
