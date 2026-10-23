@@ -35,9 +35,9 @@ import {
 } from '../core/boundingBoxMath';
 
 // Lente teleobjetivo exacto de retrato Owayo v6 (`CAMERA_STANDARD_FOV = 30` en viewer-CmBNa226.js)
-export const CAMERA_STANDARD_FOV = 30;
+const CAMERA_STANDARD_FOV = 30;
 
-export const CAMERA_PRESETS = {
+const CAMERA_PRESETS = {
   front: { pos: [0, 0.04, 5.45], target: [0, 0.0, 0] },
   three_quarter: { pos: [2.25, 0.32, 5.0], target: [0, 0.0, 0] },
   back: { pos: [0, 0.04, -5.45], target: [0, 0.0, 0] },

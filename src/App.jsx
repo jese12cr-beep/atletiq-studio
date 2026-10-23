@@ -39,14 +39,16 @@ export default function App() {
   const [appMode, setAppMode] = useState('studio');
 
   // Historial Undo/Redo de 50 pasos con memoria independiente por prenda del kit (Camiseta ↔ Short)
-  const [history, setHistory] = useState([createInitialKitSnapshot]);
+  const [history, setHistory] = useState(() => [createInitialKitSnapshot()]);
   const [historyIdx, setHistoryIdx] = useState(0);
 
-  const currentSnapshot = history[historyIdx];
-  const activeProductId = currentSnapshot.activeProductId;
+  const currentSnapshot = history[historyIdx] || history[0];
+  const activeProductId = currentSnapshot?.activeProductId || 'basketball_jersey_b6_hero';
   const design =
-    currentSnapshot.designsByProduct[activeProductId] ||
-    Object.values(currentSnapshot.designsByProduct)[0];
+    currentSnapshot?.designsByProduct?.[activeProductId] ||
+    (currentSnapshot?.designsByProduct
+      ? Object.values(currentSnapshot.designsByProduct)[0]
+      : createInitialMasterDesign());
 
   const [roster, setRoster] = useState(INITIAL_TEAM_ROSTER);
   const [artworkRegistry, setArtworkRegistry] = useState({});
