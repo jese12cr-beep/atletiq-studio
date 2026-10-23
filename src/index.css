@@ -16,6 +16,93 @@
   font-family: 'Chakra Petch', sans-serif;
 }
 
+/* Manejador dedicado de arrastre (Pointer Events + Safari fallback) */
+.decal-drag-handle {
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.decal-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Tabla responsiva de Roster con Container Queries y encabezados Sticky */
+.roster-table-wrapper {
+  overflow: auto;
+  max-inline-size: 100%;
+  max-block-size: min(440px, 60vh);
+  container-type: inline-size;
+}
+
+.roster-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  --label-2: "Corte";
+  --label-3: "Talla";
+  --label-4: "Cant.";
+  --label-5: "Nombre Espalda";
+  --label-6: "Dorsal";
+  --label-7: "Acción";
+}
+
+.roster-data-table thead {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+}
+
+.roster-data-table tbody th {
+  position: sticky;
+  inset-inline-start: 0;
+  background: #0f172a;
+}
+
+@container (width < 600px) {
+  .roster-data-table,
+  .roster-data-table thead,
+  .roster-data-table tbody,
+  .roster-data-table tr,
+  .roster-data-table th,
+  .roster-data-table td {
+    display: block;
+  }
+
+  .roster-data-table thead {
+    display: none;
+  }
+
+  .roster-data-table tr {
+    margin-block-end: 0.85rem;
+    border: 1px solid #1e293b;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .roster-data-table tbody th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 2;
+    background: #1e293b;
+  }
+
+  .roster-data-table td::before {
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 0.7rem;
+    margin-inline-end: 0.5rem;
+  }
+
+  .roster-data-table td:nth-child(2)::before { content: var(--label-2) ": "; }
+  .roster-data-table td:nth-child(3)::before { content: var(--label-3) ": "; }
+  .roster-data-table td:nth-child(4)::before { content: var(--label-4) ": "; }
+  .roster-data-table td:nth-child(5)::before { content: var(--label-5) ": "; }
+  .roster-data-table td:nth-child(6)::before { content: var(--label-6) ": "; }
+  .roster-data-table td:nth-child(7)::before { content: var(--label-7) ": "; }
+}
+
 /* Custom scrollbar for design panels */
 ::-webkit-scrollbar {
   width: 6px;
