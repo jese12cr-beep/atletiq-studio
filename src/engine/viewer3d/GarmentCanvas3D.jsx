@@ -1,25 +1,45 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildSculptedJerseyGroup } from './jerseyGeometry3D';
-import { getFabricPBRMaps } from '../compositor/fabricTexturesPBR';
-import { renderFullUVAtlas } from '../compositor/uvCanvasRenderer';
+import {
+  loadMirlModelTemplate,
+  instantiateMirlGarmentGroup,
+  buildNeckLabelCanvasTexture,
+} from './mirlModelLoader';
+import {
+  loadFishDesignMasks,
+  resolveActiveFishDesignMeta,
+  composeGarmentPartCanvas,
+} from '../compositor/fishPartCompositor';
 import { FABRIC_WEAVES, ENGINE_PRODUCTS } from '../core/designStore';
-import { GARMENT_REFERENCE_MM, evaluateDecalPlacement } from '../core/boundingBoxMath';
+import { getPartSpec, evaluateDecalPlacement } from '../core/boundingBoxMath';
 
-const CAMERA_PRESETS = {
-  front: { pos: [0, 0.04, 3.28], target: [0, -0.02, 0] },
-  three_quarter: { pos: [1.48, 0.24, 2.88], target: [0, -0.02, 0] },
-  back: { pos: [0, 0.04, -3.28], target: [0, -0.02, 0] },
-  macro_weave: { pos: [0.38, 0.42, 1.24], target: [0.18, 0.34, 0.34] },
+export const CAMERA_PRESETS = {
+  front: { pos: [0, 0.04, 4.45], target: [0, 0.0, 0] },
+  three_quarter: { pos: [1.85, 0.28, 4.05], target: [0, 0.0, 0] },
+  back: { pos: [0, 0.04, -4.45], target: [0, 0.0, 0] },
+  left_sleeve: { pos: [3.35, 0.48, 1.35], target: [0.65, 0.42, 0] },
+  right_sleeve: { pos: [-3.35, 0.48, 1.35], target: [-0.65, 0.42, 0] },
+  macro_weave: { pos: [0.45, 0.48, 1.65], target: [0.22, 0.4, 0.25] },
 };
 
+const ALL_POSSIBLE_MESH_PARTS = [
+  'Front',
+  'Back',
+  'LeftArm',
+  'RightArm',
+  'Collar',
+  'Krageneinfass',
+  'Aermelbandlinks',
+  'Aermelbandrechts',
+];
+
 /**
- * Inyecta la regla real de sublimación interior decodificada de Owayo v6 (`innenseiteAufhellen`):
- * En poliéster técnico blanco (`K-Tex 2`), la tinta sublimada sólo penetra ~38% hacia la cara interna (`!gl_FrontFacing`).
+ * Inyecta la regla óptica real de sublimación textil interior (`innenseiteAufhellen` de Owayo v6):
+ * El poliéster blanco técnico muestra penetración parcial (~38%) en la cara interior (`!gl_FrontFacing`).
  */
 function applyOwayoInnerSublimationShader(material, keySuffix) {
-  material.customProgramCacheKey = () => `owayo_inner_sublimation_${keySuffix}`;
+  material.customProgramCacheKey = () => `owayo_v4_inner_sublimation_${keySuffix}`;
   material.onBeforeCompile = (shader) => {
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <map_fragment>',
@@ -29,6 +49,19 @@ function applyOwayoInnerSublimationShader(material, keySuffix) {
       }`
     );
   };
+}
+
+const bumpTextureCache = new Map();
+function getOrLoadRealBumpTexture(url, repeatX = 48, repeatY = 48) {
+  const key = `${url}|${repeatX}|${repeatY}`;
+  if (bumpTextureCache.has(key)) return bumpTextureCache.get(key);
+  const loader = new THREE.TextureLoader();
+  const tex = loader.load(url);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(repeatX, repeatY);
+  bumpTextureCache.set(key, tex);
+  return tex;
 }
 
 export default function GarmentCanvas3D({
@@ -42,9 +75,11 @@ export default function GarmentCanvas3D({
   onUpdateDecalFrom3D,
   canvasSnapshotRef,
 }) {
+  const stageWrapperRef = useRef(null);
   const mountRef = useRef(null);
   const sceneStateRef = useRef(null);
-  const uvAtlasCanvasRef = useRef(null);
+  const fishMasksRef = useRef(null);
+
   const latestPropsRef = useRef({
     design,
     activePlayer,
@@ -58,6 +93,8 @@ export default function GarmentCanvas3D({
   const [isDraggingDecal, setIsDraggingDecal] = useState(false);
   const [hoveringDecalLabel, setHoveringDecalLabel] = useState(null);
   const [active3DOverlay, setActive3DOverlay] = useState(null);
+  const [modelStats, setModelStats] = useState({ loading: true, vertices: 0, faces: 0 });
+  const [fishVersionTick, setFishVersionTick] = useState(0);
 
   latestPropsRef.current = {
     design,
@@ -68,24 +105,33 @@ export default function GarmentCanvas3D({
     onUpdateDecalFrom3D,
   };
 
-  // Helper unificado de posicionamiento restringido (usado tanto por Pointer Events como por Teclado)
   const commitClampedDecalPosition = (decal, rawXmm, rawYmm, enableSnap = true) => {
     const curDesign = latestPropsRef.current.design;
     const candidate = {
       ...decal,
       centerMm: { x: rawXmm, y: rawYmm },
     };
-    const evaluated = evaluateDecalPlacement(candidate, null, enableSnap);
+    const evaluated = evaluateDecalPlacement(
+      candidate,
+      curDesign.productModelId,
+      enableSnap,
+      curDesign.bleedEnforcement || 'SOFT_WARN'
+    );
     const finalCenterMm =
       curDesign.bleedEnforcement === 'HARD_CLAMP'
         ? evaluated.clampedSafeCenterMm
         : evaluated.snappedCenterMm;
 
-    latestPropsRef.current.onUpdateDecalFrom3D?.(decal.id, { centerMm: finalCenterMm });
+    latestPropsRef.current.onUpdateDecalFrom3D?.(decal.id, {
+      centerMm: {
+        x: Math.round(finalCenterMm.x * 10) / 10,
+        y: Math.round(finalCenterMm.y * 10) / 10,
+      },
+    });
     return evaluated;
   };
 
-  // Raycast UV sobre las piezas `Front` y `Back` (`isDroppable === true`)
+  // Raycast UV multi-pieza real sobre `Front`, `Back`, `LeftArm`, `RightArm` y `Collar`
   const raycastDroppableUV = (clientX, clientY, restrictToPanel = null) => {
     const st = sceneStateRef.current;
     const container = mountRef.current;
@@ -105,27 +151,32 @@ export default function GarmentCanvas3D({
 
     const validHit = hits.find((h) => {
       if (!h.object?.userData?.isDroppable || !h.uv) return false;
-      if (restrictToPanel && h.object.userData.panel !== restrictToPanel) return false;
+      const hitPanel = h.object.userData.panel;
+      if (!hitPanel) return false;
+      if (restrictToPanel && hitPanel !== restrictToPanel) return false;
       return true;
     });
 
     if (!validHit) return null;
 
+    const panel = validHit.object.userData.panel;
+    const spec = getPartSpec(latestPropsRef.current.design.productModelId, panel);
     const { x: u, y: v } = validHit.uv;
-    const panel = u < 0.5 ? 'front' : 'back';
-    const localU = panel === 'front' ? u / 0.5 : (u - 0.5) / 0.5;
-    const xMm = localU * GARMENT_REFERENCE_MM.width;
-    const yMm = (1 - v) * GARMENT_REFERENCE_MM.height;
+    const xMm = u * spec.widthMm;
+    const yMm = (1 - v) * spec.heightMm;
 
-    return { panel, xMm, yMm };
+    return { panel, partName: validHit.object.userData.partName, xMm, yMm, spec };
   };
 
   const findDecalAtMm = (decals = [], panel, xMm, yMm) => {
-    for (let i = decals.length - 1; i >= 0; i--) {
-      const d = decals[i];
-      if (d.panel !== panel) continue;
-      const hw = (d.sizeMm.width * (d.scale ?? 1)) / 2 + 14;
-      const hh = (d.sizeMm.height * (d.scale ?? 1)) / 2 + 14;
+    const matching = decals
+      .filter((d) => (d.panel || 'front') === panel)
+      .slice()
+      .sort((a, b) => (b.zIndex ?? 10) - (a.zIndex ?? 10));
+
+    for (const d of matching) {
+      const hw = (d.sizeMm.width * (d.scale ?? 1)) / 2 + 12;
+      const hh = (d.sizeMm.height * (d.scale ?? 1)) / 2 + 12;
       if (Math.abs(xMm - d.centerMm.x) <= hw && Math.abs(yMm - d.centerMm.y) <= hh) {
         return d;
       }
@@ -133,20 +184,16 @@ export default function GarmentCanvas3D({
     return null;
   };
 
-  // 1. Inicializar escena WebGL Three.js una sola vez
+  // 1. Inicializar motor WebGL Three.js + materiales independientes por pieza + ciclo de vida `contentvisibilityautostatechange`
   useEffect(() => {
     const container = mountRef.current;
-    if (!container) return;
-
-    const uvCanvas = document.createElement('canvas');
-    uvCanvas.width = 2048;
-    uvCanvas.height = 1024;
-    uvAtlasCanvasRef.current = uvCanvas;
+    const stageEl = stageWrapperRef.current;
+    if (!container || !stageEl) return;
 
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(
-      35,
+      38,
       Math.max(1, container.clientWidth) / Math.max(1, container.clientHeight),
       0.1,
       50
@@ -162,7 +209,7 @@ export default function GarmentCanvas3D({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.1;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.innerHTML = '';
@@ -172,25 +219,25 @@ export default function GarmentCanvas3D({
       canvasSnapshotRef.current = renderer.domElement;
     }
 
-    // Iluminación de estudio de 3 puntos calibrada para relieve textil PBR
-    const hemiLight = new THREE.HemisphereLight(0xf8fafc, 0x1e293b, 0.98);
+    // Iluminación de estudio de 3 puntos para resaltar los pliegues reales del escaneo .mirl
+    const hemiLight = new THREE.HemisphereLight(0xf8fafc, 0x1e293b, 1.05);
     scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.9);
-    keyLight.position.set(2.6, 3.5, 3.6);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.85);
+    keyLight.position.set(2.8, 3.8, 4.4);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(1024, 1024);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xbae6fd, 0.82);
-    fillLight.position.set(-3.1, 1.3, 2.4);
+    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.85);
+    fillLight.position.set(-3.4, 1.5, 3.0);
     scene.add(fillLight);
 
-    const backRimLight = new THREE.DirectionalLight(0xfef08a, 1.25);
-    backRimLight.position.set(0.4, 2.7, -3.6);
+    const backRimLight = new THREE.DirectionalLight(0xfef3c7, 1.35);
+    backRimLight.position.set(0.3, 2.8, -4.4);
     scene.add(backRimLight);
 
-    // Sombra de contacto suave en base de estudio
+    // Sombra de contacto en base de estudio
     const shadowCanvas = document.createElement('canvas');
     shadowCanvas.width = 128;
     shadowCanvas.height = 128;
@@ -203,59 +250,69 @@ export default function GarmentCanvas3D({
     const shadowTex = new THREE.CanvasTexture(shadowCanvas);
 
     const floorShadow = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.5, 1.65),
+      new THREE.PlaneGeometry(2.6, 1.7),
       new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
     );
     floorShadow.rotation.x = -Math.PI / 2;
-    floorShadow.position.y = -1.36;
+    floorShadow.position.y = -1.44;
     scene.add(floorShadow);
 
-    // Textura dinámica UV
-    const albedoTexture = new THREE.CanvasTexture(uvCanvas);
-    albedoTexture.colorSpace = THREE.SRGBColorSpace;
-    albedoTexture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    // Crear lienzo y textura GPU dedicada para cada pieza del modelo .mirl
+    const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    const partCanvases = {};
+    const partTextures = {};
+    const partMaterials = {};
 
-    const bodyMat = new THREE.MeshPhysicalMaterial({
-      map: albedoTexture,
-      roughness: 0.56,
-      metalness: 0.02,
-      sheen: 0.3,
-      sheenRoughness: 0.55,
-      sheenColor: new THREE.Color(0xffffff),
+    const ribBumpTex = getOrLoadRealBumpTexture('/fabrics/bandstoff-rtex3.png', 28, 12);
+
+    for (const partName of ALL_POSSIBLE_MESH_PARTS) {
+      const c = document.createElement('canvas');
+      c.width = partName === 'Front' || partName === 'Back' ? 1536 : 1024;
+      c.height =
+        partName === 'Front' || partName === 'Back'
+          ? 1536
+          : partName === 'LeftArm' || partName === 'RightArm'
+          ? 512
+          : 128;
+      partCanvases[partName] = c;
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = maxAniso;
+      partTextures[partName] = tex;
+
+      const isRibTrim =
+        partName === 'Collar' ||
+        partName === 'Krageneinfass' ||
+        partName === 'Aermelbandlinks' ||
+        partName === 'Aermelbandrechts';
+
+      const mat = new THREE.MeshPhysicalMaterial({
+        map: tex,
+        bumpMap: isRibTrim ? ribBumpTex : null,
+        bumpScale: isRibTrim ? 0.008 : 0.006,
+        roughness: isRibTrim ? 0.64 : 0.54,
+        metalness: 0.02,
+        sheen: 0.28,
+        sheenRoughness: 0.56,
+        sheenColor: new THREE.Color(0xffffff),
+        side: THREE.DoubleSide,
+      });
+      applyOwayoInnerSublimationShader(mat, partName);
+      partMaterials[partName] = mat;
+    }
+
+    const neckLabelTex = buildNeckLabelCanvasTexture(activePlayer?.size || 'L');
+    const neckLabelMat = new THREE.MeshStandardMaterial({
+      map: neckLabelTex,
+      roughness: 0.65,
       side: THREE.DoubleSide,
     });
-    applyOwayoInnerSublimationShader(bodyMat, 'body');
-
-    const sleevesMat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(design.colorZones.sleeves?.hex || '#0f172a'),
-      roughness: 0.56,
-      metalness: 0.02,
-      sheen: 0.26,
+    const hemFlagMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#0f172a'),
+      roughness: 0.7,
       side: THREE.DoubleSide,
     });
-    applyOwayoInnerSublimationShader(sleevesMat, 'sleeves');
-
-    // Materiales de ribete acanalado (`Bandstoff_R-Tex-3_48mm` en cuello y sisas/puños)
-    const ribPbr = getFabricPBRMaps('pique_heavy', 54);
-    const collarMat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(design.colorZones.collar?.hex || '#ffffff'),
-      normalMap: ribPbr.normalMap,
-      normalScale: new THREE.Vector2(0.45, 0.45),
-      roughness: 0.64,
-    });
-    const accentsMat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(design.colorZones.accents?.hex || '#facc15'),
-      normalMap: ribPbr.normalMap,
-      normalScale: new THREE.Vector2(0.45, 0.45),
-      roughness: 0.58,
-    });
-
-    const materials = {
-      body: bodyMat,
-      sleeves: sleevesMat,
-      collar: collarMat,
-      accents: accentsMat,
-    };
 
     const jerseyContainer = new THREE.Group();
     scene.add(jerseyContainer);
@@ -264,10 +321,10 @@ export default function GarmentCanvas3D({
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.enablePan = false;
-    controls.minDistance = 1.15;
-    controls.maxDistance = 5.2;
-    controls.maxPolarAngle = Math.PI * 0.82; // respeta `maxNeigung` de Owayo
-    controls.minPolarAngle = Math.PI * 0.16;
+    controls.minDistance = 1.45;
+    controls.maxDistance = 6.8;
+    controls.maxPolarAngle = Math.PI * 0.84;
+    controls.minPolarAngle = Math.PI * 0.14;
 
     const targetCamPos = new THREE.Vector3(...CAMERA_PRESETS.three_quarter.pos);
     const targetLookAt = new THREE.Vector3(...CAMERA_PRESETS.three_quarter.target);
@@ -278,8 +335,11 @@ export default function GarmentCanvas3D({
       camera,
       renderer,
       controls,
-      albedoTexture,
-      materials,
+      partCanvases,
+      partTextures,
+      partMaterials,
+      neckLabelMat,
+      hemFlagMat,
       jerseyContainer,
       targetCamPos,
       targetLookAt,
@@ -302,12 +362,15 @@ export default function GarmentCanvas3D({
     });
     ro.observe(container);
 
-    let rafId;
+    let rafId = null;
+    let isLoopRunning = false;
+
     const animate = () => {
+      if (!isLoopRunning) return;
       rafId = requestAnimationFrame(animate);
       if (isTransitioningCam) {
-        camera.position.lerp(targetCamPos, 0.1);
-        controls.target.lerp(targetLookAt, 0.1);
+        camera.position.lerp(targetCamPos, 0.11);
+        controls.target.lerp(targetLookAt, 0.11);
         if (camera.position.distanceTo(targetCamPos) < 0.015) {
           isTransitioningCam = false;
         }
@@ -315,70 +378,188 @@ export default function GarmentCanvas3D({
       controls.update();
       renderer.render(scene, camera);
     };
-    animate();
+
+    const startRenderLoop = () => {
+      if (!isLoopRunning) {
+        isLoopRunning = true;
+        rafId = requestAnimationFrame(animate);
+      }
+    };
+
+    const stopRenderLoop = () => {
+      isLoopRunning = false;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    startRenderLoop();
+
+    // Pausado automático de WebGL cuando está fuera de pantalla (contentvisibilityautostatechange + fallback IntersectionObserver)
+    const handleContentVisibilityChange = (event) => {
+      if (event.skipped) {
+        stopRenderLoop();
+      } else {
+        startRenderLoop();
+      }
+    };
+    stageEl.addEventListener('contentvisibilityautostatechange', handleContentVisibilityChange);
+
+    let ioFallback = null;
+    const isContentVisibilitySupported = 'contentVisibility' in document.documentElement.style;
+    if (!isContentVisibilitySupported && typeof IntersectionObserver !== 'undefined') {
+      ioFallback = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) startRenderLoop();
+            else stopRenderLoop();
+          });
+        },
+        { rootMargin: '200px' }
+      );
+      ioFallback.observe(stageEl);
+    }
 
     return () => {
-      cancelAnimationFrame(rafId);
+      stopRenderLoop();
+      stageEl.removeEventListener('contentvisibilityautostatechange', handleContentVisibilityChange);
+      if (ioFallback) ioFallback.disconnect();
       ro.disconnect();
       controls.removeEventListener('start', onControlStart);
       controls.dispose();
-      albedoTexture.dispose();
+      Object.values(partTextures).forEach((t) => t.dispose());
+      Object.values(partMaterials).forEach((m) => m.dispose());
+      neckLabelTex.dispose();
+      neckLabelMat.dispose();
+      hemFlagMat.dispose();
       renderer.dispose();
     };
   }, []);
 
-  // 2. Reconstruir topología de 7 piezas cuando cambia el modelo o el cuello
+  // 2. Cargar geometría binaria exacta `.mirl` cuando cambia el modelo deportivo
   useEffect(() => {
+    let cancelled = false;
     const st = sceneStateRef.current;
     if (!st) return;
 
-    const prod = ENGINE_PRODUCTS.find((p) => p.id === design.productModelId);
-    const shape = prod?.garmentShape || 'jersey_short';
+    const prod = ENGINE_PRODUCTS.find((p) => p.id === design.productModelId) || ENGINE_PRODUCTS[0];
+    const mirlUrl = prod.mirlUrl || '/models/football_f3_ka.mirl';
 
-    while (st.jerseyContainer.children.length > 0) {
-      const child = st.jerseyContainer.children[0];
-      if (child.geometry) child.geometry.dispose();
-      st.jerseyContainer.remove(child);
-    }
+    setModelStats((prev) => ({ ...prev, loading: true }));
 
-    const meshGroup = buildSculptedJerseyGroup(st.materials, shape, design.collarStyle);
-    st.jerseyContainer.add(meshGroup);
-  }, [design.productModelId, design.collarStyle]);
+    loadMirlModelTemplate(mirlUrl)
+      .then((template) => {
+        if (cancelled || !sceneStateRef.current) return;
+        const curSt = sceneStateRef.current;
+        while (curSt.jerseyContainer.children.length > 0) {
+          curSt.jerseyContainer.remove(curSt.jerseyContainer.children[0]);
+        }
+        const group = instantiateMirlGarmentGroup(
+          template,
+          curSt.partMaterials,
+          curSt.neckLabelMat,
+          curSt.hemFlagMat
+        );
+        curSt.jerseyContainer.add(group);
+        setModelStats({
+          loading: false,
+          vertices: template.totalVertices,
+          faces: template.totalFaces,
+        });
+      })
+      .catch((err) => {
+        console.error('Error cargando malla .mirl:', err);
+        if (!cancelled) setModelStats({ loading: false, vertices: 0, faces: 0 });
+      });
 
-  // 3. Actualizar mapas PBR del tejido deportivo (`Stoffe/v2/k-tex2.json` + `scaleStoff`)
+    return () => {
+      cancelled = true;
+    };
+  }, [design.productModelId]);
+
+  // 3. Cargar archivo de máscaras `.fish` cuando cambia el diseño o el producto
+  useEffect(() => {
+    let cancelled = false;
+    const activeFish = resolveActiveFishDesignMeta(design);
+    if (!activeFish?.fileUrl) return;
+
+    loadFishDesignMasks(activeFish.fileUrl)
+      .then((masksMap) => {
+        if (cancelled) return;
+        fishMasksRef.current = masksMap;
+        setFishVersionTick((n) => n + 1);
+      })
+      .catch((err) => {
+        console.error('Error decodificando diseño .fish:', err);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [design.productModelId, design.patternId]);
+
+  // 4. Actualizar micro-relieve textil real (`ts-tex.png` / `k-tex2.png` / `bandstoff-rtex3.png`)
   useEffect(() => {
     const st = sceneStateRef.current;
     if (!st) return;
-
     const weave = FABRIC_WEAVES.find((w) => w.id === design.fabricWeaveId) || FABRIC_WEAVES[0];
-    const pbr = getFabricPBRMaps(weave.id, weave.uvRepeat);
+    const bumpTex = getOrLoadRealBumpTexture(weave.bumpUrl || '/fabrics/ts-tex.png', weave.uvRepeat, weave.uvRepeat);
 
-    st.materials.body.normalMap = pbr.normalMap;
-    st.materials.body.normalScale.set(weave.normalScale, weave.normalScale);
-    st.materials.body.roughness = weave.roughness;
-    st.materials.body.needsUpdate = true;
-
-    st.materials.sleeves.normalMap = pbr.normalMap;
-    st.materials.sleeves.normalScale.set(weave.normalScale * 0.85, weave.normalScale * 0.85);
-    st.materials.sleeves.roughness = weave.roughness;
-    st.materials.sleeves.needsUpdate = true;
+    ['Front', 'Back', 'LeftArm', 'RightArm'].forEach((partName) => {
+      const mat = st.partMaterials[partName];
+      if (!mat) return;
+      mat.bumpMap = bumpTex;
+      mat.bumpScale = Math.abs(weave.bumpScale || 0.005) * 1.4;
+      mat.roughness = weave.roughness;
+      mat.needsUpdate = true;
+    });
   }, [design.fabricWeaveId]);
 
-  // 4. Actualizar Atlas UV en tiempo real (incluyendo `SnapLines` y `sperrbezirke` durante arrastre 3D)
+  // 5. Actualizar etiqueta interior de talla (`Etikett`) cuando cambia el jugador activo
   useEffect(() => {
     const st = sceneStateRef.current;
-    const uvCanvas = uvAtlasCanvasRef.current;
-    if (!st || !uvCanvas) return;
+    if (!st?.neckLabelMat) return;
+    const prevMap = st.neckLabelMat.map;
+    const nextTex = buildNeckLabelCanvasTexture(activePlayer?.size || 'L');
+    st.neckLabelMat.map = nextTex;
+    st.neckLabelMat.needsUpdate = true;
+    if (prevMap) prevMap.dispose();
+  }, [activePlayer?.size]);
 
-    renderFullUVAtlas(uvCanvas, design, activePlayer, artworkRegistry, active3DOverlay);
-    st.albedoTexture.needsUpdate = true;
+  // 6. Re-componer texturas independientes por pieza en tiempo real
+  useEffect(() => {
+    const st = sceneStateRef.current;
+    if (!st) return;
 
-    st.materials.sleeves.color.set(design.colorZones.sleeves?.hex || '#0f172a');
-    st.materials.collar.color.set(design.colorZones.collar?.hex || '#ffffff');
-    st.materials.accents.color.set(design.colorZones.accents?.hex || '#facc15');
-  }, [design, activePlayer, artworkRegistry, active3DOverlay]);
+    const masksMap = fishMasksRef.current;
+    for (const partName of ALL_POSSIBLE_MESH_PARTS) {
+      const canvas = st.partCanvases[partName];
+      const tex = st.partTextures[partName];
+      if (!canvas || !tex) continue;
 
-  // 5. Presets de cámara y auto-rotación
+      composeGarmentPartCanvas(
+        canvas,
+        partName,
+        design,
+        activePlayer,
+        artworkRegistry,
+        masksMap,
+        active3DOverlay
+          ? {
+              showGuides: true,
+              showSelectionBox: true,
+              panel: active3DOverlay.panel,
+              selectedDecalId: active3DOverlay.selectedDecalId,
+              snapGuides: active3DOverlay.snapGuides,
+            }
+          : null
+      );
+      tex.needsUpdate = true;
+    }
+  }, [design, activePlayer, artworkRegistry, active3DOverlay, fishVersionTick]);
+
+  // 7. Presets de cámara y auto-rotación
   useEffect(() => {
     const st = sceneStateRef.current;
     if (!st) return;
@@ -395,7 +576,7 @@ export default function GarmentCanvas3D({
     st.setTransition(true);
   }, [cameraPreset]);
 
-  // 6. Arrastre Directo Raycast UV sobre 3D con `setPointerCapture` y `lostpointercapture`
+  // 8. Arrastre Directo Raycast UV sobre cualquiera de las 5 piezas 3D (`Front`, `Back`, `LeftArm`, `RightArm`, `Collar`)
   const handlePointerDown = (e) => {
     if (e.button !== 0 || !sceneStateRef.current) return;
 
@@ -409,7 +590,6 @@ export default function GarmentCanvas3D({
 
     if (!onUpdateDecalFrom3D) return;
 
-    // Bloquear OrbitControls mientras se manipula el escudo/texto en 3D y conservar el offset de agarre
     sceneStateRef.current.controls.enabled = false;
     dragSessionRef.current = {
       pointerId: e.pointerId,
@@ -460,14 +640,13 @@ export default function GarmentCanvas3D({
       return;
     }
 
-    // Detección ligera de hover para cambiar cursor e informar al usuario que puede arrastrar en 3D
     const hit = raycastDroppableUV(e.clientX, e.clientY);
     if (!hit) {
       if (hoveringDecalLabel) setHoveringDecalLabel(null);
       return;
     }
     const hovered = findDecalAtMm(design.decals || [], hit.panel, hit.xMm, hit.yMm);
-    const nextLabel = hovered ? hovered.label : null;
+    const nextLabel = hovered ? `${hovered.label} (${hit.spec.shortLabel})` : null;
     if (nextLabel !== hoveringDecalLabel) {
       setHoveringDecalLabel(nextLabel);
     }
@@ -482,7 +661,6 @@ export default function GarmentCanvas3D({
     setActive3DOverlay(null);
   };
 
-  // Soporte de movimiento preciso con flechas del teclado usando el mismo helper restringido
   const handleKeyDown = (e) => {
     const stepMap = {
       ArrowLeft: [-1, 0],
@@ -498,37 +676,48 @@ export default function GarmentCanvas3D({
     if (!activeDecal) return;
 
     e.preventDefault();
-    const stepMm = e.shiftKey ? 1 : 4;
-    const nextX = activeDecal.centerMm.x + dir[0] * stepMm;
-    const nextY = activeDecal.centerMm.y + dir[1] * stepMm;
-    commitClampedDecalPosition(activeDecal, nextX, nextY, false);
+    const stepMm = e.shiftKey ? 1 : 5;
+    commitClampedDecalPosition(
+      activeDecal,
+      activeDecal.centerMm.x + dir[0] * stepMm,
+      activeDecal.centerMm.y + dir[1] * stepMm,
+      false
+    );
   };
 
   return (
-    <div className="w-full h-full min-h-[380px] relative">
+    <div ref={stageWrapperRef} className="garment-3d-stage relative w-full h-full min-h-[380px]">
       <div
         ref={mountRef}
         tabIndex={0}
+        aria-label="Visor 3D interactivo multi-pieza. Arrastra para rotar la cámara o arrastra cualquier logo PNG, SVG o texto directamente sobre pecho, espalda, mangas o cuello."
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onLostPointerCapture={endPointerDragSession}
         onKeyDown={handleKeyDown}
-        className={`garment-3d-drag-surface w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70 rounded-xl ${
+        className={`garment-3d-drag-surface w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 ${
           isDraggingDecal
             ? 'cursor-grabbing'
             : hoveringDecalLabel
             ? 'cursor-grab'
-            : 'cursor-grab active:cursor-grabbing'
+            : 'cursor-move'
         }`}
-        aria-label="Visor 3D interactivo de prenda deportiva. Haz clic y arrastra un escudo sobre el modelo 3D o usa las flechas del teclado para moverlo."
       />
 
-      {/* Indicador contextual flotante cuando el puntero detecta un elemento arrastrable en 3D */}
+      {/* Badge de telemetría de malla real .mirl */}
+      <div className="pointer-events-none absolute top-2 left-3 px-2.5 py-1 rounded-xl bg-slate-950/75 border border-slate-800/90 text-[10px] font-mono text-slate-400 hidden sm:flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        {modelStats.loading
+          ? 'Descomprimiendo malla .mirl...'
+          : `Malla 3D Real: ${modelStats.vertices.toLocaleString()} vértices • ${modelStats.faces.toLocaleString()} caras`}
+      </div>
+
+      {/* Píldora flotante al pasar sobre cualquier PNG/SVG/Texto en 3D */}
       {(hoveringDecalLabel || isDraggingDecal) && (
-        <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-950/90 border border-sky-400/50 text-[11px] font-bold text-sky-300 shadow-lg whitespace-nowrap">
+        <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-950/90 border border-amber-400/50 text-[11px] font-bold text-amber-300 shadow-lg whitespace-nowrap">
           {isDraggingDecal
-            ? '🧲 Arrastrando en 3D • Imán central x=0.50 & bloqueo costura 5.0cm activos'
-            : `✋ Arrastra "${hoveringDecalLabel}" directo en 3D o usa ↑↓←→`}
+            ? '🎯 Arrastrando sobre tejido 3D (SnapLines + Sperrbezirk activos)'
+            : `✋ Arrastrar «${hoveringDecalLabel}» directamente en 3D`}
         </div>
       )}
     </div>

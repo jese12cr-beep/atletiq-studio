@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useRef, useState } from 'react';
+import React, { Suspense, lazy, useMemo, useRef, useState } from 'react';
 import {
   Undo2,
   Redo2,
@@ -20,6 +20,13 @@ import {
   Type,
   Users,
   Palette,
+  Copy,
+  FlipHorizontal2,
+  FlipVertical2,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  Eraser,
 } from 'lucide-react';
 import Interactive2DLab from '../../engine/compositor/Interactive2DLab';
 import LayerStack25DViewer from '../../engine/compositor/LayerStack25DViewer';
@@ -27,20 +34,26 @@ import LayerStack25DViewer from '../../engine/compositor/LayerStack25DViewer';
 const GarmentCanvas3D = lazy(() => import('../../engine/viewer3d/GarmentCanvas3D'));
 import {
   ENGINE_PRODUCTS,
-  TEXTILE_COLORS,
-  VECTOR_PATTERNS,
+  PANTONE_CM5_PALETTE,
+  getDesignsForProduct,
+  ZONE_SURFACE_PATTERNS,
+  VECTOR_CREST_PRESETS,
   FABRIC_WEAVES,
   SPORT_FONTS,
   VOLUME_TIERS,
 } from '../../engine/core/designStore';
 import { processUploadedArtwork, calculateEffectiveDpi } from '../../engine/core/dpiValidator';
-import { computeAutoCondenseScaleX } from '../../engine/core/boundingBoxMath';
+import {
+  computeAutoCondenseScaleX,
+  getDroppablePanelsForProduct,
+  getPartSpec,
+} from '../../engine/core/boundingBoxMath';
 
 const STEPS = [
-  { id: 1, label: '1. Prenda & Tejido', icon: Layers },
-  { id: 2, label: '2. Colores PMS', icon: Palette },
-  { id: 3, label: '3. Logos & Bounding Box', icon: Shield },
-  { id: 4, label: '4. Dorsales & Slots', icon: Type },
+  { id: 1, label: '1. Modelo & Diseño', icon: Layers },
+  { id: 2, label: '2. Pantone (167)', icon: Palette },
+  { id: 3, label: '3. PNG / SVG Libre', icon: Shield },
+  { id: 4, label: '4. Textos & Dorsales', icon: Type },
   { id: 5, label: '5. Roster Equipo', icon: Users },
 ];
 
@@ -52,6 +65,31 @@ const CUT_OPTIONS = [
 ];
 
 const SIZE_OPTIONS = ['128', '140', '152', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+
+const COLOR_ZONES_META = [
+  { id: 'primary', label: 'Zona A • Principal', short: 'A' },
+  { id: 'secondary', label: 'Zona B • Secundario', short: 'B' },
+  { id: 'accents', label: 'Zona C • Tercer/Filete', short: 'C' },
+  { id: 'quaternary', label: 'Zona D • Cuarto', short: 'D' },
+  { id: 'collar', label: 'Cuello (K)', short: 'K' },
+  { id: 'sleeves', label: 'Ribetes / Sisas', short: 'SL' },
+];
+
+const PANEL_TO_CAMERA = {
+  front: 'front',
+  back: 'back',
+  left_arm: 'left_sleeve',
+  right_arm: 'right_sleeve',
+  collar: 'front',
+};
+
+function rangeVars(val, min, max) {
+  return {
+    '--attr-min': min,
+    '--attr-max': max,
+    '--control-value': val,
+  };
+}
 
 export default function HybridStudioWorkspace({
   design,
@@ -70,13 +108,16 @@ export default function HybridStudioWorkspace({
   onSwitchToStorefront,
 }) {
   const [step, setStep] = useState(1);
-  const [viewportMode, setViewportMode] = useState('3d'); // '3d' | '2d'
+  const [viewportMode, setViewportMode] = useState('3d');
   const [cameraPreset, setCameraPreset] = useState('three_quarter');
   const [autoRotate, setAutoRotate] = useState(false);
   const [panel2D, setPanel2D] = useState('front');
   const [selectedDecalId, setSelectedDecalId] = useState('decal_club_crest');
   const [activeRosterIndex, setActiveRosterIndex] = useState(0);
   const [activeColorZone, setActiveColorZone] = useState('primary');
+  const [paletteFilterMode, setPaletteFilterMode] = useState('all'); // 'all' | 'cm5' | 'special'
+  const [colorSearch, setColorSearch] = useState('');
+  const [isDragOverUpload, setIsDragOverUpload] = useState(false);
   const [csvQuickInput, setCsvQuickInput] = useState('');
 
   const fileInputRef = useRef(null);
@@ -86,7 +127,37 @@ export default function HybridStudioWorkspace({
     ENGINE_PRODUCTS.find((p) => p.id === design.productModelId) || ENGINE_PRODUCTS[0];
   const isFaux3DAccessory = currentProduct.renderMode === 'FAUX_3D_LAYERED_WEBP';
 
-  const activePlayer = roster[activeRosterIndex] || roster[0] || { name: 'RODRÍGUEZ', number: '10', size: 'L' };
+  const availableFishDesigns = useMemo(
+    () => getDesignsForProduct(design.productModelId),
+    [design.productModelId]
+  );
+  const droppablePanels = useMemo(
+    () => getDroppablePanelsForProduct(design.productModelId),
+    [design.productModelId]
+  );
+
+  const filteredPalette = useMemo(() => {
+    const q = colorSearch.trim().toLowerCase();
+    return PANTONE_CM5_PALETTE.filter((c) => {
+      if (paletteFilterMode === 'cm5' && c.isSpecial) return false;
+      if (paletteFilterMode === 'special' && !c.isSpecial) return false;
+      if (!q) return true;
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.code.toLowerCase().includes(q) ||
+        c.pantone.toLowerCase().includes(q) ||
+        c.hex.toLowerCase().includes(q)
+      );
+    });
+  }, [paletteFilterMode, colorSearch]);
+
+  const uploadedLibrary = useMemo(() => Object.values(artworkRegistry || {}), [artworkRegistry]);
+
+  const activePlayer = roster[activeRosterIndex] || roster[0] || {
+    name: 'RODRÍGUEZ',
+    number: '10',
+    size: 'L',
+  };
   const totalUnits = roster.reduce((acc, r) => acc + (Number(r.qty) || 1), 0);
   const currentTier =
     VOLUME_TIERS.find((t) => totalUnits >= t.min && totalUnits <= t.max) || VOLUME_TIERS[0];
@@ -96,48 +167,123 @@ export default function HybridStudioWorkspace({
   const selectedDecal =
     (design.decals || []).find((d) => d.id === selectedDecalId) || (design.decals || [])[0] || null;
 
-  // Helpers de actualización inmutable del diseño
   const updateColorZone = (zoneKey, colorObj) => {
     onCommitDesign({
       ...design,
       colorZones: {
         ...design.colorZones,
-        [zoneKey]: { hex: colorObj.hex, pantone: colorObj.pantone },
+        [zoneKey]: {
+          hex: colorObj.hex,
+          pantone: colorObj.pantone || 'PMS Custom',
+          code: colorObj.code || colorObj.name || 'Custom',
+        },
       },
     });
   };
 
-  const updateDecal = (decalId, patch) => {
+  const updateDecal = (decalId, patch, recordHistory = false) => {
     onCommitDesign(
       {
         ...design,
         decals: (design.decals || []).map((d) => (d.id === decalId ? { ...d, ...patch } : d)),
       },
-      false // No saturar historial Undo en cada píxel de arrastre continuo
+      recordHistory
     );
   };
 
-  const handleUploadLogo = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const processed = await processUploadedArtwork(file);
-    onRegisterArtwork(processed.artworkId, processed);
+  const insertArtworkOnPanel = (processed, targetPanel = panel2D) => {
+    const validPanel = droppablePanels.some((p) => p.panelId === targetPanel) ? targetPanel : 'front';
+    const spec = getPartSpec(design.productModelId, validPanel);
+    const defaultWidthMm =
+      validPanel === 'collar' ? 38 : validPanel.includes('arm') ? 74 : 115;
+    const defaultHeightMm = Math.max(12, Math.round(defaultWidthMm / (processed.aspectRatio || 1)));
 
-    const baseWidthMm = 72;
-    const baseHeightMm = Math.round(baseWidthMm / processed.aspectRatio);
+    const maxZ = (design.decals || []).reduce((m, d) => Math.max(m, d.zIndex ?? 10), 10);
     const newDecal = {
-      id: `decal_${Date.now().toString(36)}`,
+      id: `decal_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 5)}`,
       type: processed.isVector ? 'UPLOADED_VECTOR' : 'UPLOADED_RASTER',
       artworkId: processed.artworkId,
-      label: processed.fileName.slice(0, 18),
-      panel: panel2D,
-      safeZoneId: panel2D === 'back' ? 'back_full' : 'front_chest_full',
-      centerMm: { x: 250, y: 225 },
-      sizeMm: { width: baseWidthMm, height: baseHeightMm },
+      label: processed.fileName.replace(/\.[^.]+$/, '').slice(0, 22),
+      panel: validPanel,
+      centerMm: {
+        x: +(spec.widthMm * spec.snapCenterU).toFixed(1),
+        y: +(spec.heightMm * (validPanel === 'front' ? 0.34 : 0.52)).toFixed(1),
+      },
+      sizeMm: { width: defaultWidthMm, height: defaultHeightMm },
       scale: 1,
       rotationDeg: 0,
+      opacity: 1,
+      blendMode: 'source-over',
+      flipX: false,
+      flipY: false,
+      removeWhiteBg: false,
+      whiteThreshold: 238,
+      invertImage: false,
+      tintHex: '',
+      zIndex: maxZ + 5,
       isVector: processed.isVector,
       widthPx: processed.widthPx,
+    };
+
+    return newDecal;
+  };
+
+  const handleFilesSelected = async (fileList) => {
+    const files = Array.from(fileList || []).filter((f) =>
+      /\.(png|svg|webp|jpe?g)$/i.test(f.name) || f.type.startsWith('image/')
+    );
+    if (files.length === 0) return;
+
+    const addedDecals = [];
+    for (const file of files) {
+      const processed = await processUploadedArtwork(file);
+      onRegisterArtwork(processed.artworkId, processed);
+      addedDecals.push(insertArtworkOnPanel(processed, panel2D));
+    }
+
+    if (addedDecals.length > 0) {
+      onCommitDesign({
+        ...design,
+        decals: [...(design.decals || []), ...addedDecals],
+      });
+      const last = addedDecals[addedDecals.length - 1];
+      setSelectedDecalId(last.id);
+      setCameraPreset(PANEL_TO_CAMERA[last.panel] || 'front');
+    }
+  };
+
+  const handleUploadInput = async (e) => {
+    await handleFilesSelected(e.target.files);
+    e.target.value = '';
+  };
+
+  const handleAddPresetCrest = (preset) => {
+    const validPanel = droppablePanels.some((p) => p.panelId === panel2D) ? panel2D : 'front';
+    const spec = getPartSpec(design.productModelId, validPanel);
+    const size = validPanel === 'collar' ? 28 : 72;
+    const maxZ = (design.decals || []).reduce((m, d) => Math.max(m, d.zIndex ?? 10), 10);
+
+    const newDecal = {
+      id: `crest_${Date.now().toString(36)}`,
+      type: 'PRESET_CREST',
+      presetId: preset.id,
+      label: preset.name,
+      panel: validPanel,
+      centerMm: {
+        x: +(spec.widthMm * spec.snapCenterU).toFixed(1),
+        y: +(spec.heightMm * 0.32).toFixed(1),
+      },
+      sizeMm: { width: size, height: size },
+      scale: 1,
+      rotationDeg: 0,
+      opacity: 1,
+      blendMode: 'source-over',
+      flipX: false,
+      flipY: false,
+      tintHex: '',
+      zIndex: maxZ + 5,
+      isVector: true,
+      widthPx: 3200,
     };
 
     onCommitDesign({
@@ -145,34 +291,158 @@ export default function HybridStudioWorkspace({
       decals: [...(design.decals || []), newDecal],
     });
     setSelectedDecalId(newDecal.id);
-    e.target.value = '';
+    setCameraPreset(PANEL_TO_CAMERA[validPanel] || 'front');
+  };
+
+  const handleAddCustomTextObject = () => {
+    const validPanel = droppablePanels.some((p) => p.panelId === panel2D) ? panel2D : 'front';
+    const spec = getPartSpec(design.productModelId, validPanel);
+    const maxZ = (design.decals || []).reduce((m, d) => Math.max(m, d.zIndex ?? 10), 10);
+
+    const newText = {
+      id: `txt_${Date.now().toString(36)}`,
+      type: 'STATIC_TEXT',
+      text: validPanel === 'collar' ? 'EST. 2026' : 'CLUB OFICIAL',
+      fontFamily: "'Bebas Neue', sans-serif",
+      fillHex: '#ffffff',
+      outlineHex: '#0c2340',
+      outlineWidthMm: 2.2,
+      outline2Hex: '',
+      archDeg: 0,
+      letterSpacingMm: 0.8,
+      label: 'Texto Libre',
+      panel: validPanel,
+      centerMm: {
+        x: +(spec.widthMm * spec.snapCenterU).toFixed(1),
+        y: +(spec.heightMm * (validPanel === 'collar' ? 0.5 : 0.45)).toFixed(1),
+      },
+      sizeMm: {
+        width: validPanel === 'collar' ? 110 : 210,
+        height: validPanel === 'collar' ? 24 : 42,
+      },
+      scale: 1,
+      rotationDeg: 0,
+      opacity: 1,
+      blendMode: 'source-over',
+      zIndex: maxZ + 5,
+      isVector: true,
+      widthPx: 3200,
+    };
+
+    onCommitDesign({
+      ...design,
+      decals: [...(design.decals || []), newText],
+    });
+    setSelectedDecalId(newText.id);
+    setStep(3);
+    setCameraPreset(PANEL_TO_CAMERA[validPanel] || 'front');
+  };
+
+  const handleMoveDecalToPanel = (decal, nextPanel) => {
+    const oldSpec = getPartSpec(design.productModelId, decal.panel || 'front');
+    const newSpec = getPartSpec(design.productModelId, nextPanel);
+    const relY = Math.max(0.15, Math.min(0.82, decal.centerMm.y / oldSpec.heightMm));
+
+    updateDecal(
+      decal.id,
+      {
+        panel: nextPanel,
+        centerMm: {
+          x: +(newSpec.widthMm * newSpec.snapCenterU).toFixed(1),
+          y: +(newSpec.heightMm * relY).toFixed(1),
+        },
+      },
+      true
+    );
+    setPanel2D(nextPanel);
+    setCameraPreset(PANEL_TO_CAMERA[nextPanel] || 'front');
+  };
+
+  const handleCloneToOppositeSleeve = (decal) => {
+    if (decal.panel !== 'left_arm' && decal.panel !== 'right_arm') return;
+    const targetPanel = decal.panel === 'left_arm' ? 'right_arm' : 'left_arm';
+    const targetSpec = getPartSpec(design.productModelId, targetPanel);
+    const maxZ = (design.decals || []).reduce((m, d) => Math.max(m, d.zIndex ?? 10), 10);
+
+    const cloned = {
+      ...decal,
+      id: `clone_${Date.now().toString(36)}`,
+      panel: targetPanel,
+      label: `${decal.label} (${targetSpec.shortLabel})`,
+      centerMm: {
+        x: +(targetSpec.widthMm * targetSpec.snapCenterU).toFixed(1),
+        y: decal.centerMm.y,
+      },
+      zIndex: maxZ + 5,
+    };
+
+    onCommitDesign({
+      ...design,
+      decals: [...(design.decals || []), cloned],
+    });
+    setSelectedDecalId(cloned.id);
+    setPanel2D(targetPanel);
+    setCameraPreset(PANEL_TO_CAMERA[targetPanel]);
+  };
+
+  const handleDuplicateDecal = (decal) => {
+    const maxZ = (design.decals || []).reduce((m, d) => Math.max(m, d.zIndex ?? 10), 10);
+    const copy = {
+      ...decal,
+      id: `dup_${Date.now().toString(36)}`,
+      label: `${decal.label} Copia`,
+      centerMm: {
+        x: +(decal.centerMm.x + 18).toFixed(1),
+        y: +(decal.centerMm.y + 18).toFixed(1),
+      },
+      zIndex: maxZ + 5,
+    };
+    onCommitDesign({
+      ...design,
+      decals: [...(design.decals || []), copy],
+    });
+    setSelectedDecalId(copy.id);
   };
 
   const handleRandomProPalette = () => {
-    const pick = () => TEXTILE_COLORS[Math.floor(Math.random() * TEXTILE_COLORS.length)];
+    const mainPool = PANTONE_CM5_PALETTE.filter((c) => !c.isSpecial);
+    const pick = () => mainPool[Math.floor(Math.random() * mainPool.length)];
     const c1 = pick();
     const c2 = pick();
     const c3 = pick();
-    const pat = VECTOR_PATTERNS[Math.floor(Math.random() * VECTOR_PATTERNS.length)];
+    const pat = availableFishDesigns[Math.floor(Math.random() * availableFishDesigns.length)];
     onCommitDesign({
       ...design,
       patternId: pat.id,
       colorZones: {
-        primary: { hex: c1.hex, pantone: c1.pantone },
-        secondary: { hex: c2.hex, pantone: c2.pantone },
-        sleeves: { hex: c2.hex, pantone: c2.pantone },
-        collar: { hex: '#f8fafc', pantone: 'PMS Bright White' },
-        accents: { hex: c3.hex, pantone: c3.pantone },
+        ...design.colorZones,
+        primary: { hex: c1.hex, pantone: c1.pantone, code: c1.code },
+        secondary: { hex: c2.hex, pantone: c2.pantone, code: c2.code },
+        accents: { hex: c3.hex, pantone: c3.pantone, code: c3.code },
+        collar: { hex: c3.hex, pantone: c3.pantone, code: c3.code },
+        sleeves: { hex: c2.hex, pantone: c2.pantone, code: c2.code },
       },
     });
   };
 
+  const handleSelectProduct = (prod) => {
+    const nextDesigns = getDesignsForProduct(prod.id);
+    const validDesignId = nextDesigns.some((d) => d.id === design.patternId)
+      ? design.patternId
+      : nextDesigns[0]?.id || 'style';
+
+    onCommitDesign({
+      ...design,
+      productModelId: prod.id,
+      patternId: validDesignId,
+      fabricWeaveId: prod.id === 'basketball_b6_hero' ? 'cooldry_hex' : 'ts_tex_football',
+    });
+    setPanel2D('front');
+  };
+
   const handleStepSelect = (nextStep) => {
     setStep(nextStep);
-    if (nextStep === 3 && !isFaux3DAccessory) {
-      // Facilitar edición de Bounding Boxes mostrando el laboratorio 2D o vista frontal
-      setCameraPreset('front');
-    } else if (nextStep === 4 || nextStep === 5) {
+    if (nextStep === 4 || nextStep === 5) {
       setCameraPreset('back');
       setPanel2D('back');
     }
@@ -202,6 +472,19 @@ export default function HybridStudioWorkspace({
     }
   };
 
+  const quickTintColors = [
+    '#ffffff',
+    '#101820',
+    '#ffcd00',
+    '#c8102e',
+    '#0033a0',
+    '#00a3e0',
+    '#00965e',
+    '#ff8200',
+    '#44d62c',
+    '#ff0090',
+  ];
+
   return (
     <div className="h-dvh w-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
       {/* ================= TOP STUDIO APP BAR ================= */}
@@ -219,15 +502,15 @@ export default function HybridStudioWorkspace({
 
           <div className="hidden xl:flex items-center gap-1.5 border-l border-slate-800 pl-3">
             <span className="text-sm font-black tracking-wider text-white">
-              ATLETIQ <span className="text-amber-400">ENGINE v3</span>
+              ATLETIQ <span className="text-amber-400">ENGINE v4.0</span>
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-400">
-              {design.designId}
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-emerald-400">
+              MIRL 1:1 • {design.designId}
             </span>
           </div>
         </div>
 
-        {/* 5-Step Progress Navigation (Owayo Flow) */}
+        {/* 5-Step Progress Navigation */}
         <nav aria-label="Pasos de personalización" className="flex items-center gap-1 overflow-x-auto py-1">
           {STEPS.map((s) => {
             const Icon = s.icon;
@@ -251,7 +534,7 @@ export default function HybridStudioWorkspace({
           })}
         </nav>
 
-        {/* Right Actions: Undo/Redo + Export Print-Ready + Cart */}
+        {/* Right Actions: Undo/Redo + Print-Ready + Cart */}
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -302,7 +585,7 @@ export default function HybridStudioWorkspace({
 
       {/* ================= MAIN WORKSPACE SPLIT ================= */}
       <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-        {/* LEFT/CENTER STAGE: 3D PBR / 2D BOUNDING BOX / 2.5D NIKE LAYER STACK */}
+        {/* LEFT/CENTER STAGE */}
         <div className="flex-1 relative bg-[radial-gradient(ellipse_at_center,#1e293b_0%,#020617_78%)] flex flex-col justify-between min-h-[340px] overflow-hidden">
           {/* Top Floating HUD */}
           <div className="p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 z-10 pointer-events-none">
@@ -311,12 +594,11 @@ export default function HybridStudioWorkspace({
               <div className="text-xs">
                 <strong className="text-white">{currentProduct.name}</strong>
                 <span className="text-slate-400 ml-2 hidden sm:inline">
-                  • Muestra Jugador: <strong className="text-amber-400">#{activePlayer.number} {activePlayer.name}</strong> ({activePlayer.size})
+                  • Jugador: <strong className="text-amber-400">#{activePlayer.number} {activePlayer.name}</strong> ({activePlayer.size})
                 </span>
               </div>
             </div>
 
-            {/* Selector Motor 3D PBR vs Laboratorio 2D CustomInk */}
             {!isFaux3DAccessory ? (
               <div className="pointer-events-auto flex items-center gap-1 bg-slate-950/90 border border-slate-800 p-1 rounded-2xl">
                 <button
@@ -327,7 +609,7 @@ export default function HybridStudioWorkspace({
                   }`}
                 >
                   <Box className="w-3.5 h-3.5" />
-                  3D PBR Real
+                  3D Escaneo Real
                 </button>
                 <button
                   type="button"
@@ -337,12 +619,12 @@ export default function HybridStudioWorkspace({
                   }`}
                 >
                   <Scan className="w-3.5 h-3.5" />
-                  Molde 2D + Bounding Box
+                  Molde Plano 2D
                 </button>
               </div>
             ) : (
               <span className="pointer-events-auto px-3 py-1 rounded-xl bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs font-bold">
-                ⚡ Motor 2.5D Capas Nike (&lt; 2 ms GPU Tint)
+                ⚡ Motor 2.5D Capas (&lt; 2 ms GPU Tint)
               </span>
             )}
           </div>
@@ -361,7 +643,7 @@ export default function HybridStudioWorkspace({
               <Suspense
                 fallback={
                   <div className="text-xs font-mono text-amber-400 animate-pulse">
-                    Inicializando Motor WebGL 3D PBR...
+                    Descomprimiendo malla 3D .mirl...
                   </div>
                 }
               >
@@ -376,7 +658,7 @@ export default function HybridStudioWorkspace({
                   onSelectDecalFrom3D={(decalId, hitPanel) => {
                     setSelectedDecalId(decalId);
                     setPanel2D(hitPanel);
-                    setStep(3);
+                    if (step !== 3 && step !== 4) setStep(3);
                   }}
                   onUpdateDecalFrom3D={updateDecal}
                 />
@@ -394,7 +676,7 @@ export default function HybridStudioWorkspace({
             )}
           </div>
 
-          {/* Bottom Floating Camera / Panel Bar */}
+          {/* Bottom Floating Camera / Piece Bar */}
           {!isFaux3DAccessory && (
             <div className="p-3 flex flex-wrap items-center justify-center gap-1.5 z-10">
               {viewportMode === '3d' ? (
@@ -402,8 +684,14 @@ export default function HybridStudioWorkspace({
                   {[
                     { id: 'three_quarter', label: '3/4 Estudio' },
                     { id: 'front', label: 'Frente 0°' },
-                    { id: 'back', label: 'Dorsal 180°' },
-                    { id: 'macro_weave', label: '🔍 Macro Tejido Dry-Fit' },
+                    { id: 'back', label: 'Espalda 180°' },
+                    ...(droppablePanels.some((p) => p.panelId === 'left_arm')
+                      ? [
+                          { id: 'left_sleeve', label: 'Manga Izq.' },
+                          { id: 'right_sleeve', label: 'Manga Der.' },
+                        ]
+                      : []),
+                    { id: 'macro_weave', label: '🔍 Macro Tejido' },
                   ].map((cam) => (
                     <button
                       key={cam.id}
@@ -412,7 +700,7 @@ export default function HybridStudioWorkspace({
                         setAutoRotate(false);
                         setCameraPreset(cam.id);
                       }}
-                      className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
+                      className={`px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
                         cameraPreset === cam.id && !autoRotate
                           ? 'bg-amber-400 text-slate-950'
                           : 'text-slate-400 hover:text-white'
@@ -433,61 +721,50 @@ export default function HybridStudioWorkspace({
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 bg-slate-950/90 border border-slate-800 p-1 rounded-2xl">
-                  <button
-                    type="button"
-                    onClick={() => setPanel2D('front')}
-                    className={`px-4 py-1 rounded-xl text-xs font-bold ${
-                      panel2D === 'front' ? 'bg-sky-400 text-slate-950' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Molde Delantero (500×600 mm)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPanel2D('back')}
-                    className={`px-4 py-1 rounded-xl text-xs font-bold ${
-                      panel2D === 'back' ? 'bg-sky-400 text-slate-950' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Molde Espalda (500×600 mm)
-                  </button>
+                <div className="flex flex-wrap items-center gap-1 bg-slate-950/90 border border-slate-800 p-1 rounded-2xl">
+                  {droppablePanels.map((p) => (
+                    <button
+                      key={p.panelId}
+                      type="button"
+                      onClick={() => setPanel2D(p.panelId)}
+                      className={`px-3 py-1 rounded-xl text-xs font-bold ${
+                        panel2D === p.panelId
+                          ? 'bg-sky-400 text-slate-950'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {p.shortLabel} ({(p.widthMm / 10).toFixed(0)}×{(p.heightMm / 10).toFixed(0)}cm)
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* RIGHT INSPECTOR PANEL: CONTEXTUAL PER ACTIVE STEP */}
-        <aside className="w-full lg:w-[440px] xl:w-[470px] shrink-0 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col max-h-[48dvh] lg:max-h-none">
+        {/* RIGHT INSPECTOR PANEL */}
+        <aside className="w-full lg:w-[460px] xl:w-[495px] shrink-0 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col max-h-[50dvh] lg:max-h-none">
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 select-text">
-            {/* ================= STEP 1: PRENDA, PATRÓN SVG Y TEJIDO DRY-FIT ================= */}
+            {/* ================= STEP 1: MODELO .MIRL, 15 DISEÑOS .FISH Y TEJIDO ================= */}
             {step === 1 && (
               <div className="space-y-5">
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-amber-400">
-                      1. Selecciona Prenda (3D PBR vs 2.5D Capas)
-                    </h3>
-                  </div>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-amber-400 mb-2">
+                    1. Selecciona Prenda (Escaneo 3D Real `.mirl`)
+                  </h3>
                   <div className="grid grid-cols-2 gap-2">
                     {ENGINE_PRODUCTS.map((prod) => (
                       <button
                         key={prod.id}
                         type="button"
-                        onClick={() =>
-                          onCommitDesign({
-                            ...design,
-                            productModelId: prod.id,
-                          })
-                        }
+                        onClick={() => handleSelectProduct(prod)}
                         className={`p-2.5 rounded-2xl border text-left transition-all ${
                           design.productModelId === prod.id
                             ? 'bg-amber-400/15 border-amber-400 text-white'
                             : 'bg-slate-950/70 border-slate-800 text-slate-300 hover:border-slate-700'
                         }`}
                       >
-                        <span className="text-[10px] font-mono text-amber-400 block">{prod.badge}</span>
+                        <span className="text-[10px] font-mono text-amber-400 block truncate">{prod.badge}</span>
                         <span className="text-xs font-bold block mt-0.5 leading-snug">{prod.name}</span>
                         <span className="text-[11px] text-slate-400">${prod.basePrice.toFixed(2)} base</span>
                       </button>
@@ -497,11 +774,10 @@ export default function HybridStudioWorkspace({
 
                 {!isFaux3DAccessory && (
                   <>
-                    {/* Patrones Vectoriales SVG (Kit Builder) */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
-                          2. Patrón Vectorial de Sublimación (SVG)
+                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-200">
+                          2. Diseños Oficiales Multi-Pieza ({availableFishDesigns.length})
                         </h3>
                         <button
                           type="button"
@@ -511,31 +787,102 @@ export default function HybridStudioWorkspace({
                           <Sparkles className="w-3 h-3" /> Combinación Pro
                         </button>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {VECTOR_PATTERNS.map((pat) => (
-                          <button
-                            key={pat.id}
-                            type="button"
-                            onClick={() => onCommitDesign({ ...design, patternId: pat.id })}
-                            className={`p-2.5 rounded-xl border text-left ${
-                              design.patternId === pat.id
-                                ? 'bg-slate-800 border-amber-400 text-white'
-                                : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            <span className="text-xs font-bold block">{pat.name}</span>
-                            <span className="text-[10px] text-slate-400">{pat.subtitle}</span>
-                          </button>
-                        ))}
+                      <div className="grid grid-cols-3 gap-2">
+                        {availableFishDesigns.map((pat) => {
+                          const isActive = design.patternId === pat.id;
+                          return (
+                            <button
+                              key={pat.id}
+                              type="button"
+                              onClick={() => onCommitDesign({ ...design, patternId: pat.id })}
+                              className={`p-2.5 rounded-xl border text-left transition-all ${
+                                isActive
+                                  ? 'bg-slate-800 border-amber-400 text-white ring-1 ring-amber-400/50'
+                                  : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1 mb-1.5">
+                                <span
+                                  className="h-2 flex-1 rounded-full"
+                                  style={{ backgroundColor: design.colorZones.primary?.hex }}
+                                />
+                                {pat.baseColors.includes('B') && (
+                                  <span
+                                    className="h-2 flex-1 rounded-full"
+                                    style={{ backgroundColor: design.colorZones.secondary?.hex }}
+                                  />
+                                )}
+                                {pat.baseColors.includes('C') && (
+                                  <span
+                                    className="h-2 flex-1 rounded-full"
+                                    style={{ backgroundColor: design.colorZones.accents?.hex }}
+                                  />
+                                )}
+                              </div>
+                              <span className="text-xs font-bold block truncate">{pat.name}</span>
+                              <span className="text-[10px] font-mono text-slate-400">
+                                Zonas {pat.baseColors.join('+')}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    {/* Micro-Textura Física del Tejido (Kit Builder Normal Map) */}
+                    {/* Textura Geométrica Sublimada sobre Zona A */}
                     <div>
-                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
-                        3. Física del Tejido Deportivo (Normal & Roughness Map)
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-200 mb-2">
+                        3. Trama Sublimada Opcional (Sobre Fondo)
                       </h3>
-                      <div className="space-y-2">
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {ZONE_SURFACE_PATTERNS.map((sp) => (
+                          <button
+                            key={sp.id}
+                            type="button"
+                            onClick={() => onCommitDesign({ ...design, surfacePatternId: sp.id })}
+                            className={`p-2 rounded-xl border text-left ${
+                              (design.surfacePatternId || 'none') === sp.id
+                                ? 'bg-amber-400/15 border-amber-400 text-white'
+                                : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            <span className="text-[11px] font-bold block truncate">{sp.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                      {design.surfacePatternId && design.surfacePatternId !== 'none' && (
+                        <label className="block mt-2">
+                          <span className="text-[11px] text-slate-400 flex justify-between">
+                            <span>Intensidad de trama</span>
+                            <span className="font-mono text-amber-400">
+                              {Math.round((design.surfacePatternOpacity ?? 0.16) * 100)}%
+                            </span>
+                          </span>
+                          <input
+                            type="range"
+                            min="0.04"
+                            max="0.45"
+                            step="0.02"
+                            value={design.surfacePatternOpacity ?? 0.16}
+                            style={rangeVars(design.surfacePatternOpacity ?? 0.16, 0.04, 0.45)}
+                            onChange={(e) =>
+                              onCommitDesign(
+                                { ...design, surfacePatternOpacity: parseFloat(e.target.value) },
+                                false
+                              )
+                            }
+                            className="studio-range"
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Física del Tejido Deportivo */}
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-200 mb-2">
+                        4. Tejido Técnico Real (BumpMaps `Stoffe/v2`)
+                      </h3>
+                      <div className="space-y-1.5">
                         {FABRIC_WEAVES.map((w) => (
                           <button
                             key={w.id}
@@ -550,11 +897,11 @@ export default function HybridStudioWorkspace({
                                 : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
                             }`}
                           >
-                            <div>
+                            <div className="pr-2">
                               <span className="text-xs font-bold block">{w.name}</span>
                               <span className="text-[11px] text-slate-400">{w.desc}</span>
                             </div>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-sky-300">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-sky-300 shrink-0">
                               x{w.uvRepeat} UV
                             </span>
                           </button>
@@ -566,212 +913,345 @@ export default function HybridStudioWorkspace({
               </div>
             )}
 
-            {/* ================= STEP 2: COLORES PANTONE TEXTIL POR ZONA ================= */}
+            {/* ================= STEP 2: SISTEMA PANTONE® / CM5 DE 167 COLORES ================= */}
             {step === 2 && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div>
                   <h3 className="text-xs font-black uppercase tracking-wider text-amber-400 mb-2">
-                    Zona Activa de la Prenda
+                    Zona de Color Independiente
                   </h3>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {[
-                      { id: 'primary', label: '1. Cuerpo Base' },
-                      { id: 'secondary', label: '2. Trama / Visera' },
-                      { id: 'sleeves', label: '3. Mangas' },
-                      { id: 'collar', label: '4. Cuello' },
-                      { id: 'accents', label: '5. Puños / Ribete' },
-                    ].map((z) => (
-                      <button
-                        key={z.id}
-                        type="button"
-                        onClick={() => setActiveColorZone(z.id)}
-                        className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-2 ${
-                          activeColorZone === z.id
-                            ? 'bg-amber-400 text-slate-950 border-amber-400'
-                            : 'bg-slate-950 text-slate-300 border-slate-800'
-                        }`}
-                      >
-                        <span
-                          className="w-3.5 h-3.5 rounded-full border border-black/40 shrink-0"
-                          style={{ backgroundColor: design.colorZones[z.id]?.hex }}
-                        />
-                        <span className="truncate">{z.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-300">
-                      Carta Oficial de Sublimación (Equivalencia Pantone)
-                    </span>
-                    <span className="text-[11px] font-mono text-amber-400">
-                      {design.colorZones[activeColorZone]?.pantone}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {TEXTILE_COLORS.map((c) => {
-                      const isSel = design.colorZones[activeColorZone]?.hex === c.hex;
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {COLOR_ZONES_META.map((z) => {
+                      const zVal = design.colorZones[z.id] || design.colorZones.primary;
+                      const active = activeColorZone === z.id;
                       return (
                         <button
-                          key={c.hex}
+                          key={z.id}
                           type="button"
-                          onClick={() => updateColorZone(activeColorZone, c)}
-                          className={`p-2 rounded-xl border text-left transition-transform ${
-                            isSel
-                              ? 'border-amber-400 scale-[1.03] bg-slate-800'
-                              : 'border-slate-800 bg-slate-950/70 hover:border-slate-700'
+                          onClick={() => setActiveColorZone(z.id)}
+                          className={`p-2 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 transition-all ${
+                            active
+                              ? 'bg-slate-800 border-amber-400 text-white ring-1 ring-amber-400/50'
+                              : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
                           }`}
                         >
-                          <div
-                            className="w-full h-7 rounded-lg mb-1.5 flex items-center justify-center border border-white/10"
-                            style={{ backgroundColor: c.hex }}
-                          >
-                            {isSel && <Check className="w-4 h-4" style={{ color: c.contrast }} />}
-                          </div>
-                          <span className="text-[11px] font-bold text-white block truncate">{c.name}</span>
-                          <span className="text-[9px] font-mono text-slate-400 block">{c.pantone}</span>
+                          <span className="flex items-center gap-2 min-w-0">
+                            <span
+                              className="pantone-dynamic-chip w-5 h-5 rounded-md border border-white/20 shrink-0 flex items-center justify-center text-[9px] font-black"
+                              style={{ '--swatch-bg': zVal?.hex || '#0033a0' }}
+                            >
+                              {z.short}
+                            </span>
+                            <span className="truncate">{z.label}</span>
+                          </span>
+                          <span className="text-[9px] font-mono text-amber-400 shrink-0">
+                            {zVal?.pantone?.replace('PMS ', '') || ''}
+                          </span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {!isFaux3DAccessory && (
-                  <div className="pt-2 border-t border-slate-800 space-y-3">
+                {/* Buscador Pantone / HEX + Selector Libre RGB */}
+                <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={colorSearch}
+                        onChange={(e) => setColorSearch(e.target.value)}
+                        placeholder="Buscar PMS 286, Rojo, Marino, #hex..."
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs text-white"
+                      />
+                    </div>
+
+                    <label
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold cursor-pointer shrink-0"
+                      title="Elegir color HEX personalizado libre"
+                    >
+                      <input
+                        type="color"
+                        value={design.colorZones[activeColorZone]?.hex || '#0033a0'}
+                        onChange={(e) =>
+                          updateColorZone(activeColorZone, {
+                            hex: e.target.value,
+                            pantone: `HEX ${e.target.value.toUpperCase()}`,
+                            code: 'Personalizado',
+                          })
+                        }
+                        className="w-4 h-4 rounded border-0 bg-transparent cursor-pointer"
+                      />
+                      <span>HEX Libre</span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-1">
+                    {[
+                      { id: 'all', label: 'Todos (167)' },
+                      { id: 'cm5', label: 'Matriz CM5 (152)' },
+                      { id: 'special', label: 'Flúor / Metálicos (15)' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setPaletteFilterMode(tab.id)}
+                        className={`flex-1 py-1 rounded-lg text-[11px] font-bold ${
+                          paletteFilterMode === tab.id
+                            ? 'bg-amber-400 text-slate-950'
+                            : 'bg-slate-900 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Matriz Cromática de 5 Columnas de Sombra (Exacta a CM5 Owayo + Pantone PMS) */}
+                <div>
+                  <div className="flex items-center justify-between text-[11px] mb-1.5">
+                    <span className="text-slate-400">
+                      Activo:{' '}
+                      <strong className="text-white">
+                        {design.colorZones[activeColorZone]?.code || 'Color'}
+                      </strong>
+                    </span>
+                    <span className="font-mono text-amber-400">
+                      {design.colorZones[activeColorZone]?.pantone} •{' '}
+                      {design.colorZones[activeColorZone]?.hex?.toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-5 gap-1.5 max-h-[340px] overflow-y-auto pr-1">
+                    {filteredPalette.map((c) => {
+                      const isSel =
+                        design.colorZones[activeColorZone]?.hex?.toLowerCase() === c.hex.toLowerCase();
+                      return (
+                        <button
+                          key={`${c.code}_${c.hex}`}
+                          type="button"
+                          onClick={() => updateColorZone(activeColorZone, c)}
+                          title={`${c.name} (${c.code}) — ${c.pantone} — ${c.hex.toUpperCase()}`}
+                          style={{ '--swatch-bg': c.hex }}
+                          className={`pantone-dynamic-chip group relative h-11 rounded-xl border flex flex-col items-center justify-center px-1 transition-transform ${
+                            isSel
+                              ? 'border-amber-400 ring-2 ring-amber-400 scale-[1.04] z-10'
+                              : 'border-white/15 hover:scale-[1.03]'
+                          }`}
+                        >
+                          {isSel ? (
+                            <Check className="w-4 h-4 stroke-[3]" />
+                          ) : (
+                            <span className="text-[8px] font-mono font-bold opacity-0 group-hover:opacity-100 transition-opacity leading-tight text-center truncate w-full">
+                              {c.pantone.replace('PMS ', '')}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ================= STEP 3: ESTUDIO PNG & SVG MULTI-PIEZA SIN LÍMITES ================= */}
+            {step === 3 && (
+              <div className="space-y-4">
+                {/* Zona Drag & Drop Multi-Archivo */}
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragOverUpload(true);
+                  }}
+                  onDragLeave={() => setIsDragOverUpload(false)}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    setIsDragOverUpload(false);
+                    await handleFilesSelected(e.dataTransfer.files);
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`p-4 rounded-2xl border-2 border-dashed cursor-pointer transition-all text-center ${
+                    isDragOverUpload
+                      ? 'border-amber-400 bg-amber-400/15'
+                      : 'border-slate-700 hover:border-amber-400 bg-slate-950/80'
+                  }`}
+                >
+                  <Upload className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+                  <span className="text-xs font-black text-white block">
+                    Arrastra o Sube múltiples archivos PNG, SVG, WebP o JPG
+                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
+                    Vectorial SVG infinito • Auto-recorte transparente • Colocación en Frente, Espalda, Mangas y Cuello
+                  </span>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".svg,.png,.webp,.jpg,.jpeg,image/svg+xml,image/png,image/webp,image/jpeg"
+                    className="hidden"
+                    onChange={handleUploadInput}
+                  />
+                </div>
+
+                {/* Selector de Modo de Libertad de Impresión */}
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'SOFT_WARN', label: 'Aviso Costura' },
+                    { id: 'ALL_OVER', label: 'All-Over Libre' },
+                    { id: 'HARD_CLAMP', label: 'Tope Estricto' },
+                  ].map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => onCommitDesign({ ...design, bleedEnforcement: mode.id })}
+                      className={`py-1.5 px-2 rounded-xl border text-[11px] font-bold ${
+                        (design.bleedEnforcement || 'SOFT_WARN') === mode.id
+                          ? 'bg-sky-400 text-slate-950 border-sky-400'
+                          : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                      }`}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Biblioteca Persistente de Archivos Subidos + Escudos Vectoriales */}
+                <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+                  {uploadedLibrary.length > 0 && (
                     <div>
-                      <span className="text-xs font-bold text-slate-300 block mb-2">Construcción de Cuello 3D (`Krageneinfass`)</span>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { id: 'v-neck', label: 'Cuello en V Competición' },
-                          { id: 'crew', label: 'Cuello Redondo Olímpico' },
-                        ].map((col) => (
+                      <span className="text-[11px] font-bold text-amber-400 block mb-1.5">
+                        Mis Archivos Subidos ({uploadedLibrary.length}) — Clic para insertar otra copia
+                      </span>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {uploadedLibrary.map((art) => (
                           <button
-                            key={col.id}
+                            key={art.artworkId}
                             type="button"
-                            onClick={() => onCommitDesign({ ...design, collarStyle: col.id })}
-                            className={`py-2 px-3 rounded-xl border text-xs font-bold ${
-                              design.collarStyle === col.id
-                                ? 'bg-amber-400 text-slate-950 border-amber-400'
-                                : 'bg-slate-950 text-slate-300 border-slate-800'
-                            }`}
+                            onClick={() => {
+                              const next = insertArtworkOnPanel(art, panel2D);
+                              onCommitDesign({
+                                ...design,
+                                decals: [...(design.decals || []), next],
+                              });
+                              setSelectedDecalId(next.id);
+                            }}
+                            className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-400 flex flex-col items-center gap-1"
+                            title={`Insertar ${art.fileName} en ${panel2D}`}
                           >
-                            {col.label}
+                            <img
+                              src={art.previewUrl}
+                              alt={art.fileName}
+                              className="w-9 h-9 object-contain"
+                            />
+                            <span className="text-[9px] font-mono text-slate-300 truncate w-full text-center">
+                              {art.isVector ? 'SVG' : 'PNG'}
+                            </span>
                           </button>
                         ))}
                       </div>
                     </div>
+                  )}
 
-                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                      <div className="text-xs pr-2">
-                        <strong className="text-white block">Contraste Automático `HF` (Owayo)</strong>
-                        <span className="text-[11px] text-slate-400">
-                          Alterna sello técnico entre Blanco/Negro según luminancia de Zona 1 (`A`).
-                        </span>
-                      </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] font-bold text-slate-300">
+                        Escudos Vectoriales & Textos Rápidos
+                      </span>
                       <button
                         type="button"
-                        onClick={() =>
-                          onCommitDesign({ ...design, autoContrastHF: design.autoContrastHF === false })
-                        }
-                        className={`px-3 py-1.5 rounded-lg text-xs font-black shrink-0 ${
-                          design.autoContrastHF !== false
-                            ? 'bg-emerald-400 text-slate-950'
-                            : 'bg-slate-800 text-slate-400'
-                        }`}
+                        onClick={handleAddCustomTextObject}
+                        className="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1"
                       >
-                        {design.autoContrastHF !== false ? 'AUTO ON' : 'MANUAL'}
+                        <Plus className="w-3 h-3" /> Añadir Texto Libre
                       </button>
                     </div>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {VECTOR_CREST_PRESETS.map((pr) => (
+                        <button
+                          key={pr.id}
+                          type="button"
+                          onClick={() => handleAddPresetCrest(pr)}
+                          className="py-1.5 px-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] font-bold text-slate-300 truncate"
+                        >
+                          + {pr.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* ================= STEP 3: LOGOS, BOUNDING BOXES Y SEMÁFORO DPI (CUSTOMINK) ================= */}
-            {step === 3 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between gap-2 bg-sky-500/10 border border-sky-500/30 p-3 rounded-2xl">
-                  <div className="text-xs text-sky-200">
-                    <strong className="block text-sky-300">Arrastre Raycast 3D + Laboratorio 2D</strong>
-                    Arrastra escudos <strong>directo sobre el modelo 3D</strong> (con imán `x=0.50` y `sperrbezirk` 5cm) o abre el <strong>Molde 2D</strong>.
-                  </div>
-                  {!isFaux3DAccessory && (
-                    <button
-                      type="button"
-                      onClick={() => setViewportMode(viewportMode === '2d' ? '3d' : '2d')}
-                      className="px-3 py-1.5 rounded-xl bg-sky-400 text-slate-950 text-xs font-black shrink-0"
-                    >
-                      {viewportMode === '2d' ? 'Ver en 3D' : 'Abrir Molde 2D'}
-                    </button>
-                  )}
                 </div>
 
-                {/* Subida con Auto-Trim Alpha y Proxy sin Base64 */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-3 rounded-2xl border-2 border-dashed border-slate-700 hover:border-amber-400 bg-slate-950/70 flex items-center justify-center gap-2 text-xs font-bold text-white"
-                  >
-                    <Upload className="w-4 h-4 text-amber-400" />
-                    Subir PNG / SVG
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                    className="hidden"
-                    onChange={handleUploadLogo}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onCommitDesign({
-                        ...design,
-                        bleedEnforcement: design.bleedEnforcement === 'HARD_CLAMP' ? 'SOFT_WARN' : 'HARD_CLAMP',
-                      })
-                    }
-                    className={`p-3 rounded-2xl border text-xs font-bold ${
-                      design.bleedEnforcement === 'HARD_CLAMP'
-                        ? 'bg-rose-500/15 border-rose-400 text-rose-300'
-                        : 'bg-slate-950 border-slate-800 text-slate-300'
-                    }`}
-                  >
-                    Límite: {design.bleedEnforcement === 'HARD_CLAMP' ? 'Bloqueo Estricto' : 'Aviso Visual'}
-                  </button>
-                </div>
-
-                {/* Lista de Capas / Decals en la prenda */}
+                {/* Lista de Capas Activas en todas las piezas */}
                 <div>
                   <span className="text-xs font-bold text-slate-400 uppercase block mb-1.5">
-                    Elementos Gráficos en Prenda ({(design.decals || []).length})
+                    Capas en Prenda ({(design.decals || []).length})
                   </span>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 max-h-[175px] overflow-y-auto pr-1">
                     {(design.decals || []).map((d) => {
-                      const dpiInfo = calculateEffectiveDpi(d.widthPx || 1200, d.sizeMm.width, d.scale ?? 1, d.isVector);
+                      const dpiInfo = calculateEffectiveDpi(
+                        d.widthPx || 1600,
+                        d.sizeMm.width,
+                        d.scale ?? 1,
+                        d.isVector
+                      );
+                      const pSpec = getPartSpec(design.productModelId, d.panel || 'front');
+                      const isSel = selectedDecal?.id === d.id;
                       return (
                         <div
                           key={d.id}
                           onClick={() => {
                             setSelectedDecalId(d.id);
-                            setPanel2D(d.panel);
+                            setPanel2D(d.panel || 'front');
+                            setCameraPreset(PANEL_TO_CAMERA[d.panel || 'front'] || 'front');
                           }}
-                          className={`p-2.5 rounded-xl border cursor-pointer flex items-center justify-between ${
-                            selectedDecal?.id === d.id
+                          className={`p-2 rounded-xl border cursor-pointer flex items-center justify-between gap-2 ${
+                            isSel
                               ? 'bg-slate-800 border-amber-400'
-                              : 'bg-slate-950/60 border-slate-800'
+                              : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
                           }`}
                         >
-                          <div>
-                            <span className="text-xs font-bold text-white block">{d.label}</span>
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-white block truncate">{d.label}</span>
                             <span className="text-[10px] font-mono text-slate-400">
-                              Panel: {d.panel.toUpperCase()} • {dpiInfo.dpi === 999 ? 'SVG Vector' : `${dpiInfo.dpi} DPI`}
+                              {pSpec.shortLabel} • {dpiInfo.dpi === 999 ? 'SVG Vector' : `${dpiInfo.dpi} DPI`}
+                              {(d.opacity ?? 1) < 0.99 ? ` • Marca Agua ${Math.round((d.opacity ?? 1) * 100)}%` : ''}
                             </span>
                           </div>
-                          {(design.decals || []).length > 1 && (
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                updateDecal(d.id, { zIndex: (d.zIndex ?? 10) + 6 }, true);
+                              }}
+                              className="p-1 text-slate-400 hover:text-white"
+                              title="Subir capa"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                updateDecal(d.id, { zIndex: Math.max(1, (d.zIndex ?? 10) - 6) }, true);
+                              }}
+                              className="p-1 text-slate-400 hover:text-white"
+                              title="Bajar capa"
+                            >
+                              <ArrowDown className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                handleDuplicateDecal(d);
+                              }}
+                              className="p-1 text-slate-400 hover:text-sky-400"
+                              title="Duplicar capa"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               type="button"
                               onClick={(ev) => {
@@ -781,115 +1261,450 @@ export default function HybridStudioWorkspace({
                                   decals: design.decals.filter((x) => x.id !== d.id),
                                 });
                               }}
-                              className="p-1.5 text-slate-500 hover:text-rose-400"
-                              aria-label="Eliminar capa"
+                              className="p-1 text-slate-500 hover:text-rose-400"
+                              title="Eliminar capa"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
-                          )}
+                          </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Controles paramétricos de precisión del Decal activo */}
+                {/* Inspector Avanzado de la Capa Seleccionada */}
                 {selectedDecal && (
                   <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-amber-400">{selectedDecal.label}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateDecal(selectedDecal.id, { centerMm: { ...selectedDecal.centerMm, x: 250 } })}
-                        className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold flex items-center gap-1"
-                      >
-                        <AlignCenterHorizontal className="w-3 h-3 text-sky-400" />
-                        Centrar Eje X (250mm)
-                      </button>
+                    <div className="flex flex-wrap items-center justify-between gap-1.5">
+                      <span className="text-xs font-black text-amber-400 truncate">
+                        Editando: {selectedDecal.label}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const spec = getPartSpec(design.productModelId, selectedDecal.panel || 'front');
+                            updateDecal(
+                              selectedDecal.id,
+                              {
+                                centerMm: {
+                                  ...selectedDecal.centerMm,
+                                  x: +(spec.widthMm * spec.snapCenterU).toFixed(1),
+                                },
+                              },
+                              true
+                            );
+                          }}
+                          className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold flex items-center gap-1"
+                        >
+                          <AlignCenterHorizontal className="w-3 h-3 text-sky-400" />
+                          Centrar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateDecal(selectedDecal.id, { flipX: !selectedDecal.flipX }, true)
+                          }
+                          className={`p-1 rounded-lg border ${
+                            selectedDecal.flipX
+                              ? 'bg-amber-400 text-slate-950 border-amber-400'
+                              : 'bg-slate-900 text-slate-300 border-slate-800'
+                          }`}
+                          title="Voltear horizontalmente"
+                        >
+                          <FlipHorizontal2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateDecal(selectedDecal.id, { flipY: !selectedDecal.flipY }, true)
+                          }
+                          className={`p-1 rounded-lg border ${
+                            selectedDecal.flipY
+                              ? 'bg-amber-400 text-slate-950 border-amber-400'
+                              : 'bg-slate-900 text-slate-300 border-slate-800'
+                          }`}
+                          title="Voltear verticalmente"
+                        >
+                          <FlipVertical2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
 
-                    {selectedDecal.type === 'PRESET_CREST' && (
-                      <div className="grid grid-cols-4 gap-1.5">
-                        {[
-                          { id: 'royal_shield', name: 'Real FC' },
-                          { id: 'eagle_crest', name: 'Águila' },
-                          { id: 'lion_gold', name: 'Pro Gold' },
-                          { id: 'bolt_pro', name: 'Rayo' },
-                        ].map((pr) => (
+                    {/* Mover a cualquier pieza (Frente, Espalda, Manga Izq., Manga Der., Cuello) */}
+                    <div>
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+                        Pieza de Destino en la Prenda
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {droppablePanels.map((p) => (
                           <button
-                            key={pr.id}
+                            key={p.panelId}
                             type="button"
-                            onClick={() => updateDecal(selectedDecal.id, { presetId: pr.id })}
-                            className={`py-1.5 px-2 rounded-lg text-[11px] font-bold border ${
-                              selectedDecal.presetId === pr.id
+                            onClick={() => handleMoveDecalToPanel(selectedDecal, p.panelId)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${
+                              (selectedDecal.panel || 'front') === p.panelId
                                 ? 'bg-amber-400 text-slate-950 border-amber-400'
-                                : 'bg-slate-900 text-slate-300 border-slate-800'
+                                : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'
                             }`}
                           >
-                            {pr.name}
+                            {p.shortLabel}
                           </button>
                         ))}
                       </div>
-                    )}
 
+                      {(selectedDecal.panel === 'left_arm' || selectedDecal.panel === 'right_arm') && (
+                        <button
+                          type="button"
+                          onClick={() => handleCloneToOppositeSleeve(selectedDecal)}
+                          className="mt-1.5 w-full py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/40 text-sky-300 text-[11px] font-bold flex items-center justify-center gap-1.5"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Clonar Simétrico en la Manga Opuesta
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Edición específica si es TEXTO LIBRE */}
                     {selectedDecal.type === 'STATIC_TEXT' && (
-                      <input
-                        type="text"
-                        maxLength={22}
-                        value={selectedDecal.text || ''}
-                        onChange={(e) => updateDecal(selectedDecal.id, { text: e.target.value.toUpperCase() })}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-white uppercase"
-                        placeholder="TEXTO PATROCINADOR"
-                      />
+                      <div className="space-y-2 pt-1 border-t border-slate-800">
+                        <input
+                          type="text"
+                          maxLength={32}
+                          value={selectedDecal.text || ''}
+                          onChange={(e) =>
+                            updateDecal(selectedDecal.id, {
+                              text: e.target.value,
+                              label: e.target.value.slice(0, 18) || 'Texto',
+                            })
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold text-white"
+                          placeholder="Escribe lema, sponsor o iniciales..."
+                        />
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <select
+                            value={selectedDecal.fontFamily || SPORT_FONTS[0].family}
+                            onChange={(e) =>
+                              updateDecal(selectedDecal.id, { fontFamily: e.target.value }, true)
+                            }
+                            className="bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white"
+                          >
+                            {SPORT_FONTS.map((f) => (
+                              <option key={f.id} value={f.family}>
+                                {f.label}
+                              </option>
+                            ))}
+                          </select>
+
+                          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1">
+                            <label className="text-[10px] text-slate-400 flex items-center gap-1">
+                              Texto
+                              <input
+                                type="color"
+                                value={selectedDecal.fillHex || '#ffffff'}
+                                onChange={(e) =>
+                                  updateDecal(selectedDecal.id, { fillHex: e.target.value })
+                                }
+                                className="w-4 h-4 bg-transparent border-0 cursor-pointer"
+                              />
+                            </label>
+                            <label className="text-[10px] text-slate-400 flex items-center gap-1">
+                              Borde
+                              <input
+                                type="color"
+                                value={selectedDecal.outlineHex || '#0c2340'}
+                                onChange={(e) =>
+                                  updateDecal(selectedDecal.id, { outlineHex: e.target.value })
+                                }
+                                className="w-4 h-4 bg-transparent border-0 cursor-pointer"
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        <label className="block">
+                          <span className="text-[11px] text-slate-400 flex justify-between">
+                            <span>Arco / Curvatura del Texto</span>
+                            <span className="font-mono text-amber-400">{selectedDecal.archDeg || 0}°</span>
+                          </span>
+                          <input
+                            type="range"
+                            min="-140"
+                            max="140"
+                            step="5"
+                            value={selectedDecal.archDeg || 0}
+                            style={rangeVars(selectedDecal.archDeg || 0, -140, 140)}
+                            onChange={(e) =>
+                              updateDecal(selectedDecal.id, { archDeg: parseInt(e.target.value, 10) })
+                            }
+                            className="studio-range"
+                          />
+                        </label>
+                      </div>
                     )}
 
+                    {/* Escala Amplia (10% a 350% All-Over) + Rotación 360° + Opacidad Marca de Agua */}
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <label className="block">
-                        <span className="text-slate-400 text-[11px] block mb-1">
-                          Escala: {Math.round((selectedDecal.scale ?? 1) * 100)}%
+                        <span className="text-slate-400 text-[11px] flex justify-between">
+                          <span>Escala</span>
+                          <span className="font-mono text-amber-400">
+                            {Math.round((selectedDecal.scale ?? 1) * 100)}%
+                          </span>
                         </span>
                         <input
                           type="range"
-                          min="0.4"
-                          max="2.2"
+                          min="0.15"
+                          max="3.5"
                           step="0.05"
                           value={selectedDecal.scale ?? 1}
-                          onChange={(e) => updateDecal(selectedDecal.id, { scale: parseFloat(e.target.value) })}
-                          className="w-full accent-amber-400"
+                          style={rangeVars(selectedDecal.scale ?? 1, 0.15, 3.5)}
+                          onChange={(e) =>
+                            updateDecal(selectedDecal.id, { scale: parseFloat(e.target.value) })
+                          }
+                          className="studio-range"
                         />
                       </label>
 
                       <label className="block">
-                        <span className="text-slate-400 text-[11px] block mb-1">
-                          Rotación: {selectedDecal.rotationDeg || 0}°
+                        <span className="text-slate-400 text-[11px] flex justify-between">
+                          <span>Rotación 360°</span>
+                          <span className="font-mono text-amber-400">
+                            {selectedDecal.rotationDeg || 0}°
+                          </span>
                         </span>
                         <input
                           type="range"
-                          min="-45"
-                          max="45"
+                          min="-180"
+                          max="180"
                           step="1"
                           value={selectedDecal.rotationDeg || 0}
-                          onChange={(e) => updateDecal(selectedDecal.id, { rotationDeg: parseInt(e.target.value, 10) })}
-                          className="w-full accent-amber-400"
+                          style={rangeVars(selectedDecal.rotationDeg || 0, -180, 180)}
+                          onChange={(e) =>
+                            updateDecal(selectedDecal.id, {
+                              rotationDeg: parseInt(e.target.value, 10),
+                            })
+                          }
+                          className="studio-range"
                         />
                       </label>
                     </div>
+
+                    <div className="flex flex-wrap gap-1">
+                      {[
+                        { label: 'Mini 50%', patch: { scale: 0.5 } },
+                        { label: 'Estándar 100%', patch: { scale: 1 } },
+                        { label: 'Grande 180%', patch: { scale: 1.8 } },
+                        { label: 'All-Over 280%', patch: { scale: 2.8 } },
+                        { label: '-90°', patch: { rotationDeg: -90 } },
+                        { label: '0°', patch: { rotationDeg: 0 } },
+                        { label: '+90°', patch: { rotationDeg: 90 } },
+                      ].map((b) => (
+                        <button
+                          key={b.label}
+                          type="button"
+                          onClick={() => updateDecal(selectedDecal.id, b.patch, true)}
+                          className="px-2 py-0.5 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-slate-300"
+                        >
+                          {b.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Opacidad / Marca de Agua (`wasserzeichen` de Owayo) + Modo de Fusión */}
+                    <div className="grid grid-cols-2 gap-3 items-end pt-1 border-t border-slate-800">
+                      <label className="block">
+                        <span className="text-slate-400 text-[11px] flex justify-between">
+                          <span>Opacidad / Marca Agua</span>
+                          <span className="font-mono text-amber-400">
+                            {Math.round((selectedDecal.opacity ?? 1) * 100)}%
+                          </span>
+                        </span>
+                        <input
+                          type="range"
+                          min="0.05"
+                          max="1"
+                          step="0.05"
+                          value={selectedDecal.opacity ?? 1}
+                          style={rangeVars(selectedDecal.opacity ?? 1, 0.05, 1)}
+                          onChange={(e) =>
+                            updateDecal(selectedDecal.id, { opacity: parseFloat(e.target.value) })
+                          }
+                          className="studio-range"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="text-slate-400 text-[11px] block mb-1">Fusión Textil</span>
+                        <select
+                          value={selectedDecal.blendMode || 'source-over'}
+                          onChange={(e) =>
+                            updateDecal(selectedDecal.id, { blendMode: e.target.value }, true)
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white"
+                        >
+                          <option value="source-over">Normal (Nítido)</option>
+                          <option value="multiply">Multiply (Tinta en Tela)</option>
+                          <option value="screen">Screen (Luz / Marca Agua)</option>
+                          <option value="overlay">Overlay (Contraste)</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    {/* Herramientas avanzadas para PNG / SVG: Quitar Fondo Blanco + Tinte Pantone */}
+                    {selectedDecal.type !== 'STATIC_TEXT' && (
+                      <div className="pt-2 border-t border-slate-800 space-y-2">
+                        {selectedDecal.artworkId && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateDecal(
+                                  selectedDecal.id,
+                                  { removeWhiteBg: !selectedDecal.removeWhiteBg },
+                                  true
+                                )
+                              }
+                              className={`flex-1 py-1.5 px-2.5 rounded-xl border text-[11px] font-bold flex items-center justify-center gap-1.5 ${
+                                selectedDecal.removeWhiteBg
+                                  ? 'bg-emerald-400 text-slate-950 border-emerald-400'
+                                  : 'bg-slate-900 text-slate-300 border-slate-800'
+                              }`}
+                            >
+                              <Eraser className="w-3.5 h-3.5" />
+                              {selectedDecal.removeWhiteBg ? 'Fondo Blanco Eliminado' : 'Quitar Fondo Blanco'}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateDecal(
+                                  selectedDecal.id,
+                                  { invertImage: !selectedDecal.invertImage },
+                                  true
+                                )
+                              }
+                              className={`py-1.5 px-2.5 rounded-xl border text-[11px] font-bold ${
+                                selectedDecal.invertImage
+                                  ? 'bg-amber-400 text-slate-950 border-amber-400'
+                                  : 'bg-slate-900 text-slate-300 border-slate-800'
+                              }`}
+                            >
+                              Invertir
+                            </button>
+                          </div>
+                        )}
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] text-slate-400">
+                              Recolorear SVG / PNG Monocromo:
+                            </span>
+                            {selectedDecal.tintHex && (
+                              <button
+                                type="button"
+                                onClick={() => updateDecal(selectedDecal.id, { tintHex: '' }, true)}
+                                className="text-[10px] font-bold text-amber-400 hover:underline"
+                              >
+                                Restaurar Color Original
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {quickTintColors.map((hex) => (
+                              <button
+                                key={hex}
+                                type="button"
+                                onClick={() => updateDecal(selectedDecal.id, { tintHex: hex }, true)}
+                                className={`w-6 h-6 rounded-lg border ${
+                                  selectedDecal.tintHex === hex
+                                    ? 'border-amber-400 scale-110 ring-1 ring-amber-400'
+                                    : 'border-white/20'
+                                }`}
+                                style={{ backgroundColor: hex }}
+                              />
+                            ))}
+                            <input
+                              type="color"
+                              value={selectedDecal.tintHex || '#ffffff'}
+                              onChange={(e) => updateDecal(selectedDecal.id, { tintHex: e.target.value })}
+                              className="w-6 h-6 rounded bg-transparent border-0 cursor-pointer"
+                              title="Cualquier color de tinte"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             )}
 
-            {/* ================= STEP 4: VARIABLE SLOTS & AUTO-CONDENSE (OWAYO) ================= */}
+            {/* ================= STEP 4: SLOTS VARIABLES DE JUGADOR & DORSALES CURVOS ================= */}
             {step === 4 && (
               <div className="space-y-4">
-                <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300">
-                  <strong className="text-amber-400 block mb-0.5">Slots Paramétricos Owayo (`Single-Design-ID`)</strong>
-                  Aquí defines la regla tipográfica <strong>una sola vez</strong>. Los 20+ nombres y números del equipo se inyectan dinámicamente sin duplicar imágenes.
+                <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2">
+                  <div className="text-xs text-slate-300">
+                    <strong className="text-amber-400 block">Slots Variables (`einzelexemplare`)</strong>
+                    Se actualizan automáticamente para cada jugador del Roster sin duplicar diseño.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddCustomTextObject}
+                    className="px-2.5 py-1.5 rounded-xl bg-amber-400 text-slate-950 text-[11px] font-black shrink-0"
+                  >
+                    + Texto Fijo
+                  </button>
                 </div>
 
+                {/* Interruptores ON/OFF de los 4 Slots de Jugador */}
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { key: 'playerNameBack', label: 'Nombre Espalda', cam: 'back' },
+                    { key: 'playerNumberBack', label: 'Dorsal Espalda', cam: 'back' },
+                    { key: 'playerNumberFront', label: 'Número Pecho', cam: 'front' },
+                    ...(droppablePanels.some((p) => p.panelId === 'right_arm')
+                      ? [{ key: 'playerNumberSleeve', label: 'Número Manga', cam: 'right_sleeve' }]
+                      : []),
+                  ].map((sl) => {
+                    const enabled = Boolean(design.variableSlots?.[sl.key]?.enabled);
+                    return (
+                      <button
+                        key={sl.key}
+                        type="button"
+                        onClick={() => {
+                          setCameraPreset(sl.cam);
+                          onCommitDesign({
+                            ...design,
+                            variableSlots: {
+                              ...design.variableSlots,
+                              [sl.key]: {
+                                ...design.variableSlots[sl.key],
+                                enabled: !enabled,
+                              },
+                            },
+                          });
+                        }}
+                        className={`p-2 rounded-xl border text-xs font-bold flex items-center justify-between ${
+                          enabled
+                            ? 'bg-emerald-500/15 border-emerald-400 text-white'
+                            : 'bg-slate-950 border-slate-800 text-slate-400'
+                        }`}
+                      >
+                        <span>{sl.label}</span>
+                        <span className="text-[10px] font-mono">{enabled ? 'ON' : 'OFF'}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* 10 Fuentes Deportivas */}
                 <div>
-                  <span className="text-xs font-bold text-slate-300 block mb-2">Tipografía Deportiva Oficial</span>
-                  <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs font-bold text-slate-300 block mb-1.5">
+                    10 Tipografías Atléticas de Competición
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5 max-h-[210px] overflow-y-auto pr-1">
                     {SPORT_FONTS.map((f) => {
                       const active = design.variableSlots.playerNumberBack.fontFamily === f.family;
                       return (
@@ -901,138 +1716,237 @@ export default function HybridStudioWorkspace({
                               ...design,
                               variableSlots: {
                                 ...design.variableSlots,
-                                playerNameBack: { ...design.variableSlots.playerNameBack, fontFamily: f.family },
-                                playerNumberBack: { ...design.variableSlots.playerNumberBack, fontFamily: f.family },
-                                playerNumberFront: { ...design.variableSlots.playerNumberFront, fontFamily: f.family },
+                                playerNameBack: {
+                                  ...design.variableSlots.playerNameBack,
+                                  fontFamily: f.family,
+                                },
+                                playerNumberBack: {
+                                  ...design.variableSlots.playerNumberBack,
+                                  fontFamily: f.family,
+                                },
+                                playerNumberFront: {
+                                  ...design.variableSlots.playerNumberFront,
+                                  fontFamily: f.family,
+                                },
+                                playerNumberSleeve: {
+                                  ...(design.variableSlots.playerNumberSleeve || {}),
+                                  fontFamily: f.family,
+                                },
                               },
                             })
                           }
-                          className={`p-2.5 rounded-xl border text-center ${
+                          className={`p-2 rounded-xl border text-center ${
                             active
                               ? 'bg-amber-400 text-slate-950 border-amber-400 font-black'
-                              : 'bg-slate-950 text-slate-200 border-slate-800'
+                              : 'bg-slate-950 text-slate-200 border-slate-800 hover:border-slate-700'
                           }`}
                           style={{ fontFamily: f.family }}
                         >
-                          <span className="text-lg block leading-none">{f.label} 10</span>
+                          <span className="text-base block leading-tight truncate">{f.label} 10</span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Color de Dorsal y Borde */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-xs font-bold text-slate-300 block mb-1.5">Relleno Dorsal</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {['#f8fafc', '#facc15', '#0f172a', '#dc2626', '#06b6d4'].map((hex) => (
-                        <button
-                          key={hex}
-                          type="button"
-                          onClick={() =>
-                            onCommitDesign({
+                {/* Colores, Arco de Nombre y Tamaño de Dorsal */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <label className="text-[11px] text-slate-300 flex flex-col gap-1">
+                      <span>Relleno Dorsal</span>
+                      <input
+                        type="color"
+                        value={design.variableSlots.playerNumberBack.fillHex || '#ffffff'}
+                        onChange={(e) => {
+                          const hex = e.target.value;
+                          onCommitDesign(
+                            {
                               ...design,
                               variableSlots: {
                                 ...design.variableSlots,
                                 playerNameBack: { ...design.variableSlots.playerNameBack, fillHex: hex },
                                 playerNumberBack: { ...design.variableSlots.playerNumberBack, fillHex: hex },
+                                playerNumberFront: { ...design.variableSlots.playerNumberFront, fillHex: hex },
+                                playerNumberSleeve: {
+                                  ...(design.variableSlots.playerNumberSleeve || {}),
+                                  fillHex: hex,
+                                },
                               },
-                            })
-                          }
-                          className={`w-7 h-7 rounded-lg border-2 ${
-                            design.variableSlots.playerNumberBack.fillHex === hex
-                              ? 'border-amber-400 scale-110'
-                              : 'border-slate-700'
-                          }`}
-                          style={{ backgroundColor: hex }}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                            },
+                            false
+                          );
+                        }}
+                        className="w-full h-8 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer"
+                      />
+                    </label>
 
-                  <div>
-                    <span className="text-xs font-bold text-slate-300 block mb-1.5">Contorno (Stroke)</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {['#0f172a', '#f8fafc', '#facc15', '#1d4ed8'].map((hex) => (
-                        <button
-                          key={hex}
-                          type="button"
-                          onClick={() =>
-                            onCommitDesign({
+                    <label className="text-[11px] text-slate-300 flex flex-col gap-1">
+                      <span>Contorno 1</span>
+                      <input
+                        type="color"
+                        value={design.variableSlots.playerNumberBack.outlineHex || '#0c2340'}
+                        onChange={(e) => {
+                          const hex = e.target.value;
+                          onCommitDesign(
+                            {
                               ...design,
                               variableSlots: {
                                 ...design.variableSlots,
                                 playerNameBack: { ...design.variableSlots.playerNameBack, outlineHex: hex },
                                 playerNumberBack: { ...design.variableSlots.playerNumberBack, outlineHex: hex },
+                                playerNumberFront: { ...design.variableSlots.playerNumberFront, outlineHex: hex },
                               },
-                            })
-                          }
-                          className={`w-7 h-7 rounded-lg border-2 ${
-                            design.variableSlots.playerNumberBack.outlineHex === hex
-                              ? 'border-amber-400 scale-110'
-                              : 'border-slate-700'
+                            },
+                            false
+                          );
+                        }}
+                        className="w-full h-8 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer"
+                      />
+                    </label>
+
+                    <label className="text-[11px] text-slate-300 flex flex-col gap-1">
+                      <span>Halo Exterior</span>
+                      <input
+                        type="color"
+                        value={design.variableSlots.playerNumberBack.inlineHex || '#ffcd00'}
+                        onChange={(e) =>
+                          onCommitDesign(
+                            {
+                              ...design,
+                              variableSlots: {
+                                ...design.variableSlots,
+                                playerNumberBack: {
+                                  ...design.variableSlots.playerNumberBack,
+                                  inlineHex: e.target.value,
+                                },
+                              },
+                            },
+                            false
+                          )
+                        }
+                        className="w-full h-8 rounded-lg bg-slate-900 border border-slate-700 cursor-pointer"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block">
+                      <span className="text-[11px] text-slate-400 flex justify-between">
+                        <span>Arco Nombre</span>
+                        <span className="font-mono text-amber-400">
+                          {design.variableSlots.playerNameBack.archDeg || 0}°
+                        </span>
+                      </span>
+                      <input
+                        type="range"
+                        min="-90"
+                        max="90"
+                        step="5"
+                        value={design.variableSlots.playerNameBack.archDeg || 0}
+                        style={rangeVars(design.variableSlots.playerNameBack.archDeg || 0, -90, 90)}
+                        onChange={(e) =>
+                          onCommitDesign(
+                            {
+                              ...design,
+                              variableSlots: {
+                                ...design.variableSlots,
+                                playerNameBack: {
+                                  ...design.variableSlots.playerNameBack,
+                                  archDeg: parseInt(e.target.value, 10),
+                                },
+                              },
+                            },
+                            false
+                          )
+                        }
+                        className="studio-range"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="text-[11px] text-slate-400 flex justify-between">
+                        <span>Altura Dorsal</span>
+                        <span className="font-mono text-amber-400">
+                          {((design.variableSlots.playerNumberBack.heightMm || 225) / 10).toFixed(1)} cm
+                        </span>
+                      </span>
+                      <input
+                        type="range"
+                        min="140"
+                        max="290"
+                        step="5"
+                        value={design.variableSlots.playerNumberBack.heightMm || 225}
+                        style={rangeVars(design.variableSlots.playerNumberBack.heightMm || 225, 140, 290)}
+                        onChange={(e) =>
+                          onCommitDesign(
+                            {
+                              ...design,
+                              variableSlots: {
+                                ...design.variableSlots,
+                                playerNumberBack: {
+                                  ...design.variableSlots.playerNumberBack,
+                                  heightMm: parseInt(e.target.value, 10),
+                                },
+                              },
+                            },
+                            false
+                          )
+                        }
+                        className="studio-range"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Prueba rápida de jugadores del Roster */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] font-bold text-white">Probar Jugadores (`autoCondense`)</span>
+                      <span className="text-[10px] font-mono text-emerald-400">
+                        scaleX:{' '}
+                        {computeAutoCondenseScaleX(
+                          activePlayer.name,
+                          design.variableSlots.playerNameBack.maxWidthMm,
+                          design.variableSlots.playerNameBack.capHeightMm
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {roster.slice(0, 4).map((r, idx) => (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveRosterIndex(idx);
+                            setCameraPreset('back');
+                          }}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold border ${
+                            activeRosterIndex === idx
+                              ? 'bg-amber-400 text-slate-950 border-amber-400'
+                              : 'bg-slate-900 text-slate-300 border-slate-800'
                           }`}
-                          style={{ backgroundColor: hex }}
-                        />
+                        >
+                          #{r.number} {r.name}
+                        </button>
                       ))}
                     </div>
-                  </div>
-                </div>
-
-                {/* Prueba en vivo de Auto-Condense para apellidos largos */}
-                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white">Compresión Horizontal (`autoCondense`)</span>
-                    <span className="text-[11px] font-mono text-emerald-400">
-                      scaleX:{' '}
-                      {computeAutoCondenseScaleX(
-                        activePlayer.name,
-                        design.variableSlots.playerNameBack.maxWidthMm,
-                        design.variableSlots.playerNameBack.capHeightMm
-                      )}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Haz clic para probar cómo la espalda adapta nombres cortos y compuestos sin invadir las sisas:
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    { roster.slice(0, 4).map((r, idx) => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveRosterIndex(idx);
-                          setCameraPreset('back');
-                        }}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border ${
-                          activeRosterIndex === idx
-                            ? 'bg-amber-400 text-slate-950 border-amber-400'
-                            : 'bg-slate-900 text-slate-300 border-slate-800'
-                        }`}
-                      >
-                        #{r.number} {r.name}
-                      </button>
-                    ))}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* ================= STEP 5: ROSTER DE EQUIPO CON TABLA RESPONSIVA ================= */}
+            {/* ================= STEP 5: ROSTER DE EQUIPO ================= */}
             {step === 5 && (
               <div className="space-y-4">
                 <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
                   <div>
                     <span className="text-xs font-black text-emerald-300 block">{currentTier.label}</span>
                     <span className="text-[11px] text-slate-300">
-                      Haz clic en el ojo de cualquier fila para inspeccionar su camiseta en vivo.
+                      Haz clic en el ojo para inspeccionar cada camiseta e interior de talla en 3D.
                     </span>
                   </div>
                   <span className="text-base font-black text-white">${unitPrice.toFixed(2)}/ud</span>
                 </div>
 
-                {/* Tabla Semántica Responsiva con Sticky Headers & Container Queries */}
                 <div
                   tabIndex={0}
                   role="region"
@@ -1154,7 +2068,7 @@ export default function HybridStudioWorkspace({
                                   className={`p-1 rounded-lg ${
                                     isPreviewing ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-300'
                                   }`}
-                                  title="Previsualizar este jugador en el modelo"
+                                  title="Previsualizar este jugador"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
                                 </button>
@@ -1209,7 +2123,6 @@ export default function HybridStudioWorkspace({
                   </span>
                 </div>
 
-                {/* Importador rápido desde Excel / CSV */}
                 <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
                   <span className="text-[11px] font-bold text-slate-300 block">
                     Pegado Masivo desde Excel / WhatsApp (`NOMBRE, NUMERO, TALLA`)
@@ -1233,7 +2146,7 @@ export default function HybridStudioWorkspace({
             )}
           </div>
 
-          {/* Sticky Bottom Navigation inside Sidebar */}
+          {/* Sticky Bottom Navigation */}
           <div className="p-3.5 border-t border-slate-800 bg-slate-950/90 flex items-center justify-between gap-2">
             <button
               type="button"
@@ -1253,17 +2166,18 @@ export default function HybridStudioWorkspace({
               <button
                 type="button"
                 onClick={() => handleStepSelect(step + 1)}
-                className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black uppercase"
+                className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black"
               >
-                Siguiente Paso →
+                Siguiente →
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onOpenProductionModal}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-xs font-black uppercase"
+                className="px-3.5 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs font-black flex items-center gap-1"
               >
-                Generar Orden →
+                <Scissors className="w-3.5 h-3.5" />
+                Generar Orden
               </button>
             )}
           </div>

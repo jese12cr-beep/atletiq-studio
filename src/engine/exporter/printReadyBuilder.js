@@ -1,8 +1,8 @@
 /**
- * ATLETIQ Engine v3.1 — Exportador Print-Ready de Moldes de Sublimación + Roster Relacional Owayo (`einzelexemplare`) + Puente Shopify
+ * ATLETIQ Engine v4.0 — Exportador Print-Ready de Moldes de Sublimación + Roster Relacional Owayo (`einzelexemplare`) + Puente Shopify
  *
- * 1. Genera un molde vectorial SVG real de corte y confección (880 x 620 mm) adaptado al patronaje activo
- *    (`222m-Hero` de baloncesto con ribetes de sisa de 48 mm o mangas sastre de fútbol/ciclismo).
+ * 1. Genera un molde vectorial SVG real de corte y confección (880 x 620 mm) adaptado al patronaje `.mirl`/`.fish` activo
+ *    (`204m_Basic_KA` de fútbol/e-sports con 5 piezas o `222m-Hero` de baloncesto con ribetes de sisa de 48 mm).
  * 2. Construye el payload relacional exacto `einzelexemplare` decodificado de Owayo v6 (`textObjectUUID` + `masterID`).
  * 3. Construye el payload `POST /cart/add.js` de Shopify agrupando tallas sin Base64.
  */
@@ -20,9 +20,10 @@ function escapeXml(str = '') {
 export function generateSublimationCutSheetSVG(design, product, roster = []) {
   const cPrimary = design.colorZones.primary?.hex || '#1d4ed8';
   const cSecondary = design.colorZones.secondary?.hex || '#0f172a';
-  const cSleeves = design.colorZones.sleeves?.hex || '#0f172a';
-  const cCollar = design.colorZones.collar?.hex || '#ffffff';
   const cAccents = design.colorZones.accents?.hex || '#facc15';
+  const cQuaternary = design.colorZones.quaternary?.hex || '#ffffff';
+  const cSleeves = design.colorZones.sleeves?.hex || cSecondary;
+  const cCollar = design.colorZones.collar?.hex || '#ffffff';
   const isBasketball = product?.garmentShape === 'basketball_tank';
 
   const samplePlayer = roster[0] || { name: 'RODRÍGUEZ', number: '10', size: 'L', cut: 'MEN_PRO_SLIM' };
@@ -129,16 +130,19 @@ export function generateSublimationCutSheetSVG(design, product, roster = []) {
     )} • 110×4.8cm)</text>
   </g>
 
-  <g transform="translate(585, 290)">
+  <g transform="translate(585, 282)">
     <text x="0" y="0" font-family="sans-serif" font-weight="bold" font-size="11" fill="#facc15">PERFIL CROMÁTICO CM5 / PANTONE:</text>
-    <rect x="0" y="10" width="14" height="14" fill="${cPrimary}"/><text x="20" y="21" font-family="monospace" font-size="10" fill="#e2e8f0">Code A: ${cPrimary} (${escapeXml(
+    <rect x="0" y="8" width="13" height="13" fill="${cPrimary}"/><text x="18" y="18" font-family="monospace" font-size="9.5" fill="#e2e8f0">Code A: ${cPrimary} (${escapeXml(
     design.colorZones.primary?.pantone || 'Custom'
   )})</text>
-    <rect x="0" y="28" width="14" height="14" fill="${cSecondary}"/><text x="20" y="39" font-family="monospace" font-size="10" fill="#e2e8f0">Code B: ${cSecondary} (${escapeXml(
+    <rect x="0" y="24" width="13" height="13" fill="${cSecondary}"/><text x="18" y="34" font-family="monospace" font-size="9.5" fill="#e2e8f0">Code B: ${cSecondary} (${escapeXml(
     design.colorZones.secondary?.pantone || 'Custom'
   )})</text>
-    <rect x="0" y="46" width="14" height="14" fill="${cAccents}"/><text x="20" y="57" font-family="monospace" font-size="10" fill="#e2e8f0">Code C: ${cAccents} (${escapeXml(
+    <rect x="0" y="40" width="13" height="13" fill="${cAccents}"/><text x="18" y="50" font-family="monospace" font-size="9.5" fill="#e2e8f0">Code C: ${cAccents} (${escapeXml(
     design.colorZones.accents?.pantone || 'Custom'
+  )})</text>
+    <rect x="0" y="56" width="13" height="13" fill="${cQuaternary}"/><text x="18" y="66" font-family="monospace" font-size="9.5" fill="#e2e8f0">Code D: ${cQuaternary} (${escapeXml(
+    design.colorZones.quaternary?.pantone || 'Custom'
   )})</text>
   </g>
 
@@ -159,6 +163,7 @@ export function buildShopifyAndManufacturingBundle(design, product, roster = [],
   const uuidNameBack = design.variableSlots?.playerNameBack?.textObjectUUID || 'uuid-slot-name-back';
   const uuidNumBack = design.variableSlots?.playerNumberBack?.textObjectUUID || 'uuid-slot-num-back';
   const uuidNumFront = design.variableSlots?.playerNumberFront?.textObjectUUID || 'uuid-slot-num-front';
+  const uuidNumSleeve = design.variableSlots?.playerNumberSleeve?.textObjectUUID || 'uuid-slot-num-sleeve';
 
   // Estructura relacional exacta `einzelexemplare` decodificada de Owayo v6 (`loadEinzelexemplare`)
   const owayoEinzelexemplare = roster.map((row) => ({
@@ -184,6 +189,16 @@ export function buildShopifyAndManufacturingBundle(design, product, roster = [],
         textObjectUUID: uuidNumFront,
         masterID: uuidNumBack, // Clon vinculado automáticamente al dorsal trasero
       },
+      ...(design.variableSlots?.playerNumberSleeve?.enabled
+        ? [
+            {
+              isFixed: false,
+              value: String(row.number || ''),
+              textObjectUUID: uuidNumSleeve,
+              masterID: uuidNumBack, // Clon vinculado a mangas
+            },
+          ]
+        : []),
     ],
   }));
 
@@ -217,7 +232,7 @@ export function buildShopifyAndManufacturingBundle(design, product, roster = [],
       Corte_y_Talla: `${group.cut} — Talla ${group.size}`,
       Jugadores: group.players.map((p) => `${p.name || 'S/N'} (#${p.num || '-'})`).join(', '),
       _atletiq_design_id: design.designId,
-      _atletiq_engine: '3.1.0',
+      _atletiq_engine: '4.0.0',
       _atletiq_preview_front: previewWebpUrl || `https://cdn.atletiq.pro/previews/${design.designId}_front.webp`,
       _atletiq_tier_code: tier.code,
       _atletiq_roster_slice: JSON.stringify(group.players),
@@ -243,15 +258,18 @@ export function buildShopifyAndManufacturingBundle(design, product, roster = [],
     },
     masterDesignRecord: {
       designId: design.designId,
-      engineVersion: '3.1.0',
+      engineVersion: '4.0.0',
       productModelId: product.id,
       patternId: design.patternId,
+      surfacePatternId: design.surfacePatternId || 'none',
+      surfacePatternOpacity: design.surfacePatternOpacity ?? 0.16,
       fabricWeaveId: design.fabricWeaveId,
       collarStyle: design.collarStyle,
       autoContrastHF: design.autoContrastHF !== false,
+      bleedEnforcement: design.bleedEnforcement || 'SOFT_WARN',
       colorZones: design.colorZones,
       decals: (design.decals || []).map(
-        ({ id, type, label, panel, safeZoneId, centerMm, sizeMm, scale, rotationDeg, artworkId, presetId, text }) => ({
+        ({
           id,
           type,
           label,
@@ -261,6 +279,43 @@ export function buildShopifyAndManufacturingBundle(design, product, roster = [],
           sizeMm,
           scale,
           rotationDeg,
+          opacity,
+          flipX,
+          flipY,
+          removeWhiteBg,
+          whiteBgTolerance,
+          invertImage,
+          tintHex,
+          archDeg,
+          fontFamily,
+          fillHex,
+          strokeHex,
+          strokeWidthMm,
+          artworkId,
+          presetId,
+          text,
+        }) => ({
+          id,
+          type,
+          label,
+          panel,
+          safeZoneId: safeZoneId || null,
+          centerMm,
+          sizeMm,
+          scale,
+          rotationDeg,
+          opacity: opacity ?? 1,
+          flipX: Boolean(flipX),
+          flipY: Boolean(flipY),
+          removeWhiteBg: Boolean(removeWhiteBg),
+          whiteBgTolerance: whiteBgTolerance ?? 242,
+          invertImage: Boolean(invertImage),
+          tintHex: tintHex || '',
+          archDeg: archDeg ?? 0,
+          fontFamily: fontFamily || null,
+          fillHex: fillHex || null,
+          strokeHex: strokeHex || null,
+          strokeWidthMm: strokeWidthMm ?? 0,
           artworkId: artworkId || null,
           presetId: presetId || null,
           text: text || null,

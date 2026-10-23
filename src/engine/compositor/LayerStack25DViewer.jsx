@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { drawPresetCrest } from './uvCanvasRenderer';
+import { getFilteredArtworkDrawable } from '../core/dpiValidator';
 
 /**
  * ATLETIQ Engine v3.0 — Motor 2.5D "Faux-3D" de Capas Alpha Apiladas (Inspirado en Nike By You)
@@ -269,13 +270,23 @@ export default function LayerStack25DViewer({
 
     if (currentAngle !== 180) {
       const crestDecal = (design.decals || [])[0];
-      if (crestDecal?.type === 'UPLOADED_RASTER' || crestDecal?.type === 'UPLOADED_VECTOR') {
-        const art = artworkRegistry[crestDecal.artworkId];
-        if (art?.imageElement) {
-          oCtx.drawImage(art.imageElement, -55, -55, 110, 110);
+      if (crestDecal) {
+        oCtx.save();
+        const sc = crestDecal.scale ?? 1;
+        const rot = ((crestDecal.rotationDeg ?? 0) * Math.PI) / 180;
+        oCtx.globalAlpha = crestDecal.opacity ?? 1;
+        oCtx.rotate(rot);
+        oCtx.scale((crestDecal.flipX ? -1 : 1) * sc, (crestDecal.flipY ? -1 : 1) * sc);
+        if (crestDecal.type === 'UPLOADED_RASTER' || crestDecal.type === 'UPLOADED_VECTOR') {
+          const art = artworkRegistry[crestDecal.artworkId];
+          const drawable = getFilteredArtworkDrawable(art, crestDecal);
+          if (drawable) {
+            oCtx.drawImage(drawable, -55, -55, 110, 110);
+          }
+        } else if (crestDecal.type === 'PRESET_VECTOR') {
+          drawPresetCrest(oCtx, crestDecal.presetId || 'royal_shield', 96, 104, design.colorZones);
         }
-      } else {
-        drawPresetCrest(oCtx, crestDecal?.presetId || 'royal_shield', 96, 104, design.colorZones);
+        oCtx.restore();
       }
 
       if (accessoryType !== 'cap' && activePlayer?.name) {

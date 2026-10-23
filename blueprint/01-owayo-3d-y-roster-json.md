@@ -118,9 +118,11 @@ Decodificado de `loadEinzelexemplare` / `createEinzelExemplarTextArray` en el mo
 
 ---
 
-## 3. Mecánicas Incorporadas Directamente en ATLETIQ Engine v3.1
+## 3. Mecánicas Incorporadas Directamente en ATLETIQ Engine v4.0 (Clon Binario 1:1)
 
-1. **Malla 3D Anatómica de 7 Piezas Cosidas (`jerseyGeometry3D.js`)**: Separación real de `Front`, `Back`, `Krageneinfass` (cuello ribeteado), `Aermelbandlinks` / `Aermelbandrechts` (sisas de baloncesto B6 Hero o mangas cosidas con puños), `Etikett` (etiqueta interior de nuca) y `EtikettFahne` (banderín lateral).
-2. **Shader de Reverso Sublimado (`gl_FrontFacing` 62% Blanco)**: Implementado vía `onBeforeCompile` sobre `MeshPhysicalMaterial` para que el interior del cuello y sisas luzca como poliéster `K-Tex` real.
-3. **Arrastre Raycast UV Directo en 3D + `SnapLines` + `sperrbezirke` (`5.0 cm`)**: Selección y arrastre en vivo de escudos/patrocinadores directamente sobre el modelo 3D (con `setPointerCapture` y soporte de teclado), bloqueando los `50 mm` inferiores de costura de dobladillo (`VonUntenCm: 5.00`) e imantando al eje central `x = 0.50`.
-4. **Contraste Automático `HF` (`ColorCodeAbhaengigkeiten`) y Exportador `einzelexemplare` (`textObjectUUID` + `masterID`)**.
+1. **Decodificador Binario `.mirl` v1.1 Nativo (`mirlModelLoader.js`)**: Descompresión GZIP en navegador (`DecompressionStream('gzip')`) y parseo de `uint16` para cargar las mallas reales de alta densidad:
+   * **Fútbol / E-Sports (`football_f3_ka.mirl` / `204m_Basic_KA`)**: **38,319 vértices y 74,898 triángulos** en 7 sub-mallas independientes (`Front`, `Back`, `LeftArm`, `RightArm`, `Collar`, `Etikett`, `EtikettFahne`).
+   * **Baloncesto (`basketball_b6_hero.mirl` / `222m-Hero`)**: **31,204 vértices y 60,593 triángulos** en 7 sub-mallas independientes (`Front`, `Back`, `Krageneinfass`, `Aermelbandlinks`, `Aermelbandrechts`, `Etikett`, `EtikettFahne`).
+2. **Desempaquetador ZIP `.fish` + LUT 32-Bit ABGR (`fishPartCompositor.js`)**: 15 plantillas `.fish` reales de fútbol (`Tackle`, `Nou Camp`, `Style`, `Steps`, `Gladiator`, `Fight`, `Horizon`, `Level`, `Champion`, `Vivo`, `Strike`, `Rayo`, `Sweep`, `Monaco`, `Pure`) y 9 de baloncesto (`Legend`, `Screen`, `Fly`, `Buzzer`, `Rim`, `Dagger`, `Aero`, `Tower`, `Triple`), limpias de marcas de agua de terceros (`190 <= R < 255` dilatado por BFS) y recoloreadas en `< 1.2 ms`.
+3. **Sistema Cromático Textil Completo de 167 Colores (`palette152.js`)**: Matriz oficial **CM5** de 152 tonos (30 familias × 5 gradaciones) + 15 tintas **Flúor / Neón / Metálicas (`FB`)**, cada una vinculada a su código **Pantone® Solid Coated (`PMS`)**.
+4. **Proyección Isométrica Multi-Pieza PNG/SVG (`pxPerMmX`, `pxPerMmY`)**: Colocación libre y por arrastre Raycast 3D sobre **las 5 piezas imprimibles** (`Front`, `Back`, `LeftArm`, `RightArm`, `Collar`), escala `15%–350%` (incluyendo modo **Sublimación Total All-Over**), rotación `360°` sin deformación de aspecto, sanitización/normalización de SVG de Illustrator/Figma, eliminado de fondo blanco, tintado Pantone monocromo, clonado simétrico entre mangas y textos rectos o en arco circular.

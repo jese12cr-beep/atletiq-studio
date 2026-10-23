@@ -1,48 +1,68 @@
 /**
- * ATLETIQ Engine v3.1 — Catálogo de Modelos 3D/2.5D, Paletas CM5/Pantone y Estado Maestro (Actualizado con REA Owayo v6)
+ * ATLETIQ Engine v4.0 — Catálogo 3D Exacto (`.mirl` + `.fish` Owayo v6),
+ * Sistema Cromático de 167 Colores Pantone® / CM5, Fuentes Atléticas y Estado Maestro Multi-Pieza
  */
+
+import {
+  PANTONE_CM5_PALETTE,
+  FOOTBALL_FISH_DESIGNS,
+  BASKETBALL_FISH_DESIGNS,
+} from './palette152';
+
+export { PANTONE_CM5_PALETTE, FOOTBALL_FISH_DESIGNS, BASKETBALL_FISH_DESIGNS };
 
 export const ENGINE_PRODUCTS = [
   {
     id: 'futbol_jersey_pro_vneck',
-    name: 'Jersey Fútbol Pro Elite 3D',
+    name: 'Camiseta Fútbol F3 Pro (204m-KA)',
     sport: 'Fútbol',
     renderMode: 'WEBGL_3D_PBR',
     garmentShape: 'jersey_short',
+    mirlUrl: '/models/football_f3_ka.mirl',
+    mirlKey: 'football_f3_ka',
+    owayoCutCode: '204m_Basic_KA',
     basePrice: 34.0,
     shopifyVariantBase: 44901234567001,
-    badge: '7 Piezas 3D + K-Tex',
+    badge: 'Malla Real 38,319 Verts • 15 Diseños',
   },
   {
     id: 'basketball_b6_hero',
-    name: 'Camiseta Basket B6 Hero 3D',
+    name: 'Camiseta Basket B6 Hero (222m)',
     sport: 'Baloncesto',
     renderMode: 'WEBGL_3D_PBR',
     garmentShape: 'basketball_tank',
+    mirlUrl: '/models/basketball_b6_hero.mirl',
+    mirlKey: 'basketball_b6_hero',
     owayoCutCode: '222m-Hero',
     basePrice: 32.5,
     shopifyVariantBase: 44901234567007,
-    badge: 'REA Owayo 222m-Hero',
-  },
-  {
-    id: 'cycling_aero_maillot',
-    name: 'Maillot Ciclismo Aero Pro 3D',
-    sport: 'Ciclismo',
-    renderMode: 'WEBGL_3D_PBR',
-    garmentShape: 'cycling_aero',
-    basePrice: 42.0,
-    shopifyVariantBase: 44901234567002,
-    badge: 'Cremallera + Drop-Tail',
+    badge: 'Malla Real 31,204 Verts • 9 Diseños',
   },
   {
     id: 'esports_pro_jersey',
-    name: 'Jersey E-Sports Pro Arena 3D',
+    name: 'Jersey E-Sports Pro Arena (KA)',
     sport: 'E-Sports',
     renderMode: 'WEBGL_3D_PBR',
     garmentShape: 'jersey_crew',
+    mirlUrl: '/models/football_f3_ka.mirl',
+    mirlKey: 'football_f3_ka',
+    owayoCutCode: '204m_Basic_KA',
     basePrice: 36.0,
     shopifyVariantBase: 44901234567003,
-    badge: 'Sublimación Full HD',
+    badge: 'Malla Real 38,319 Verts • Sublimación Full',
+  },
+  {
+    id: 'cycling_aero_maillot',
+    name: 'Jersey Entrenamiento / Club Pro (KA)',
+    sport: 'Multideporte',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'cycling_aero',
+    mirlUrl: '/models/football_f3_ka.mirl',
+    mirlKey: 'football_f3_ka',
+    owayoCutCode: '204m_Basic_KA',
+    basePrice: 38.0,
+    shopifyVariantBase: 44901234567002,
+    badge: 'Malla Real 38,319 Verts • TS-Tex',
   },
   {
     id: 'cap_snapback_6panel',
@@ -52,7 +72,7 @@ export const ENGINE_PRODUCTS = [
     accessoryType: 'cap',
     basePrice: 21.0,
     shopifyVariantBase: 44901234567004,
-    badge: 'Motor 2.5D Capas Nike',
+    badge: 'Motor 2.5D Capas',
   },
   {
     id: 'bottle_inox_laser_750',
@@ -62,7 +82,7 @@ export const ENGINE_PRODUCTS = [
     accessoryType: 'bottle',
     basePrice: 18.5,
     shopifyVariantBase: 44901234567005,
-    badge: 'Motor 2.5D Capas Nike',
+    badge: 'Motor 2.5D Capas',
   },
   {
     id: 'shinguards_carbon_pro',
@@ -72,71 +92,90 @@ export const ENGINE_PRODUCTS = [
     accessoryType: 'shinguards',
     basePrice: 25.0,
     shopifyVariantBase: 44901234567006,
-    badge: 'Motor 2.5D Capas Nike',
+    badge: 'Motor 2.5D Capas',
   },
 ];
 
-export const TEXTILE_COLORS = [
-  { name: 'Azul Real', hex: '#1d4ed8', pantone: 'PMS 286 C', contrast: '#ffffff' },
-  { name: 'Azul Marino Noche', hex: '#0f172a', pantone: 'PMS 289 C', contrast: '#ffffff' },
-  { name: 'Rojo Escarlata (Red 5)', hex: '#dc2626', pantone: 'PMS 186 C', contrast: '#ffffff' },
-  { name: 'Blanco Óptico (White 1)', hex: '#f8fafc', pantone: 'PMS Bright White', contrast: '#0f172a' },
-  { name: 'Oro Campeón', hex: '#facc15', pantone: 'PMS 116 C', contrast: '#0f172a' },
-  { name: 'Verde Esmeralda', hex: '#059669', pantone: 'PMS 340 C', contrast: '#ffffff' },
-  { name: 'Menta Pro (Mint 4)', hex: '#14b8a6', pantone: 'PMS 3262 C', contrast: '#0f172a' },
-  { name: 'Lima Eléctrico', hex: '#84cc16', pantone: 'PMS 382 C', contrast: '#0f172a' },
-  { name: 'Naranja Competición', hex: '#ea580c', pantone: 'PMS 1655 C', contrast: '#ffffff' },
-  { name: 'Púrpura Imperial', hex: '#7c3aed', pantone: 'PMS 266 C', contrast: '#ffffff' },
-  { name: 'Acero Azul (Steel Blue 4)', hex: '#3b82f6', pantone: 'PMS 279 C', contrast: '#ffffff' },
-  { name: 'Gris Titanio', hex: '#475569', pantone: 'PMS 431 C', contrast: '#ffffff' },
+export function getDesignsForProduct(productModelId = 'futbol_jersey_pro_vneck') {
+  if (productModelId === 'basketball_b6_hero') {
+    return BASKETBALL_FISH_DESIGNS;
+  }
+  return FOOTBALL_FISH_DESIGNS;
+}
+
+// Selección rápida de colores destacados + acceso total a PANTONE_CM5_PALETTE (167 tonos)
+export const TEXTILE_COLORS = PANTONE_CM5_PALETTE;
+
+export const VECTOR_PATTERNS = FOOTBALL_FISH_DESIGNS.map((d) => ({
+  id: d.id,
+  name: d.name,
+  subtitle: `Zonas ${d.baseColors.join('+')} • 5 Piezas HD`,
+}));
+
+export const ZONE_SURFACE_PATTERNS = [
+  { id: 'none', name: 'Liso Limpio', desc: 'Color Pantone sólido puro' },
+  { id: 'hex_carbon', name: 'Panal Hexagonal', desc: 'Micro-malla geométrica e-sports/fútbol' },
+  { id: 'speed_lines', name: 'Líneas Velocidad', desc: 'Trama diagonal aerodinámica' },
+  { id: 'halftone_dots', name: 'Degradado Halftone', desc: 'Puntos progresivos de competición' },
+  { id: 'micro_chevrons', name: 'Espiga Jacquard', desc: 'Textura tejida en V tipo estadio' },
+  { id: 'diag_pinstripes', name: 'Filetes Finos', desc: 'Rayado sutil a 45° tono sobre tono' },
 ];
 
-export const VECTOR_PATTERNS = [
-  { id: 'solid_pro', name: 'Pure Liso', subtitle: 'Base limpia de competición' },
-  { id: 'classic_stripes', name: 'Triple Bastones', subtitle: 'Franjas verticales con filete' },
-  { id: 'chest_band', name: 'Legend Franja', subtitle: 'Banda icónica de pecho' },
-  { id: 'diagonal_sash', name: 'Slash Cruzada', subtitle: 'Cinta diagonal hombro-cadera' },
-  { id: 'cyber_gradient', name: 'Screen Halftone', subtitle: 'Degradado micro-perforado' },
-  { id: 'chevron_v', name: 'Fly Doble V', subtitle: 'Chevron dinámico pectoral' },
-  { id: 'half_split', name: 'Buzzer Bicolor', subtitle: 'División simétrica vertical' },
-  { id: 'hex_matrix', name: 'Aero Hexagonal', subtitle: 'Trama geométrica de alto flujo' },
+export const VECTOR_CREST_PRESETS = [
+  { id: 'royal_shield', name: 'Escudo Club Pro', category: 'Escudos' },
+  { id: 'eagle_hex', name: 'Emblema Hexagonal', category: 'Escudos' },
+  { id: 'circle_badge', name: 'Sello Redondo FC', category: 'Escudos' },
+  { id: 'league_patch', name: 'Parche Oficial Manga', category: 'Mangas' },
+  { id: 'three_stars', name: '3 Estrellas Campeón', category: 'Insignias' },
+  { id: 'esports_bolt', name: 'Rayo Pro Gaming', category: 'E-Sports' },
+  { id: 'crown_crest', name: 'Corona Real Oro', category: 'Insignias' },
+  { id: 'wing_emblem', name: 'Alas Velocidad', category: 'Sponsor' },
 ];
 
 export const FABRIC_WEAVES = [
   {
-    id: 'cooldry_hex',
-    name: 'K-Tex 2™ Micromesh 155g',
-    uvRepeat: 44,
-    normalScale: 0.36,
-    bumpScale: -0.0075,
-    roughness: 0.56,
-    desc: 'Tejido oficial transpirable Owayo K-Tex 2 (scaleStoff 0.35×0.50)',
+    id: 'ts_tex_football',
+    name: 'TS-Tex™ Fútbol Ultra-Dry 145g',
+    bumpUrl: '/fabrics/ts-tex.png',
+    uvRepeat: 48,
+    normalScale: 0.34,
+    bumpScale: -0.004,
+    roughness: 0.52,
+    desc: 'Tejido oficial Owayo TS-Tex extraído de camisetas F3 (scaleStoff 0.50×0.60)',
   },
   {
-    id: 'interlock_pro',
-    name: 'AeroSilk™ Interlock 140g',
-    uvRepeat: 64,
-    normalScale: 0.22,
-    bumpScale: -0.004,
-    roughness: 0.44,
-    desc: 'Tejido sedoso aerodinámico con ligero brillo de competición',
+    id: 'cooldry_hex',
+    name: 'K-Tex 2™ Micromesh 155g',
+    bumpUrl: '/fabrics/k-tex2.png',
+    uvRepeat: 44,
+    normalScale: 0.42,
+    bumpScale: -0.0075,
+    roughness: 0.56,
+    desc: 'Malla transpirable oficial Owayo K-Tex 2 (scaleStoff 0.35×0.50)',
   },
   {
     id: 'pique_heavy',
-    name: 'R-Tex 3™ Rib & Piqué 210g',
-    uvRepeat: 32,
+    name: 'R-Tex 3™ Ribete & Piqué 210g',
+    bumpUrl: '/fabrics/bandstoff-rtex3.png',
+    uvRepeat: 34,
     normalScale: 0.52,
     bumpScale: -0.009,
-    roughness: 0.68,
-    desc: 'Trama acanalada de alta resistencia al tirón y contacto',
+    roughness: 0.65,
+    desc: 'Trama acanalada de alta resistencia para cuellos, puños y contacto',
   },
 ];
 
 export const SPORT_FONTS = [
-  { id: 'Varsity', label: 'Varsity Premier', family: "'Bebas Neue', sans-serif" },
-  { id: 'Athletic', label: 'Athletic Tall', family: "'Teko', sans-serif" },
-  { id: 'Cyber', label: 'Cyber Strike', family: "'Chakra Petch', sans-serif" },
-  { id: 'Modern', label: 'Pro Sans Heavy', family: "'Outfit', sans-serif" },
+  { id: 'F-101', label: 'Varsity Premier (Bebas)', family: "'Bebas Neue', sans-serif" },
+  { id: 'F-102', label: 'Athletic Tall (Teko)', family: "'Teko', sans-serif" },
+  { id: 'F-103', label: 'Cyber Strike (Chakra)', family: "'Chakra Petch', sans-serif" },
+  { id: 'F-104', label: 'Stadium Block (Anton)', family: "'Anton', sans-serif" },
+  { id: 'F-105', label: 'Bundesliga Cond (Oswald)', family: "'Oswald', sans-serif" },
+  { id: 'F-106', label: 'Motorsports Pro (Russo)', family: "'Russo One', sans-serif" },
+  { id: 'F-107', label: 'Tactical Stencil (Black Ops)', family: "'Black Ops One', sans-serif" },
+  { id: 'F-108', label: 'Heavy Impact (Archivo)', family: "'Archivo Black', sans-serif" },
+  { id: 'F-109', label: 'Arena Tech (Play)', family: "'Play', sans-serif" },
+  { id: 'F-110', label: 'Pro Sans Clean (Outfit)', family: "'Outfit', sans-serif" },
 ];
 
 export const VOLUME_TIERS = [
@@ -146,19 +185,15 @@ export const VOLUME_TIERS = [
   { min: 25, max: 9999, discountPct: 35, code: 'CLUB_PRO', label: '25+ uds (-35% Club Oficial)' },
 ];
 
-/**
- * Regla Owayo `ColorCodeAbhaengigkeiten` ("Schwarz-Weiß im Kontrast"):
- * Calcula automáticamente Blanco Óptico o Negro Carbón según la luminancia relativa WCAG del color maestro `A`.
- */
 export function computeOwayoAutoContrastHex(masterHex = '#1d4ed8') {
   const clean = String(masterHex).replace('#', '');
-  if (clean.length !== 6) return '#f8fafc';
+  if (clean.length !== 6) return '#ffffff';
   const r = parseInt(clean.slice(0, 2), 16) / 255;
   const g = parseInt(clean.slice(2, 4), 16) / 255;
   const b = parseInt(clean.slice(4, 6), 16) / 255;
   const toLinear = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
   const luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-  return luminance > 0.36 ? '#0f172a' : '#f8fafc';
+  return luminance > 0.36 ? '#101820' : '#ffffff';
 }
 
 export function generateDesignId() {
@@ -173,19 +208,22 @@ export function generateDesignId() {
 export function createInitialMasterDesign() {
   return {
     designId: generateDesignId(),
-    engineVersion: '3.1.0',
+    engineVersion: '4.0.0',
     productModelId: 'futbol_jersey_pro_vneck',
-    collarStyle: 'v-neck', // 'v-neck' | 'crew'
-    patternId: 'classic_stripes',
-    fabricWeaveId: 'cooldry_hex',
-    bleedEnforcement: 'SOFT_WARN', // 'SOFT_WARN' | 'HARD_CLAMP'
-    autoContrastHF: true, // ColorCodeAbhaengigkeiten ("Schwarz-Weiß im Kontrast")
+    collarStyle: 'v-neck',
+    patternId: 'tackle', // Diseño oficial .fish de 5 piezas (Front, Back, LeftArm, RightArm, Collar)
+    surfacePatternId: 'none', // Textura opcional sublimada sobre Zona A
+    surfacePatternOpacity: 0.16,
+    fabricWeaveId: 'ts_tex_football',
+    bleedEnforcement: 'SOFT_WARN', // 'SOFT_WARN' | 'HARD_CLAMP' | 'ALL_OVER'
+    autoContrastHF: true,
     colorZones: {
-      primary: { hex: '#1d4ed8', pantone: 'PMS 286 C', owayoCode: 'A' },
-      secondary: { hex: '#0f172a', pantone: 'PMS 289 C', owayoCode: 'B' },
-      sleeves: { hex: '#0f172a', pantone: 'PMS 289 C', owayoCode: 'SLL/SLR' },
-      collar: { hex: '#f8fafc', pantone: 'PMS Bright White', owayoCode: 'K' },
-      accents: { hex: '#facc15', pantone: 'PMS 116 C', owayoCode: 'C' },
+      primary: { hex: '#0033a0', pantone: 'PMS 286 C', code: 'Royal 4', owayoCode: 'A' },
+      secondary: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'B' },
+      accents: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'C' },
+      quaternary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'D' },
+      collar: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'K' },
+      sleeves: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'SLL/SLR' },
     },
     decals: [
       {
@@ -194,30 +232,62 @@ export function createInitialMasterDesign() {
         presetId: 'royal_shield',
         label: 'Escudo del Club',
         panel: 'front',
-        safeZoneId: 'front_chest_full',
-        centerMm: { x: 306, y: 183 },
-        sizeMm: { width: 58, height: 64 },
+        centerMm: { x: 334, y: 185 },
+        sizeMm: { width: 68, height: 74 },
         scale: 1,
         rotationDeg: 0,
+        opacity: 1,
+        blendMode: 'source-over',
+        flipX: false,
+        flipY: false,
+        removeWhiteBg: false,
+        tintHex: '',
+        zIndex: 10,
         isVector: true,
-        widthPx: 2400,
+        widthPx: 3200,
       },
       {
         id: 'decal_main_sponsor',
         type: 'STATIC_TEXT',
         text: 'ATLETIQ AIRWAYS',
         fontFamily: "'Chakra Petch', sans-serif",
-        fillHex: '#f8fafc',
-        outlineHex: '#0f172a',
-        label: 'Sponsor Frontal',
+        fillHex: '#ffffff',
+        outlineHex: '#0c2340',
+        outlineWidthMm: 2.2,
+        outline2Hex: '',
+        archDeg: 0,
+        letterSpacingMm: 1.2,
+        label: 'Sponsor Pecho',
         panel: 'front',
-        safeZoneId: 'front_chest_full',
-        centerMm: { x: 250, y: 278 },
-        sizeMm: { width: 195, height: 38 },
+        centerMm: { x: 259.6, y: 298 },
+        sizeMm: { width: 230, height: 42 },
         scale: 1,
         rotationDeg: 0,
+        opacity: 1,
+        blendMode: 'source-over',
+        zIndex: 20,
         isVector: true,
-        widthPx: 2400,
+        widthPx: 3200,
+      },
+      {
+        id: 'decal_sleeve_patch',
+        type: 'PRESET_CREST',
+        presetId: 'league_patch',
+        label: 'Parche Liga (Manga Izq.)',
+        panel: 'left_arm',
+        centerMm: { x: 225, y: 162 },
+        sizeMm: { width: 68, height: 68 },
+        scale: 1,
+        rotationDeg: 0,
+        opacity: 1,
+        blendMode: 'source-over',
+        flipX: false,
+        flipY: false,
+        removeWhiteBg: false,
+        tintHex: '',
+        zIndex: 15,
+        isVector: true,
+        widthPx: 3200,
       },
     ],
     variableSlots: {
@@ -226,38 +296,50 @@ export function createInitialMasterDesign() {
         masterID: null,
         enabled: true,
         panel: 'back',
-        centerMm: { x: 250, y: 172 },
-        maxWidthMm: 225,
-        capHeightMm: 42,
+        centerMm: { x: 316.6, y: 158 },
+        maxWidthMm: 295,
+        capHeightMm: 52,
+        archDeg: 0,
         autoCondense: true,
         fontFamily: "'Bebas Neue', sans-serif",
-        fillHex: '#f8fafc',
-        outlineHex: '#0f172a',
-        outlineWidthMm: 2.8,
+        fillHex: '#ffffff',
+        outlineHex: '#0c2340',
+        outlineWidthMm: 3.0,
       },
       playerNumberBack: {
         textObjectUUID: 'uuid-slot-num-back',
         masterID: null,
         enabled: true,
         panel: 'back',
-        centerMm: { x: 250, y: 305 },
-        heightMm: 165,
+        centerMm: { x: 316.6, y: 332 },
+        heightMm: 225,
         fontFamily: "'Bebas Neue', sans-serif",
-        fillHex: '#f8fafc',
-        outlineHex: '#0f172a',
-        inlineHex: '#facc15',
-        outlineWidthMm: 4.5,
+        fillHex: '#ffffff',
+        outlineHex: '#0c2340',
+        inlineHex: '#ffcd00',
+        outlineWidthMm: 4.8,
       },
       playerNumberFront: {
         textObjectUUID: 'uuid-slot-num-front',
-        masterID: 'uuid-slot-num-back', // Sincronizado como clon maestro Owayo
+        masterID: 'uuid-slot-num-back',
         enabled: true,
         panel: 'front',
-        centerMm: { x: 192, y: 185 },
-        heightMm: 38,
+        centerMm: { x: 185, y: 188 },
+        heightMm: 48,
         fontFamily: "'Bebas Neue', sans-serif",
-        fillHex: '#facc15',
-        outlineHex: '#0f172a',
+        fillHex: '#ffcd00',
+        outlineHex: '#0c2340',
+      },
+      playerNumberSleeve: {
+        textObjectUUID: 'uuid-slot-num-sleeve',
+        masterID: 'uuid-slot-num-back',
+        enabled: false,
+        panel: 'right_arm',
+        centerMm: { x: 280.6, y: 164 },
+        heightMm: 44,
+        fontFamily: "'Bebas Neue', sans-serif",
+        fillHex: '#ffffff',
+        outlineHex: '#0c2340',
       },
     },
   };
