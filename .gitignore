@@ -4,5 +4,6 @@ dist
 dist-ssr
 *.local
 
-# Ignorar archivos .har crudos por si contienen cookies de sesión, pero versionar los reportes limpios (.report.json)
+# Ignorar archivos .har crudos y reportes crudos con parámetros de sesión
 rea-captures/**/*.har
+rea-captures/**/*.report.json

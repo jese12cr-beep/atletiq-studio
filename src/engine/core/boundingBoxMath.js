@@ -1,13 +1,49 @@
 /**
- * ATLETIQ Engine v3.0 — Geometría de Áreas Imprimibles y Bounding Boxes (Inspirado en CustomInk Design Lab)
+ * ATLETIQ Engine v3.1 — Geometría de Áreas Imprimibles, `sperrbezirke` y `SnapLines` (CustomInk + REA Owayo v6)
  *
- * Trabaja en milímetros físicos reales sobre un molde de referencia de 500 x 600 mm (Talla L).
- * Calcula envolventes OBB -> AABB con rotación, guías magnéticas (Smart Snapping) y desbordes.
+ * Trabaja en milímetros físicos reales sobre un molde de referencia de 500 x 600 mm (Talla L)
+ * y aplica las reglas reales extraídas de `parts.json`, `sperrbezirke.json` (`VonUntenCm: 5.00`)
+ * y `getSnapLines.php` del motor Owayo v6.
  */
 
 export const GARMENT_REFERENCE_MM = {
   width: 500,
   height: 600,
+};
+
+/**
+ * Regla Owayo `sperrbezirke.json`: `{"Front": {"VonUntenCm": 5.00}, "Back": {"VonUntenCm": 5.00}}`
+ * Los 50 mm inferiores del faldón están reservados al dobladillo de máquina recubridora.
+ */
+export const SPERRBEZIRK_BOTTOM_HEM_MM = 50;
+
+/**
+ * Métricas reales extraídas de `parts.json` y `getSnapLines.php` (`222m-Hero`):
+ * `partStauchungsFaktor = hoehenfaktor / (groesseY / groesseX)`
+ */
+export const OWAYO_PART_METRICS = {
+  front: {
+    partName: 'Front',
+    groesseX: 2048,
+    groesseY: 2048,
+    breiteCM: 63.2338,
+    hoeheCM: 85.8962,
+    hoehenfaktor: 1.35839,
+    patternAnker: { x: 0.5, y: 0.26535 },
+    snapLineX: 0.5,
+    snapYRange: [0.03476, 0.75241],
+  },
+  back: {
+    partName: 'Back',
+    groesseX: 2048,
+    groesseY: 2048,
+    breiteCM: 44.461,
+    hoeheCM: 79.8984,
+    hoehenfaktor: 1.79704,
+    patternAnker: { x: 0.5, y: 0.09113 },
+    snapLineX: 0.5,
+    snapYRange: [0.03285, 0.93817],
+  },
 };
 
 export const SAFE_PRINT_ZONES = {
@@ -49,7 +85,7 @@ export const SAFE_PRINT_ZONES = {
   },
 };
 
-const SNAP_THRESHOLD_MM = 5.5;
+const SNAP_THRESHOLD_MM = 6.5;
 
 /**
  * Calcula los semi-anchos (Ex, Ey) de la caja envolvente alineada a los ejes (AABB)
@@ -70,9 +106,9 @@ export function computeOBBEnvelope(widthMm, heightMm, scale = 1, rotationDeg = 0
 }
 
 /**
- * Evalúa la posición de un decal respecto a su SafePrintZone, aplicando:
- *  1. Imanes inteligentes al eje central del torso y línea de pecho.
- *  2. Detección matemática de desborde (overflow en mm por cada lado).
+ * Evalúa la posición de un decal respecto a su SafePrintZone y al `sperrbezirk` inferior de 50 mm (Owayo):
+ *  1. Imanes inteligentes al eje central `x = 0.50` (`getSnapLines.php`) y líneas de pecho/sponsor.
+ *  2. Detección matemática de desborde (`SafePrintZone` + `sperrbezirke` de dobladillo `VonUntenCm: 5.00`).
  *  3. Coordenadas restringidas (clamped) tanto a la zona segura como al lienzo total.
  */
 export function evaluateDecalPlacement(decal, zoneOverride = null, enableMagneticSnap = true) {
@@ -91,9 +127,9 @@ export function evaluateDecalPlacement(decal, zoneOverride = null, enableMagneti
   let cx = decal.centerMm.x;
   let cy = decal.centerMm.y;
 
-  const garmentCenterX = GARMENT_REFERENCE_MM.width / 2; // 250 mm
-  const chestLineY = 183; // Línea estándar de escudos en pecho
-  const sponsorLineY = 275; // Línea estándar de patrocinador central
+  const garmentCenterX = GARMENT_REFERENCE_MM.width / 2; // 250 mm -> x = 0.50 en getSnapLines.php
+  const chestLineY = 183;
+  const sponsorLineY = 278;
 
   const snapGuides = {
     verticalCenter: false,
@@ -115,7 +151,7 @@ export function evaluateDecalPlacement(decal, zoneOverride = null, enableMagneti
     }
   }
 
-  // Límites de la zona segura de impresión
+  // Límites de la zona segura de impresión (CustomInk)
   const minX = zone.xMm;
   const maxX = zone.xMm + zone.widthMm;
   const minY = zone.yMm;
@@ -126,25 +162,35 @@ export function evaluateDecalPlacement(decal, zoneOverride = null, enableMagneti
   const overflowTop = Math.max(0, minY - (cy - halfHeightMm));
   const overflowBottom = Math.max(0, cy + halfHeightMm - maxY);
 
+  // Regla Owayo `sperrbezirke.json` (`VonUntenCm: 5.00` = 50 mm desde el borde inferior del molde de 600 mm)
+  const sperrbezirkTopY = GARMENT_REFERENCE_MM.height - SPERRBEZIRK_BOTTOM_HEM_MM; // 550 mm
+  const sperrbezirkPenetrationMm = Math.max(0, cy + halfHeightMm - sperrbezirkTopY);
+  const inBottomHemSperrbezirk = sperrbezirkPenetrationMm > 0.5;
+
   const isOutOfSafeZone =
-    overflowLeft > 0.5 || overflowRight > 0.5 || overflowTop > 0.5 || overflowBottom > 0.5;
+    overflowLeft > 0.5 ||
+    overflowRight > 0.5 ||
+    overflowTop > 0.5 ||
+    overflowBottom > 0.5 ||
+    inBottomHemSperrbezirk;
 
   // Coordenada restringida estrictamente dentro de la SafePrintZone
   const safeMinCx = minX + halfWidthMm;
   const safeMaxCx = maxX - halfWidthMm;
   const safeMinCy = minY + halfHeightMm;
-  const safeMaxCy = maxY - halfHeightMm;
+  const safeMaxCy = Math.min(maxY, sperrbezirkTopY) - halfHeightMm;
 
   const clampedSafeCenterMm = {
     x: safeMinCx <= safeMaxCx ? Math.max(safeMinCx, Math.min(cx, safeMaxCx)) : (minX + maxX) / 2,
     y: safeMinCy <= safeMaxCy ? Math.max(safeMinCy, Math.min(cy, safeMaxCy)) : (minY + maxY) / 2,
   };
 
-  // Coordenada restringida al molde físico total (para evitar que el elemento se pierda fuera del visor)
+  // Coordenada alcanzable dentro de la pieza física respetando el bloqueo de costura `sperrbezirk` de 50 mm
   const canvasMargin = 35;
+  const maxReachableY = Math.max(canvasMargin + halfHeightMm, sperrbezirkTopY - halfHeightMm);
   const reachableCenterMm = {
     x: Math.max(canvasMargin, Math.min(cx, GARMENT_REFERENCE_MM.width - canvasMargin)),
-    y: Math.max(canvasMargin, Math.min(cy, GARMENT_REFERENCE_MM.height - canvasMargin)),
+    y: Math.max(canvasMargin, Math.min(cy, maxReachableY)),
   };
 
   return {
@@ -153,7 +199,11 @@ export function evaluateDecalPlacement(decal, zoneOverride = null, enableMagneti
     snappedCenterMm: reachableCenterMm,
     clampedSafeCenterMm,
     isOutOfSafeZone,
-    maxOverflowMm: Math.round(Math.max(overflowLeft, overflowRight, overflowTop, overflowBottom)),
+    inBottomHemSperrbezirk,
+    sperrbezirkTopY,
+    maxOverflowMm: Math.round(
+      Math.max(overflowLeft, overflowRight, overflowTop, overflowBottom, sperrbezirkPenetrationMm)
+    ),
     snapGuides,
   };
 }

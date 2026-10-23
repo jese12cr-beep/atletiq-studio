@@ -16,12 +16,16 @@
   font-family: 'Chakra Petch', sans-serif;
 }
 
-/* Manejador dedicado de arrastre (Pointer Events + Safari fallback) */
-.decal-drag-handle {
-  cursor: grab;
+/* Manejadores dedicados de arrastre 2D y 3D (Pointer Events + Safari fallback) */
+.decal-drag-handle,
+.garment-3d-drag-surface {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+.decal-drag-handle {
+  cursor: grab;
 }
 
 .decal-drag-handle:active {

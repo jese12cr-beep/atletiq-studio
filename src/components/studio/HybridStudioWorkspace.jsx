@@ -145,9 +145,6 @@ export default function HybridStudioWorkspace({
       decals: [...(design.decals || []), newDecal],
     });
     setSelectedDecalId(newDecal.id);
-    if (!isFaux3DAccessory) {
-      setViewportMode('2d');
-    }
     e.target.value = '';
   };
 
@@ -206,7 +203,7 @@ export default function HybridStudioWorkspace({
   };
 
   return (
-    <div className="h-dvh w-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden select-none">
+    <div className="h-dvh w-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
       {/* ================= TOP STUDIO APP BAR ================= */}
       <header className="h-14 shrink-0 bg-slate-900/95 border-b border-slate-800 px-3 sm:px-5 flex items-center justify-between gap-2 z-20">
         <div className="flex items-center gap-2.5">
@@ -374,12 +371,14 @@ export default function HybridStudioWorkspace({
                   artworkRegistry={artworkRegistry}
                   cameraPreset={cameraPreset}
                   autoRotate={autoRotate}
+                  selectedDecalId={selectedDecalId}
                   canvasSnapshotRef={canvasSnapshotRef}
                   onSelectDecalFrom3D={(decalId, hitPanel) => {
                     setSelectedDecalId(decalId);
                     setPanel2D(hitPanel);
                     setStep(3);
                   }}
+                  onUpdateDecalFrom3D={updateDecal}
                 />
               </Suspense>
             ) : (
@@ -640,26 +639,50 @@ export default function HybridStudioWorkspace({
                 </div>
 
                 {!isFaux3DAccessory && (
-                  <div className="pt-2 border-t border-slate-800">
-                    <span className="text-xs font-bold text-slate-300 block mb-2">Construcción de Cuello 3D</span>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        { id: 'v-neck', label: 'Cuello en V Competición' },
-                        { id: 'crew', label: 'Cuello Redondo Olímpico' },
-                      ].map((col) => (
-                        <button
-                          key={col.id}
-                          type="button"
-                          onClick={() => onCommitDesign({ ...design, collarStyle: col.id })}
-                          className={`py-2 px-3 rounded-xl border text-xs font-bold ${
-                            design.collarStyle === col.id
-                              ? 'bg-amber-400 text-slate-950 border-amber-400'
-                              : 'bg-slate-950 text-slate-300 border-slate-800'
-                          }`}
-                        >
-                          {col.label}
-                        </button>
-                      ))}
+                  <div className="pt-2 border-t border-slate-800 space-y-3">
+                    <div>
+                      <span className="text-xs font-bold text-slate-300 block mb-2">Construcción de Cuello 3D (`Krageneinfass`)</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'v-neck', label: 'Cuello en V Competición' },
+                          { id: 'crew', label: 'Cuello Redondo Olímpico' },
+                        ].map((col) => (
+                          <button
+                            key={col.id}
+                            type="button"
+                            onClick={() => onCommitDesign({ ...design, collarStyle: col.id })}
+                            className={`py-2 px-3 rounded-xl border text-xs font-bold ${
+                              design.collarStyle === col.id
+                                ? 'bg-amber-400 text-slate-950 border-amber-400'
+                                : 'bg-slate-950 text-slate-300 border-slate-800'
+                            }`}
+                          >
+                            {col.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                      <div className="text-xs pr-2">
+                        <strong className="text-white block">Contraste Automático `HF` (Owayo)</strong>
+                        <span className="text-[11px] text-slate-400">
+                          Alterna sello técnico entre Blanco/Negro según luminancia de Zona 1 (`A`).
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onCommitDesign({ ...design, autoContrastHF: design.autoContrastHF === false })
+                        }
+                        className={`px-3 py-1.5 rounded-lg text-xs font-black shrink-0 ${
+                          design.autoContrastHF !== false
+                            ? 'bg-emerald-400 text-slate-950'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {design.autoContrastHF !== false ? 'AUTO ON' : 'MANUAL'}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -671,8 +694,8 @@ export default function HybridStudioWorkspace({
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2 bg-sky-500/10 border border-sky-500/30 p-3 rounded-2xl">
                   <div className="text-xs text-sky-200">
-                    <strong className="block text-sky-300">Laboratorio CustomInk Bounding Box</strong>
-                    Activa el <strong>Molde 2D</strong> para arrastrar logos con guías magnéticas y control de costuras.
+                    <strong className="block text-sky-300">Arrastre Raycast 3D + Laboratorio 2D</strong>
+                    Arrastra escudos <strong>directo sobre el modelo 3D</strong> (con imán `x=0.50` y `sperrbezirk` 5cm) o abre el <strong>Molde 2D</strong>.
                   </div>
                   {!isFaux3DAccessory && (
                     <button

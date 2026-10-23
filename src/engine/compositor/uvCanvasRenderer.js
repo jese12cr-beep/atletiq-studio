@@ -1,19 +1,20 @@
 /**
- * ATLETIQ Engine v3.0 — Compositor UV Vectorial + Escudos + Slots Variables (Kit Builder + Owayo + CustomInk)
+ * ATLETIQ Engine v3.1 — Compositor UV Vectorial + `SnapLines` + `sperrbezirke` + `HF` Auto-Contraste
+ * (Integra mecánicas decodificadas de Owayo v6 + CustomInk + Kit Builder)
  *
  * Pinta un Atlas UV de 2048 x 1024 px:
- *   - Mitad izquierda [0..1024, 0..1024]: Panel Delantero (500 x 600 mm)
- *   - Mitad derecha   [1024..2048, 0..1024]: Panel Trasero (500 x 600 mm)
- *
- * También permite renderizar guías de Bounding Boxes (CustomInk) para el modo de edición 2D preciso.
+ *   - Mitad izquierda [0..1024, 0..1024]: Pieza `Front` (500 x 600 mm)
+ *   - Mitad derecha   [1024..2048, 0..1024]: Pieza `Back` (500 x 600 mm)
  */
 
 import {
   GARMENT_REFERENCE_MM,
   SAFE_PRINT_ZONES,
+  SPERRBEZIRK_BOTTOM_HEM_MM,
   computeAutoCondenseScaleX,
   evaluateDecalPlacement,
 } from '../core/boundingBoxMath';
+import { computeOwayoAutoContrastHex } from '../core/designStore';
 
 export const UV_ATLAS_WIDTH = 2048;
 export const UV_ATLAS_HEIGHT = 1024;
@@ -163,7 +164,6 @@ function renderVectorSublimationPattern(ctx, patternId, colorZones, panel = 'fro
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, PANEL_PX, PANEL_PX);
 
-    // Puntos halftone geométricos
     ctx.fillStyle = cAccent;
     for (let y = 260; y < 860; y += 28) {
       const radius = Math.max(1.5, ((y - 240) / 620) * 8.5);
@@ -219,16 +219,79 @@ function renderVectorSublimationPattern(ctx, patternId, colorZones, panel = 'fro
     ctx.globalAlpha = 1;
   }
 
-  // Costuras laterales transpirables y dobladillo inferior
+  // Paneles laterales respirables en contraste (K-Tex Side Inserts)
   ctx.fillStyle = colorZones.sleeves?.hex || cSecondary;
-  ctx.globalAlpha = 0.85;
-  ctx.fillRect(0, 0, PANEL_PX * 0.12, PANEL_PX);
-  ctx.fillRect(PANEL_PX * 0.88, 0, PANEL_PX * 0.12, PANEL_PX);
+  ctx.globalAlpha = 0.88;
+  ctx.fillRect(0, 0, PANEL_PX * 0.085, PANEL_PX);
+  ctx.fillRect(PANEL_PX * 0.915, 0, PANEL_PX * 0.085, PANEL_PX);
   ctx.globalAlpha = 1;
 
-  // Ribete inferior de cintura
+  // Filete técnico sobre costura lateral
   ctx.fillStyle = cAccent;
-  ctx.fillRect(0, PANEL_PX * 0.905, PANEL_PX, 18);
+  ctx.fillRect(PANEL_PX * 0.085 - 3, 0, 5, PANEL_PX);
+  ctx.fillRect(PANEL_PX * 0.915 - 2, 0, 5, PANEL_PX);
+
+  // Ribete inferior sobre la línea del dobladillo
+  ctx.fillStyle = cAccent;
+  ctx.fillRect(0, PANEL_PX * 0.918, PANEL_PX, 12);
+}
+
+/**
+ * Dibuja el distintivo técnico `HF` con contraste automático Owayo (`ColorCodeAbhaengigkeiten`: "Schwarz-Weiß im Kontrast").
+ */
+function renderOwayoHFManufacturerMark(ctx, design, panel) {
+  const hfHex =
+    design.autoContrastHF !== false
+      ? computeOwayoAutoContrastHex(design.colorZones.primary?.hex || '#1d4ed8')
+      : design.colorZones.accents?.hex || '#facc15';
+
+  ctx.save();
+  ctx.fillStyle = hfHex;
+  if (panel === 'front') {
+    // Marca técnica en pecho derecho superior (código HF en Owayo)
+    const { x, y } = mmToPanelPx(188, 146);
+    ctx.font = "900 18px 'Chakra Petch', sans-serif";
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = 0.9;
+    ctx.fillText('ATLETIQ', x, y);
+    ctx.fillRect(x - 24, y + 6, 48, 3);
+  } else {
+    // Sello técnico K-Tex sobre la línea de faldón trasero (justo encima del sperrbezirk de 50mm)
+    const { x, y } = mmToPanelPx(355, 534);
+    ctx.font = "700 13px 'Chakra Petch', sans-serif";
+    ctx.textAlign = 'right';
+    ctx.globalAlpha = 0.72;
+    ctx.fillText('K-TEX 2 PRO DRY', x, y);
+  }
+  ctx.restore();
+}
+
+/**
+ * Dibuja la franja rayada `sperrbezirke` (50 mm inferiores de costura no imprimible).
+ */
+function renderSperrbezirkBand(ctx, highlightDanger = false) {
+  const sperrTopMm = GARMENT_REFERENCE_MM.height - SPERRBEZIRK_BOTTOM_HEM_MM;
+  const { y: topPx } = mmToPanelPx(0, sperrTopMm);
+  const bandHeight = PANEL_PX - topPx;
+
+  ctx.save();
+  ctx.fillStyle = highlightDanger ? 'rgba(244, 63, 94, 0.36)' : 'rgba(15, 23, 42, 0.52)';
+  ctx.fillRect(0, topPx, PANEL_PX, bandHeight);
+
+  ctx.strokeStyle = highlightDanger ? '#fb7185' : 'rgba(248, 113, 113, 0.65)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 6]);
+  ctx.beginPath();
+  ctx.moveTo(0, topPx);
+  ctx.lineTo(PANEL_PX, topPx);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+  ctx.fillStyle = highlightDanger ? '#ffe4e6' : '#fca5a5';
+  ctx.font = "700 12px 'Outfit', sans-serif";
+  ctx.textAlign = 'center';
+  ctx.fillText('SPERRBEZIRK COSTURA DOBLADILLO (5.0 CM — NO IMPRIMIBLE)', PANEL_PX / 2, topPx + 24);
+  ctx.restore();
 }
 
 /**
@@ -240,9 +303,10 @@ export function renderGarmentPanel(
   panel = 'front',
   activePlayer = { name: 'RODRÍGUEZ', number: '10' },
   artworkRegistry = {},
-  interactiveOpts = { showGuides: false, selectedDecalId: null }
+  interactiveOpts = { showGuides: false, selectedDecalId: null, is3DInteractive: false, snapGuides: null }
 ) {
   renderVectorSublimationPattern(ctx, design.patternId, design.colorZones, panel);
+  renderOwayoHFManufacturerMark(ctx, design, panel);
 
   // 1. Pintar Decals (Logos subidos, escudos y patrocinadores)
   const panelDecals = (design.decals || []).filter((d) => d.panel === panel);
@@ -252,6 +316,7 @@ export function renderGarmentPanel(
     const { x: cx, y: cy } = mmToPanelPx(decal.centerMm.x, decal.centerMm.y);
     const wPx = (decal.sizeMm.width / GARMENT_REFERENCE_MM.width) * PANEL_PX * (decal.scale ?? 1);
     const hPx = (decal.sizeMm.height / GARMENT_REFERENCE_MM.height) * PANEL_PX * (decal.scale ?? 1);
+    const isSelectedHere = interactiveOpts.selectedDecalId === decal.id;
 
     ctx.save();
     ctx.translate(cx, cy);
@@ -277,8 +342,28 @@ export function renderGarmentPanel(
       ctx.fillText(decal.text.toUpperCase(), 0, 0);
     }
 
-    // Si en modo interactivo se sale de la SafePrintZone, resaltar borde de alerta (CustomInk style)
-    if (interactiveOpts.showGuides && evalResult.isOutOfSafeZone) {
+    // Marco interactivo sobre el modelo 3D (estilo `handleAndGuideLayer` de Owayo)
+    if (interactiveOpts.is3DInteractive && isSelectedHere) {
+      ctx.strokeStyle = evalResult.isOutOfSafeZone ? '#fb7185' : '#38bdf8';
+      ctx.lineWidth = 3.5;
+      ctx.setLineDash([8, 5]);
+      ctx.strokeRect(-wPx / 2 - 6, -hPx / 2 - 6, wPx + 12, hPx + 12);
+      ctx.setLineDash([]);
+      // Esquinas de control visual
+      const corners = [
+        [-wPx / 2 - 6, -hPx / 2 - 6],
+        [wPx / 2 + 6, -hPx / 2 - 6],
+        [-wPx / 2 - 6, hPx / 2 + 6],
+        [wPx / 2 + 6, hPx / 2 + 6],
+      ];
+      ctx.fillStyle = '#facc15';
+      for (const [kx, ky] of corners) {
+        ctx.fillRect(kx - 5, ky - 5, 10, 10);
+      }
+    }
+
+    // Si en modo interactivo se sale de la SafePrintZone o invade sperrbezirk, resaltar alerta
+    if ((interactiveOpts.showGuides || interactiveOpts.is3DInteractive) && evalResult.isOutOfSafeZone) {
       ctx.strokeStyle = '#fb7185';
       ctx.lineWidth = 4;
       ctx.setLineDash([8, 6]);
@@ -311,7 +396,6 @@ export function renderGarmentPanel(
   }
 
   if (panel === 'back') {
-    // Nombre de Jugador con Auto-Condense horizontal Owayo
     if (slots.playerNameBack?.enabled && activePlayer?.name) {
       const slot = slots.playerNameBack;
       const { x, y } = mmToPanelPx(slot.centerMm.x, slot.centerMm.y);
@@ -335,7 +419,6 @@ export function renderGarmentPanel(
       ctx.restore();
     }
 
-    // Dorsal Gigante Trasero con triple capa deportiva
     if (slots.playerNumberBack?.enabled && activePlayer?.number) {
       const slot = slots.playerNumberBack;
       const { x, y } = mmToPanelPx(slot.centerMm.x, slot.centerMm.y);
@@ -347,20 +430,16 @@ export function renderGarmentPanel(
       ctx.textBaseline = 'middle';
       ctx.lineJoin = 'round';
 
-      // Sombra proyectada sutil
       ctx.fillStyle = 'rgba(0,0,0,0.32)';
       ctx.fillText(activePlayer.number, x + 5, y + 7);
 
-      // Borde exterior grueso
       ctx.lineWidth = Math.max(10, fontPx * 0.1);
       ctx.strokeStyle = slot.outlineHex || '#0f172a';
       ctx.strokeText(activePlayer.number, x, y);
 
-      // Relleno principal
       ctx.fillStyle = slot.fillHex || '#ffffff';
       ctx.fillText(activePlayer.number, x, y);
 
-      // Filete interior fino de contraste
       ctx.lineWidth = Math.max(2.5, fontPx * 0.018);
       ctx.strokeStyle = design.colorZones.accents?.hex || '#facc15';
       ctx.strokeText(activePlayer.number, x, y);
@@ -368,61 +447,73 @@ export function renderGarmentPanel(
     }
   }
 
-  // 3. Guías de Área Imprimible Segura e Imanes (sólo en modo editor 2D CustomInk)
-  if (interactiveOpts.showGuides) {
+  // 3. Guías de Área Imprimible Segura, `sperrbezirke` e Imanes (`getSnapLines.php`)
+  if (interactiveOpts.showGuides || interactiveOpts.is3DInteractive) {
     const activeDecal = panelDecals.find((d) => d.id === interactiveOpts.selectedDecalId);
-    const zone = activeDecal
-      ? SAFE_PRINT_ZONES[activeDecal.safeZoneId] ||
-        (panel === 'back' ? SAFE_PRINT_ZONES.back_full : SAFE_PRINT_ZONES.front_chest_full)
-      : panel === 'back'
-      ? SAFE_PRINT_ZONES.back_full
-      : SAFE_PRINT_ZONES.front_chest_full;
+    const activeEval = activeDecal ? evaluateDecalPlacement(activeDecal, null, false) : null;
 
-    const topLeft = mmToPanelPx(zone.xMm, zone.yMm);
-    const dims = mmToPanelPx(zone.widthMm, zone.heightMm);
-
-    ctx.save();
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
-    ctx.lineWidth = 2.5;
-    ctx.setLineDash([10, 8]);
-    ctx.strokeRect(topLeft.x, topLeft.y, dims.x, dims.y);
-
-    // Etiqueta técnica de la SafePrintZone
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-    ctx.fillRect(topLeft.x, topLeft.y - 26, 290, 24);
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = "700 13px 'Outfit', sans-serif";
-    ctx.fillText(`${zone.label} (${zone.widthMm}×${zone.heightMm} mm)`, topLeft.x + 8, topLeft.y - 10);
-
-    // Guías magnéticas activas
-    if (interactiveOpts.snapGuides?.verticalCenter) {
-      ctx.strokeStyle = '#ec4899';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(PANEL_PX / 2, topLeft.y - 15);
-      ctx.lineTo(PANEL_PX / 2, topLeft.y + dims.y + 15);
-      ctx.stroke();
+    if (interactiveOpts.showGuides || activeEval?.inBottomHemSperrbezirk) {
+      renderSperrbezirkBand(ctx, Boolean(activeEval?.inBottomHemSperrbezirk));
     }
-    if (interactiveOpts.snapGuides?.horizontalChest || interactiveOpts.snapGuides?.horizontalSponsor) {
-      const guideMmY = interactiveOpts.snapGuides.horizontalChest ? 183 : 275;
-      const { y: gy } = mmToPanelPx(0, guideMmY);
-      ctx.strokeStyle = '#ec4899';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(topLeft.x - 15, gy);
-      ctx.lineTo(topLeft.x + dims.x + 15, gy);
-      ctx.stroke();
+
+    if (interactiveOpts.showGuides) {
+      const zone = activeDecal
+        ? SAFE_PRINT_ZONES[activeDecal.safeZoneId] ||
+          (panel === 'back' ? SAFE_PRINT_ZONES.back_full : SAFE_PRINT_ZONES.front_chest_full)
+        : panel === 'back'
+        ? SAFE_PRINT_ZONES.back_full
+        : SAFE_PRINT_ZONES.front_chest_full;
+
+      const topLeft = mmToPanelPx(zone.xMm, zone.yMm);
+      const dims = mmToPanelPx(zone.widthMm, zone.heightMm);
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([10, 8]);
+      ctx.strokeRect(topLeft.x, topLeft.y, dims.x, dims.y);
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.fillRect(topLeft.x, topLeft.y - 26, 290, 24);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = "700 13px 'Outfit', sans-serif";
+      ctx.fillText(`${zone.label} (${zone.widthMm}×${zone.heightMm} mm)`, topLeft.x + 8, topLeft.y - 10);
+      ctx.restore();
     }
-    ctx.restore();
+
+    // Guías magnéticas activas (`getSnapLines.php` x = 0.50 + líneas de pecho/sponsor)
+    if (interactiveOpts.snapGuides) {
+      ctx.save();
+      if (interactiveOpts.snapGuides.verticalCenter) {
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3.5;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(PANEL_PX / 2, PANEL_PX * 0.04);
+        ctx.lineTo(PANEL_PX / 2, PANEL_PX * 0.92);
+        ctx.stroke();
+      }
+      if (interactiveOpts.snapGuides.horizontalChest || interactiveOpts.snapGuides.horizontalSponsor) {
+        const guideMmY = interactiveOpts.snapGuides.horizontalChest ? 183 : 278;
+        const { y: gy } = mmToPanelPx(0, guideMmY);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(PANEL_PX * 0.14, gy);
+        ctx.lineTo(PANEL_PX * 0.86, gy);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
   }
 }
 
 /**
  * Compila el Atlas UV completo (2048x1024) listo para alimentar `THREE.CanvasTexture`.
+ * Si `active3DOverlay` está activo durante un arrastre directo en 3D, dibuja las `SnapLines` Owayo sobre la prenda.
  */
-export function renderFullUVAtlas(canvas, design, activePlayer, artworkRegistry = {}) {
+export function renderFullUVAtlas(canvas, design, activePlayer, artworkRegistry = {}, active3DOverlay = null) {
   if (canvas.width !== UV_ATLAS_WIDTH || canvas.height !== UV_ATLAS_HEIGHT) {
     canvas.width = UV_ATLAS_WIDTH;
     canvas.height = UV_ATLAS_HEIGHT;
@@ -430,14 +521,34 @@ export function renderFullUVAtlas(canvas, design, activePlayer, artworkRegistry 
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, UV_ATLAS_WIDTH, UV_ATLAS_HEIGHT);
 
-  // Mitad Izquierda: Frente (0..1024)
+  const frontInteractive =
+    active3DOverlay && active3DOverlay.panel === 'front'
+      ? {
+          showGuides: false,
+          is3DInteractive: true,
+          selectedDecalId: active3DOverlay.selectedDecalId,
+          snapGuides: active3DOverlay.snapGuides,
+        }
+      : { showGuides: false };
+
+  const backInteractive =
+    active3DOverlay && active3DOverlay.panel === 'back'
+      ? {
+          showGuides: false,
+          is3DInteractive: true,
+          selectedDecalId: active3DOverlay.selectedDecalId,
+          snapGuides: active3DOverlay.snapGuides,
+        }
+      : { showGuides: false };
+
+  // Mitad Izquierda: Pieza `Front` (0..1024)
   ctx.save();
-  renderGarmentPanel(ctx, design, 'front', activePlayer, artworkRegistry, { showGuides: false });
+  renderGarmentPanel(ctx, design, 'front', activePlayer, artworkRegistry, frontInteractive);
   ctx.restore();
 
-  // Mitad Derecha: Espalda (1024..2048)
+  // Mitad Derecha: Pieza `Back` (1024..2048)
   ctx.save();
   ctx.translate(PANEL_PX, 0);
-  renderGarmentPanel(ctx, design, 'back', activePlayer, artworkRegistry, { showGuides: false });
+  renderGarmentPanel(ctx, design, 'back', activePlayer, artworkRegistry, backInteractive);
   ctx.restore();
 }

@@ -131,7 +131,7 @@ export default function ProductionPayloadModal({
             }`}
           >
             <Database className="w-4 h-4" />
-            3. Documento Maestro `Single-Design-ID`
+            3. JSON Maestro + `einzelexemplare` Owayo
           </button>
         </div>
 
@@ -181,14 +181,26 @@ export default function ProductionPayloadModal({
             <div className="relative">
               <button
                 type="button"
-                onClick={() => handleCopyJson({ masterDesign: bundle.masterDesignRecord, roster })}
+                onClick={() =>
+                  handleCopyJson({
+                    masterDesign: bundle.masterDesignRecord,
+                    owayoEinzelexemplare: bundle.owayoEinzelexemplarePayload,
+                  })
+                }
                 className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold flex items-center gap-1.5"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? 'Copiado' : 'Copiar JSON Maestro'}
               </button>
               <pre className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-mono text-sky-300 overflow-x-auto">
-                {JSON.stringify({ masterDesign: bundle.masterDesignRecord, roster }, null, 2)}
+                {JSON.stringify(
+                  {
+                    masterDesign: bundle.masterDesignRecord,
+                    owayoEinzelexemplare: bundle.owayoEinzelexemplarePayload,
+                  },
+                  null,
+                  2
+                )}
               </pre>
             </div>
           )}
