@@ -11,4 +11,10 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['input-switch-polyfill'],
   },
+  server: {
+    host: true,
+    watch: {
+      ignored: ['**/rea-captures/**', '**/tools/**'],
+    },
+  },
 })

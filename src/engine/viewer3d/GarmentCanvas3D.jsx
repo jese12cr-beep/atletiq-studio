@@ -15,6 +15,7 @@ import {
   Copy,
   Minus,
   Plus,
+  StepBack,
 } from 'lucide-react';
 import {
   loadMirlModelTemplate,
@@ -514,18 +515,28 @@ export default function GarmentCanvas3D({
         partName === 'Front' ||
         partName === 'Back' ||
         partName === 'RightLeg' ||
-        partName === 'LeftLeg';
-      c.width = isLargeBodyOrLeg ? 1536 : 1024;
+        partName === 'LeftLeg' ||
+        partName === 'FrontLeftPart' ||
+        partName === 'FrontRightPart' ||
+        partName === 'LinkesBeinvorne' ||
+        partName === 'RechtesBeinvorne' ||
+        partName === 'LinkesBeinhinten' ||
+        partName === 'RechtesBeinhinten';
+      c.width = isLargeBodyOrLeg ? 2048 : 1024;
       c.height = isLargeBodyOrLeg
-        ? 1536
+        ? 2048
         : partName === 'LeftArm' || partName === 'RightArm'
-        ? 512
+        ? 1024
+        : partName.includes('Collar') || partName.includes('Krageneinfass')
+        ? 256
         : 128;
       partCanvases[partName] = c;
 
       const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = maxAniso;
+      tex.__lastW = c.width;
+      tex.__lastH = c.height;
       partTextures[partName] = tex;
 
       const isRibTrim =
@@ -595,6 +606,9 @@ export default function GarmentCanvas3D({
         isTransitioningCam = v;
       },
     };
+    if (typeof window !== 'undefined') {
+      window.__OWAYO_SCENE_STATE__ = sceneStateRef.current;
+    }
 
     const onControlStart = () => {
       isTransitioningCam = false;
@@ -739,9 +753,9 @@ export default function GarmentCanvas3D({
   // 3. Cargar archivo de máscaras `.fish` (o limpiar máscaras para diseño liso `Pure`)
   useEffect(() => {
     let cancelled = false;
+    fishMasksRef.current = null;
     const activeFish = resolveActiveFishDesignMeta(design);
     if (!activeFish?.fileUrl) {
-      fishMasksRef.current = null;
       setFishVersionTick((n) => n + 1);
       return;
     }
@@ -796,6 +810,12 @@ export default function GarmentCanvas3D({
 
     const masksMap = fishMasksRef.current;
     let partsToUpdate = activeMeshPartNamesRef.current;
+    console.log('[DEBUG EFFECT 6]', {
+      partsCount: partsToUpdate?.length,
+      patternId: design.patternId,
+      primaryHex: design.colorZones.primary?.hex,
+      hasMasksMap: Boolean(masksMap)
+    });
 
     if (active3DOverlay?.panel) {
       const singlePart = PANEL_TO_PARTNAME[active3DOverlay.panel];
@@ -839,6 +859,15 @@ export default function GarmentCanvas3D({
             }
           : null
       );
+
+      // Si las dimensiones del canvas cambiaron respecto al buffer GPU anterior, liberar WebGLTexture para forzar glTexImage2D
+      if (tex.__lastW !== canvas.width || tex.__lastH !== canvas.height) {
+        tex.dispose();
+        tex.__lastW = canvas.width;
+        tex.__lastH = canvas.height;
+        const mat = st.partMaterials[partName];
+        if (mat) mat.needsUpdate = true;
+      }
       tex.needsUpdate = true;
     }
   }, [
@@ -1115,25 +1144,27 @@ export default function GarmentCanvas3D({
         }`}
       />
 
-      {/* Telemetría superior izquierda de malla `.mirl` */}
-      <div className="pointer-events-none absolute top-3 left-3 px-2.5 py-1 rounded-xl bg-slate-950/80 border border-slate-800/90 text-[10px] font-mono text-slate-300 hidden sm:flex items-center gap-2 backdrop-blur-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-        {modelStats.loading
-          ? 'Cargando malla .mirl...'
-          : `${modelStats.vertices.toLocaleString()} vértices • ${modelStats.faces.toLocaleString()} caras • FOV 30°`}
+      {/* Insignia superior izquierda Owayo: Logo + configurador ATLETIQ 3D */}
+      <div className="absolute top-4 left-4 flex items-center gap-2.5 z-10 select-none">
+        <div className="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center font-black text-xs italic tracking-tighter shadow-sm">
+          AQ
+        </div>
+        <span className="text-xs font-bold text-slate-500 tracking-wide">
+          configurador ATLETIQ 3D
+        </span>
       </div>
 
       {/* Selector rápido de vistas 3D + Botón Exterior/Interior (`#trikotwenderbutton`) */}
-      <div className="absolute top-3 right-3 flex flex-wrap items-center justify-end gap-1 max-w-[75%]">
+      <div className="absolute top-4 right-4 flex flex-wrap items-center justify-end gap-1 max-w-[75%] z-10">
         {quickCameraButtons.map((btn) => (
           <button
             key={btn.id}
             type="button"
             onClick={() => onChangeCameraPreset?.(btn.id)}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors border ${
+            className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
               cameraPreset === btn.id
-                ? 'bg-amber-400 text-slate-950 border-amber-300 shadow'
-                : 'bg-slate-950/80 text-slate-300 border-slate-800 hover:border-slate-600 hover:text-white'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                : 'bg-white/90 text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-900'
             }`}
           >
             {btn.label}
@@ -1141,41 +1172,28 @@ export default function GarmentCanvas3D({
         ))}
       </div>
 
-      {/* Barra flotante lateral `#toolbox` idéntica a Owayo (`Zoom +`, `Zoom -`, `Girar ↺/↻`, `Undo`, `Redo`) */}
+      {/* Barra flotante lateral `#toolbox` idéntica a Owayo (`Zoom +`, `Zoom -`, `Girar ↺/↻`, `Voltear Espalda`) */}
       <div
         aria-label="Herramientas de visor 3D"
-        className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 p-1.5 rounded-2xl bg-slate-950/85 border border-slate-800/90 shadow-xl backdrop-blur-md"
+        className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 p-1.5 z-10"
       >
         <button
           type="button"
           onClick={() => handleToolboxZoom(0.84)}
           title="Acercar (Zoom +)"
           aria-label="Acercar cámara"
-          className="p-2 rounded-xl text-slate-200 hover:bg-slate-800 hover:text-amber-300 transition-colors"
+          className="p-1.5 text-slate-800 hover:text-sky-600 hover:scale-110 transition-all cursor-pointer"
         >
-          <ZoomIn className="w-4 h-4" />
+          <ZoomIn className="w-5 h-5 stroke-[2]" />
         </button>
         <button
           type="button"
           onClick={() => handleToolboxZoom(1.18)}
           title="Alejar (Zoom -)"
           aria-label="Alejar cámara"
-          className="p-2 rounded-xl text-slate-200 hover:bg-slate-800 hover:text-amber-300 transition-colors"
+          className="p-1.5 text-slate-800 hover:text-sky-600 hover:scale-110 transition-all cursor-pointer"
         >
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <div className="h-px bg-slate-800 mx-1" />
-        <button
-          type="button"
-          onPointerDown={() => startHoldOrbitTurn(-1)}
-          onPointerUp={stopHoldOrbitTurn}
-          onPointerLeave={stopHoldOrbitTurn}
-          onPointerCancel={stopHoldOrbitTurn}
-          title="Girar prenda a la izquierda (mantener pulsado)"
-          aria-label="Girar prenda a la izquierda"
-          className="p-2 rounded-xl text-slate-200 hover:bg-slate-800 hover:text-amber-300 transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
+          <ZoomOut className="w-5 h-5 stroke-[2]" />
         </button>
         <button
           type="button"
@@ -1183,32 +1201,29 @@ export default function GarmentCanvas3D({
           onPointerUp={stopHoldOrbitTurn}
           onPointerLeave={stopHoldOrbitTurn}
           onPointerCancel={stopHoldOrbitTurn}
-          title="Girar prenda a la derecha (mantener pulsado)"
-          aria-label="Girar prenda a la derecha"
-          className="p-2 rounded-xl text-slate-200 hover:bg-slate-800 hover:text-amber-300 transition-colors"
+          title="Girar prenda (mantener pulsado)"
+          aria-label="Girar prenda"
+          className="p-1.5 text-slate-800 hover:text-sky-600 hover:scale-110 transition-all cursor-pointer"
         >
-          <RotateCw className="w-4 h-4" />
-        </button>
-        <div className="h-px bg-slate-800 mx-1" />
-        <button
-          type="button"
-          disabled={!canUndo}
-          onClick={onUndo}
-          title="Deshacer (Ctrl+Z)"
-          aria-label="Deshacer cambio"
-          className="p-2 rounded-xl text-slate-200 hover:bg-slate-800 hover:text-amber-300 disabled:opacity-30 disabled:pointer-events-none transition-colors"
-        >
-          <Undo2 className="w-4 h-4" />
+          <RotateCw className="w-5 h-5 stroke-[2]" />
         </button>
         <button
           type="button"
-          disabled={!canRedo}
-          onClick={onRedo}
-          title="Rehacer (Ctrl+Y)"
-          aria-label="Rehacer cambio"
-          className="p-2 rounded-xl text-slate-200 hover:bg-slate-800 hover:text-amber-300 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+          onClick={() => onChangeCameraPreset?.('front')}
+          title="Restablecer vista frontal"
+          aria-label="Restablecer vista frontal"
+          className="p-1.5 text-slate-800 hover:text-sky-600 hover:scale-110 transition-all cursor-pointer"
         >
-          <Redo2 className="w-4 h-4" />
+          <RotateCcw className="w-5 h-5 stroke-[2]" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onChangeCameraPreset?.(cameraPreset === 'back' ? 'front' : 'back')}
+          title="Girar a vista trasera / frontal"
+          aria-label="Girar a vista trasera"
+          className="p-1.5 text-slate-800 hover:text-sky-600 hover:scale-110 transition-all cursor-pointer"
+        >
+          <StepBack className="w-5 h-5 stroke-[2]" />
         </button>
       </div>
 

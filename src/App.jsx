@@ -4,8 +4,11 @@ import HybridStudioWorkspace from './components/studio/HybridStudioWorkspace';
 import ProductionPayloadModal from './components/studio/ProductionPayloadModal';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import HowItWorks from './components/HowItWorks';
 import ProductCatalog from './components/ProductCatalog';
-import QualityShowcase from './components/QualityShowcase';
+import SizeGuideAndSamples from './components/SizeGuideAndSamples';
+import AthleteProof from './components/AthleteProof';
+import FaqSection from './components/FaqSection';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import ShopifyIntegrationGuide from './components/ShopifyIntegrationGuide';
@@ -21,11 +24,11 @@ import {
 function createInitialKitSnapshot() {
   const fbJersey = createInitialMasterDesign();
   const fbShorts = createDefaultDesignForProduct('football_shorts_fp3', fbJersey.colorZones);
-  const bkJersey = createDefaultDesignForProduct('basketball_b6_hero', fbJersey.colorZones);
+  const bkJersey = createDefaultDesignForProduct('basketball_b6_hero');
   const bkShorts = createDefaultDesignForProduct('basketball_shorts_bp6', bkJersey.colorZones);
-  const bkWJersey = createDefaultDesignForProduct('basketball_b7w_epic_women', fbJersey.colorZones);
+  const bkWJersey = createDefaultDesignForProduct('basketball_b7w_epic_women');
   const bkWShorts = createDefaultDesignForProduct('basketball_shorts_bp7w_women', bkWJersey.colorZones);
-  const jktMen = createDefaultDesignForProduct('jacket_softshell_601m_men', fbJersey.colorZones);
+  const jktMen = createDefaultDesignForProduct('jacket_softshell_601m_men');
   const jktWomen = createDefaultDesignForProduct('jacket_softshell_601w_women', jktMen.colorZones);
 
   return {
@@ -44,14 +47,40 @@ function createInitialKitSnapshot() {
 }
 
 export default function App() {
-  const [appMode, setAppMode] = useState('studio');
+  const [appMode, setAppMode] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#studio') {
+      return 'studio';
+    }
+    return 'storefront';
+  });
 
-  // Historial Undo/Redo de 50 pasos con memoria independiente por prenda del kit (Camiseta ↔ Short)
-  const [history, setHistory] = useState(() => [createInitialKitSnapshot()]);
-  const [historyIdx, setHistoryIdx] = useState(0);
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#studio') {
+        setAppMode('studio');
+      } else if (window.location.hash === '#storefront' || window.location.hash === '') {
+        setAppMode('storefront');
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  const switchMode = useCallback((mode) => {
+    setAppMode(mode);
+    if (typeof window !== 'undefined') {
+      window.location.hash = mode === 'studio' ? '#studio' : '';
+    }
+  }, []);
+
+  // Historial Undo/Redo de 50 pasos atómico con memoria independiente por prenda del kit
+  const [{ history, historyIdx }, setHistoryState] = useState(() => ({
+    history: [createInitialKitSnapshot()],
+    historyIdx: 0,
+  }));
 
   const currentSnapshot = history[historyIdx] || history[0];
-  const activeProductId = currentSnapshot?.activeProductId || 'basketball_jersey_b6_hero';
+  const activeProductId = currentSnapshot?.activeProductId || 'basketball_b6_hero';
   const design =
     currentSnapshot?.designsByProduct?.[activeProductId] ||
     (currentSnapshot?.designsByProduct
@@ -71,22 +100,24 @@ export default function App() {
     ENGINE_PRODUCTS.find((p) => p.id === design.productModelId) || ENGINE_PRODUCTS[0];
 
   const pushSnapshot = useCallback((updater, recordUndo = true) => {
-    setHistory((prevHistory) => {
-      const curIdx = Math.min(historyIdx, prevHistory.length - 1);
-      const baseSnap = prevHistory[curIdx];
+    setHistoryState((prev) => {
+      const curIdx = Math.min(prev.historyIdx, prev.history.length - 1);
+      const baseSnap = prev.history[curIdx];
       const nextSnap = typeof updater === 'function' ? updater(baseSnap) : updater;
 
       if (!recordUndo) {
-        const copy = [...prevHistory];
+        const copy = [...prev.history];
         copy[curIdx] = nextSnap;
-        return copy;
+        return { ...prev, history: copy };
       }
-      const sliced = prevHistory.slice(0, curIdx + 1).slice(-50);
+      const sliced = prev.history.slice(0, curIdx + 1).slice(-50);
       const nextArr = [...sliced, nextSnap];
-      setHistoryIdx(nextArr.length - 1);
-      return nextArr;
+      return {
+        history: nextArr,
+        historyIdx: nextArr.length - 1,
+      };
     });
-  }, [historyIdx]);
+  }, []);
 
   const handleCommitDesign = useCallback(
     (nextDesign, recordUndo = true) => {
@@ -145,12 +176,18 @@ export default function App() {
   }, [currentProduct.pairedProductId, pushSnapshot]);
 
   const handleUndo = useCallback(() => {
-    setHistoryIdx((idx) => (idx > 0 ? idx - 1 : idx));
+    setHistoryState((prev) => ({
+      ...prev,
+      historyIdx: Math.max(0, prev.historyIdx - 1),
+    }));
   }, []);
 
   const handleRedo = useCallback(() => {
-    setHistoryIdx((idx) => (idx < history.length - 1 ? idx + 1 : idx));
-  }, [history.length]);
+    setHistoryState((prev) => ({
+      ...prev,
+      historyIdx: Math.min(prev.history.length - 1, prev.historyIdx + 1),
+    }));
+  }, []);
 
   // Atajos globales de teclado Ctrl+Z / Ctrl+Y idénticos a Owayo
   useEffect(() => {
@@ -210,22 +247,42 @@ export default function App() {
     setIsCartOpen(true);
   };
 
-  const handleSelectCatalogProduct = (catalogProd) => {
-    const mapTypeToEngineId = {
-      jersey: 'futbol_jersey_pro_vneck',
-      basket: 'basketball_jersey_b6_hero',
-      hoodie: 'futbol_shorts_fp3',
-      cap: 'cap_snapback_6panel',
-      bottle: 'bottle_inox_laser_750',
-      shinguards: 'shinguards_carbon_pro',
-    };
-    const targetId = mapTypeToEngineId[catalogProd.type] || 'futbol_jersey_pro_vneck';
-    handleSwitchProduct(targetId);
+  const handleSelectCatalogProduct = (engineId) => {
+    handleSwitchProduct(engineId);
     setAppMode('studio');
   };
 
+  const handleLaunch3DStudioFromKitLab = (engineId, kitData) => {
+    handleSwitchProduct(engineId);
+    if (kitData) {
+      pushSnapshot((snap) => {
+        const curDesign = snap.designsByProduct[engineId];
+        if (!curDesign) return snap;
+        const updatedZones = { ...curDesign.colorZones };
+        if (kitData.primaryColor && updatedZones.primary) {
+          updatedZones.primary = { ...updatedZones.primary, hex: kitData.primaryColor };
+        }
+        if (kitData.accentColor && updatedZones.accent) {
+          updatedZones.accent = { ...updatedZones.accent, hex: kitData.accentColor };
+        }
+        return {
+          ...snap,
+          activeProductId: engineId,
+          designsByProduct: {
+            ...snap.designsByProduct,
+            [engineId]: {
+              ...curDesign,
+              colorZones: updatedZones,
+            },
+          },
+        };
+      }, true);
+    }
+    switchMode('studio');
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {appMode === 'studio' ? (
         <HybridStudioWorkspace
           design={design}
@@ -244,20 +301,35 @@ export default function App() {
           onOpenProductionModal={() => setIsProductionModalOpen(true)}
           onOpenCart={() => setIsCartOpen(true)}
           cartCount={cartItems.length}
-          onSwitchToStorefront={() => setAppMode('storefront')}
+          onSwitchToStorefront={() => switchMode('storefront')}
         />
       ) : (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-slate-50">
           <Navbar
             cartCount={cartItems.length}
             onOpenCart={() => setIsCartOpen(true)}
+            onOpenStudio={() => switchMode('studio')}
             onOpenShopifyGuide={() => setIsShopifyGuideOpen(true)}
-            onOpenRosterModal={() => setAppMode('studio')}
+            onOpenQuoteModal={() => setIsQuoteModalOpen(true)}
           />
-          <main className="flex-1">
-            <Hero onStartDesigning={() => setAppMode('studio')} />
-            <ProductCatalog onSelectProduct={handleSelectCatalogProduct} />
-            <QualityShowcase />
+          <main className="flex-1 w-full">
+            <Hero
+              onStartDesigning={(productId) => {
+                if (productId) {
+                  handleSelectCatalogProduct(productId);
+                } else {
+                  switchMode('studio');
+                }
+              }}
+            />
+            <HowItWorks onOpenStudio={() => switchMode('studio')} />
+            <ProductCatalog
+              onSelectProduct={handleSelectCatalogProduct}
+              onOpenQuote={() => setIsQuoteModalOpen(true)}
+            />
+            <SizeGuideAndSamples />
+            <AthleteProof />
+            <FaqSection />
           </main>
           <Footer onOpenShopifyGuide={() => setIsShopifyGuideOpen(true)} />
         </div>

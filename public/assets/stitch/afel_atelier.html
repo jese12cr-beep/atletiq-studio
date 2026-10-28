@@ -1,0 +1,844 @@
+<!DOCTYPE html><html class="dark" lang="es"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;family=Syne:wght@600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-error-container": "#ffdad6", "on-primary-fixed-variant": "#93000b", "on-background": "#e5e1e4", "tertiary": "#c6c5cf", "tertiary-fixed": "#e3e1ec", "error": "#ffb4ab", "tertiary-container": "#71717a", "surface-bright": "#39393b", "tertiary-fixed-dim": "#c6c5cf", "surface-container-highest": "#353437", "secondary-fixed-dim": "#c4c7c9", "inverse-surface": "#e5e1e4", "surface-container-lowest": "#0e0e10", "primary-fixed": "#ffdad6", "surface-container-high": "#2a2a2c", "on-tertiary-fixed-variant": "#46464e", "inverse-primary": "#bf0715", "surface-dim": "#131315", "secondary": "#c4c7c9", "on-primary": "#690005", "on-secondary-fixed-variant": "#444749", "on-secondary": "#2d3133", "surface": "#131315", "inverse-on-surface": "#313032", "primary-container": "#dc2626", "background": "#131315", "surface-container": "#201f22", "on-error": "#690005", "surface-container-low": "#1c1b1d", "outline-variant": "#5c403c", "on-surface-variant": "#e6bdb8", "secondary-fixed": "#e0e3e5", "on-primary-fixed": "#410002", "secondary-container": "#464a4b", "on-tertiary": "#2f3038", "surface-variant": "#353437", "outline": "#ac8884", "primary-fixed-dim": "#ffb4ab", "on-tertiary-fixed": "#1a1b22", "primary": "#ffb4ab", "error-container": "#93000a", "on-secondary-container": "#b6b9bb", "on-tertiary-container": "#f9f7ff", "on-primary-container": "#fff6f5", "surface-tint": "#ffb4ab", "on-secondary-fixed": "#191c1e", "on-surface": "#e5e1e4" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter-mobile": "0.75rem", "space-lg": "1.5rem", "space-md": "1rem", "margin": "3rem", "space-xl": "3rem", "gutter": "1.5rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "margin-mobile": "1rem" }, "fontFamily": { "headline-lg-mobile": [ "Syne" ], "body-sm": [ "Geist" ], "label-lg": [ "Space Mono" ], "headline-lg": [ "Syne" ], "label-xs": [ "Space Mono" ], "headline-md": [ "Syne" ], "headline-sm": [ "Syne" ], "body-lg": [ "Geist" ], "display-hero": [ "Syne" ], "label-md": [ "Space Mono" ], "display-hero-mobile": [ "Syne" ], "body-md": [ "Geist" ] }, "fontSize": { "headline-lg-mobile": [ "28px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "700" } ], "body-sm": [ "12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" } ], "label-lg": [ "13px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "700" } ], "headline-lg": [ "40px", { "lineHeight": "46px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-xs": [ "9px", { "lineHeight": "12px", "letterSpacing": "0.14em", "fontWeight": "400" } ], "headline-md": [ "24px", { "lineHeight": "30px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "headline-sm": [ "18px", { "lineHeight": "24px", "letterSpacing": "0.04em", "fontWeight": "600" } ], "body-lg": [ "16px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "400" } ], "display-hero": [ "64px", { "lineHeight": "68px", "letterSpacing": "-0.03em", "fontWeight": "800" } ], "label-md": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.1em", "fontWeight": "400" } ], "display-hero-mobile": [ "38px", { "lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "800" } ], "body-md": [ "14px", { "lineHeight": "22px", "letterSpacing": "0.01em", "fontWeight": "400" } ] } } } };</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.5)]"><div class="h-20 w-full px-margin-mobile lg:px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><img alt="AFEL ATELIER Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XTkcG7TcDtEN-3wMR4ifyZk43QqVIZcR3gwxBaLp-Xd9Xqiu_5SzHyi9V6w8O3_07-SBBA0F1pPyoiW7noZc0kLPzBA_5x6ZDWdRe9NkXQxw2Gh_rS_YX3u3wDrYiNxd2i0DGCUZAlp3RC9x2x0uw9-bcGPxShhRA9c7ZPR7omnSAUl3HO68KUJ3a6ia6OsVw6rNZBHBsQ0MLQB9cbEikQ8LEucJPI7ani2ig-L_QtYoonrF5L1aSNt2U"><a class="font-headline-sm text-headline-sm uppercase tracking-widest text-on-surface hover:text-primary transition-colors duration-150" data-path="home" href="#">AFEL<span class="font-label-xs text-label-xs text-primary ml-space-xs tracking-normal">[ATELIER]</span></a></div><nav class="hidden xl:flex items-center gap-space-lg" data-active-classes="bg-primary-container text-on-primary-container font-bold"><a class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors duration-100" data-path="coleccion-ss25" href="#">COLECCIÓN SS25</a><a class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors duration-100 open-modal-trigger" data-path="atelier-lab-custom" href="#" id="btn-header-3d-lab">ATELIER LAB (CUSTOM)</a><a class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors duration-100" data-path="archive" href="#">ARCHIVE</a><a class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors duration-100" data-path="lookbook" href="#">LOOKBOOK</a><a class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors duration-100" data-path="editorial" href="#">EDITORIAL</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden md:flex items-center gap-space-xs font-label-xs text-label-xs text-secondary hover:text-on-surface transition-colors cursor-pointer"><span class="material-symbols-outlined text-sm">public</span><span class="">EUR / EN</span></div><div class="hidden lg:flex items-center gap-space-xs bg-surface-container-low px-space-sm py-space-xs"><span class="material-symbols-outlined text-sm text-secondary">terminal</span><input class="bg-transparent font-label-xs text-label-xs text-on-surface placeholder-secondary focus:outline-none w-28 uppercase tracking-widest" placeholder="QUERY ATELIER..." type="text"></div><div class="relative flex items-center cursor-pointer text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">shopping_bag</span><span class="absolute -top-1.5 -right-2 bg-primary-container text-on-primary-container font-label-xs text-label-xs px-1 py-0.5 leading-none font-bold">03</span></div><div class="flex items-center gap-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDhJqttZ7BBe8ml--q_DxcXKi1pL4GxdxCAwe2pI7aVMP7gG18H-YkAUFmVt2kdg_K9IFm1ME7x-9YdbENvqUQfAkhgu35b8nomwF-Jsa2CuL47fjWqp4Vek4WtIXFk4unpLkgP8q3Nm2IDWFm7f88-FVluC45K_jmjGA1mGTzRVi_TKLFDsLozKy911fD8wuHlY1tBuoGvyB4eVYfMiaUaCnWZMfl3gcUQ43wEcMppExXVDe1Extl"><span class="hidden sm:inline-block font-label-xs text-label-xs text-secondary uppercase">VIP CLUB</span></div></div></div></header><main class="w-full pt-20 bg-background"><div class="flex flex-col w-full">
+<!-- HERO SECTION MONUMENTAL -->
+<section class="relative w-full min-h-[942px] flex flex-col justify-between -mt-20 pt-24 pb-space-lg px-margin-mobile lg:px-margin overflow-hidden bg-surface-container-lowest">
+<!-- Atmospheric Visual Background with Generative Scrim -->
+<div class="absolute inset-0 z-0 bg-cover bg-center mix-blend-luminosity opacity-40 transform scale-105 transition-transform duration-1000 ease-out" data-alt="Editorial avant-garde high fashion photograph of a statuesque model wearing an architectural deconstructed charcoal trench coat and heavyweight matte hoodie in a dark brutalist concrete chamber filled with heavy industrial fog and sharp rim lighting in hyper crimson red, luxury high contrast, grain texture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB7M00P1flHBwZF6ftuqLzmtI4rZjM4FedLi3ozoNf0SlH4aanJigmqQkd-cM93qGGN7HGRKtLiM1NS8SXwFNpNh6DogHI_uZO0d4BGw5JvKUrv5nr_X-GFZa7VWraQvviM5Fs-fA_WE7LbwhliMMJLQa11SqqZ-vOOHsulD3VDYui0ngFydPrGAnXxq1BsVzH06gOE9EqZJrgwm--zFgs0AxtlfNTQ4sSgyr8xlzEHLJXAX75PJoA1')">
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-surface-dim/75 to-transparent z-10 pointer-events-none"></div>
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_#131315_85%)] z-10 pointer-events-none"></div>
+<!-- Top Technical Manifest Bar -->
+<div class="relative z-20 flex flex-wrap items-center justify-between gap-space-sm pt-space-md">
+<div class="flex items-center gap-space-sm bg-surface-container-low/90 backdrop-blur-md px-space-md py-space-xs shadow-md">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+<span class="font-label-xs text-label-xs tracking-widest text-primary uppercase font-bold">[ DROP 04 // MANIFIESTO DISTÓPICO ]</span>
+</div>
+<div class="hidden md:flex items-center gap-space-md font-label-xs text-label-xs text-secondary tracking-widest uppercase">
+<span class="">LOC: 52°31'12.4"N 13°24'18.2"E</span>
+<span class="text-tertiary-container">•</span>
+<span class="text-on-surface">STOCK RESTRICTED: 68/100 UNITS</span>
+</div>
+</div>
+<!-- Colossal Typographic Statement & Interventions -->
+<div class="relative z-20 my-auto py-space-xl flex flex-col gap-space-md max-w-6xl">
+<div class="flex items-center gap-space-sm font-label-sm text-label-md tracking-widest text-primary uppercase">
+<span class="material-symbols-outlined text-sm">adjust</span>
+<span class="">ATELIER DECONSTRUCT SYSTEM v2.5</span>
+</div>
+<h1 class="font-display-hero text-display-hero uppercase tracking-tighter text-on-surface leading-none select-none">
+        VIOLENT <span class="text-transparent" style="-webkit-text-stroke: 1.5px #e5e1e4;">ELEGANCE</span>
+</h1>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter mt-space-sm">
+<p class="md:col-span-7 font-body-lg text-body-lg text-secondary leading-relaxed">
+          Piezas de sastrería pesada fusionadas con ingeniería textil táctica. Siluetas brutales construidas con algodón orgánico de 520 GSM, disponibles en edición lista para portar o deconstruibles en tiempo real dentro del laboratorio custom.
+        </p>
+<!-- Floating HUD Fast Action Bar -->
+<div class="md:col-span-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-start md:justify-end gap-space-sm">
+<a class="group relative px-space-lg py-space-md bg-on-surface text-surface font-label-lg text-label-lg uppercase tracking-widest font-bold shadow-xl flex items-center justify-center gap-space-sm hover:bg-primary-container hover:text-on-primary-container transition-none open-modal-trigger" href="#atelier-customizer" id="btn-hero-3d-lab">
+<span class="w-2 h-2 bg-primary-container group-hover:bg-on-primary-container"></span>
+<span class="">CUSTOM LAB [3D]</span>
+<span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+<a class="px-space-md py-space-md bg-surface-container-high/80 backdrop-blur-md text-on-surface font-label-lg text-label-lg uppercase tracking-wider text-center hover:bg-surface-bright transition-colors shadow-sm" href="#drops-catalog">
+            DROP SS25
+          </a>
+</div>
+</div>
+</div>
+<!-- Hero Technical Telemetry Readout -->
+<div class="relative z-20 grid grid-cols-2 md:grid-cols-4 gap-gutter pt-space-md bg-surface-container-lowest/80 backdrop-blur-md px-space-md py-space-sm shadow-md">
+<div class="flex flex-col">
+<span class="font-label-xs text-label-xs text-secondary uppercase tracking-widest">DENSIDAD ESTRUCTURAL</span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold uppercase">520 GSM TERRY COMPACT</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-xs text-label-xs text-secondary uppercase tracking-widest">PATRÓN DE CORTE</span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold uppercase">OVERSIZED DROP-SHOULDER</span>
+</div>
+<div class="hidden md:flex flex-col">
+<span class="font-label-xs text-label-xs text-secondary uppercase tracking-widest">TRATAMIENTO TINTA</span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold uppercase">CARBON PIGMENT DYE</span>
+</div>
+<div class="flex flex-col items-end justify-center">
+<span class="font-label-xs text-label-xs text-primary font-bold uppercase tracking-widest flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">lock_open</span> CAD/CAM LIVE READY
+        </span>
+</div>
+</div>
+</section>
+<!-- SECCIÓN PRINCIPAL: ATELIER LAB // SUITE DE PERSONALIZACIÓN -->
+<section class="w-full bg-surface-container-lowest py-space-xl px-margin-mobile lg:px-margin relative" id="atelier-customizer">
+<!-- Header de Módulo Técnico -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-space-md pb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs font-label-xs text-label-xs text-primary tracking-widest uppercase">
+<span class="w-2 h-2 bg-primary-container"></span>
+<span class="">SISTEMA DE PERSONALIZACIÓN PROCEDURAL v04</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg uppercase tracking-tight text-on-surface">
+          ATELIER LAB <span class="text-secondary font-light">// CUSTOM STUDIO</span>
+</h2>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="font-label-xs text-label-xs text-secondary uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-space-xs" id="reset-canvas">
+<span class="material-symbols-outlined text-sm">restart_alt</span> [RESTAURAR MATRIZ]
+        </button>
+<div class="px-space-md py-space-xs bg-surface-container-high font-label-xs text-label-xs text-on-surface uppercase tracking-widest font-bold">
+          PASO 02: CONFIGURACIÓN LIBRE
+        </div>
+</div>
+</div>
+<!-- Garment Selector Horizontal Rail -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-gutter mb-space-lg">
+<button class="custom-garment-select active-garment p-space-md bg-surface-container text-left transition-all relative shadow-md group" data-garment="hoodie" data-price="180">
+<div class="absolute top-2 right-2 w-2 h-2 bg-primary-container"></div>
+<span class="font-label-xs text-label-xs text-primary uppercase font-bold tracking-widest">01 // PRENDA BASE</span>
+<p class="font-headline-sm text-headline-sm text-on-surface uppercase mt-1 truncate">Raw Hoodie 520 GSM</p>
+<span class="font-label-xs text-label-xs text-secondary mt-1 block">TINTADO CARBÓN // €180</span>
+</button>
+<button class="custom-garment-select p-space-md bg-surface-container-low hover:bg-surface-container text-left transition-all relative group" data-garment="trench" data-price="380">
+<span class="font-label-xs text-label-xs text-secondary uppercase font-bold tracking-widest">02 // PRENDA BASE</span>
+<p class="font-headline-sm text-headline-sm text-on-surface uppercase mt-1 truncate">Cyber-Trench Coat</p>
+<span class="font-label-xs text-label-xs text-secondary mt-1 block">NYLON REFORZADO // €380</span>
+</button>
+<button class="custom-garment-select p-space-md bg-surface-container-low hover:bg-surface-container text-left transition-all relative group" data-garment="tee" data-price="95">
+<span class="font-label-xs text-label-xs text-secondary uppercase font-bold tracking-widest">03 // PRENDA BASE</span>
+<p class="font-headline-sm text-headline-sm text-on-surface uppercase mt-1 truncate">Boxy Tee 340 GSM</p>
+<span class="font-label-xs text-label-xs text-secondary mt-1 block">ALGODÓN PEINADO // €95</span>
+</button>
+<button class="custom-garment-select p-space-md bg-surface-container-low hover:bg-surface-container text-left transition-all relative group" data-garment="vest" data-price="220">
+<span class="font-label-xs text-label-xs text-secondary uppercase font-bold tracking-widest">04 // PRENDA BASE</span>
+<p class="font-headline-sm text-headline-sm text-on-surface uppercase mt-1 truncate">Tactical Cargo Vest</p>
+<span class="font-label-xs text-label-xs text-secondary mt-1 block">RIPSTOP MATTE // €220</span>
+</button>
+</div>
+<!-- MAIN WORKBENCH: 8 Columns Viewport + 4 Columns Modular Tool Rack -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-stretch">
+<!-- VIEWPORT STAGE (8 COLS) -->
+<div class="lg:col-span-8 flex flex-col bg-surface-container-low relative shadow-xl min-h-[580px] p-space-md overflow-hidden">
+<!-- Viewport Overhead HUD & Toggles -->
+<div class="flex items-center justify-between w-full z-20">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest/80 backdrop-blur-md px-space-sm py-space-xs font-label-xs text-label-xs">
+<span class="text-primary font-bold">PROJECTION:</span>
+<span class="text-on-surface uppercase" id="view-mode-label">FRONT VIEW [ORTHOGRAPHIC]</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-space-xs bg-on-surface text-surface font-label-xs text-label-xs uppercase font-bold shadow-sm" id="btn-view-front">
+              DELANTERA
+            </button>
+<button class="px-space-md py-space-xs bg-surface-container text-secondary hover:text-on-surface font-label-xs text-label-xs uppercase font-bold" id="btn-view-back">
+              TRASERA
+            </button>
+<div class="h-4 w-px bg-surface-bright mx-1"></div>
+<button class="p-space-xs bg-surface-container text-secondary hover:text-primary" id="btn-toggle-grid" title="Alternar Cuadrícula">
+<span class="material-symbols-outlined text-sm">grid_4x4</span>
+</button>
+</div>
+</div>
+<!-- Central Interactive Canvas Stage -->
+<div class="relative flex-1 flex items-center justify-center py-space-lg select-none">
+<!-- Tactical Canvas Crosshairs Overlay -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30">
+<div class="w-full h-px bg-secondary-container"></div>
+<div class="h-full w-px bg-secondary-container absolute"></div>
+<span class="absolute top-4 left-4 font-label-xs text-label-xs text-secondary">+00.00 X / +00.00 Y</span>
+<span class="absolute bottom-4 right-4 font-label-xs text-label-xs text-secondary">[ACTIVE WORKSPACE: 380mm x 450mm]</span>
+</div>
+<!-- Garment Visual Silhouetted Render -->
+<div class="relative w-[340px] sm:w-[420px] md:w-[480px] aspect-square flex items-center justify-center">
+<!-- Base Garment Mockup Image -->
+<img class="w-full h-full object-contain filter contrast-125 drop-shadow-2xl" data-alt="Technical high-fashion oversized brutalist raw black hoodie flat lay studio product render isolated on pure dark background, ultra-high resolution fabric texture, 520 GSM heavy fleece ribbing, cinematic rim lighting" id="garment-render-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCupyJ55NQ1rEjoV4lPsI5OeP4qJf8zHJzDKyCq8iLnu_oXtt--WgvCfIzxeni0uN8BU0_7Gmhl6rGD1XyCeo-X6qj49rYgu8GEb9AtiKrSMq0E3F0xyuKWnzrOTHGBlVQe2xcssCZTm-5bTn9gdmGejhnE3V8Xx9vQDcU271ONERsPoaNOEYpnrTCwJDf3mLxJLwJnD2rTTqALmF41v_APMAsCsQLliOohMFIpDQbblNlKfMDi4OsN">
+<!-- INTERACTIVE BOUNDING CANVAS (Print & Embroidery Region) -->
+<div class="absolute w-52 sm:w-64 h-56 sm:h-72 bg-surface-container-highest/20 cursor-move flex flex-col items-center justify-center group/bounding shadow-[inset_0_0_15px_rgba(220,38,38,0.15)]" id="interactive-bounding-box">
+<!-- Bounding Corner Markers -->
+<span class="absolute -top-1 -left-1 w-2.5 h-2.5 bg-primary-container"></span>
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary-container"></span>
+<span class="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-primary-container"></span>
+<span class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-primary-container"></span>
+<!-- Rotational Anchor Pin -->
+<div class="absolute -top-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+<div class="w-2.5 h-2.5 rounded-full bg-on-surface shadow"></div>
+<div class="w-px h-5 bg-primary-container"></div>
+</div>
+<!-- LIVE APPLIED GRAPHICS CONTAINER -->
+<div class="flex flex-col items-center justify-center p-2 text-center transition-all duration-75" id="applied-canvas-layer">
+<!-- Vector Badge Symbol -->
+<div class="w-16 h-16 text-primary flex items-center justify-center mb-1" id="applied-vector-art">
+<svg class="w-full h-full fill-current" viewBox="0 0 100 100">
+<polygon fill="none" points="50,5 95,28 95,72 50,95 5,72 5,28" stroke="currentColor" stroke-width="4"></polygon>
+<line stroke="currentColor" stroke-width="3" x1="50" x2="50" y1="5" y2="95"></line>
+<line stroke="currentColor" stroke-width="3" x1="5" x2="95" y1="28" y2="72"></line>
+<circle cx="50" cy="50" fill="currentColor" r="14"></circle>
+</svg>
+</div>
+<!-- Customized Typographic Stamp -->
+<p class="font-headline-sm text-headline-sm uppercase tracking-widest text-primary-fixed-dim leading-none drop-shadow" id="applied-text-preview">
+                  AFEL-09 // TOKYO
+                </p>
+<!-- Spec Monospace Subline -->
+<span class="font-label-xs text-label-xs tracking-wider text-secondary mt-1 bg-surface-container-lowest/80 px-2 py-0.5" id="applied-spec-preview">
+                  [ 48.8566° N // SPEC_AUTONOMY ]
+                </span>
+</div>
+<!-- Dynamic Calibration Indicator -->
+<div class="absolute bottom-1 right-1 opacity-0 group-hover/bounding:opacity-100 transition-opacity font-label-xs text-label-xs text-primary bg-surface-container-lowest px-1">
+                POS: 50% 48% | SCL: 1.0
+              </div>
+</div>
+</div>
+</div>
+<!-- Bottom Canvas Controls & Zoom Status -->
+<div class="flex items-center justify-between z-20 pt-space-xs font-label-xs text-label-xs text-secondary">
+<div class="flex items-center gap-space-sm">
+<span class="flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-sm text-primary">drag_pan</span> ARRASTRAR PARA POSICIONAR
+            </span>
+<span class="hidden sm:inline">•</span>
+<span class="hidden sm:inline">RESOLUCIÓN DE VECTOR: 1200 DPI</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 hover:text-on-surface"><span class="material-symbols-outlined text-sm">zoom_out</span></button>
+<span class="text-on-surface font-bold">100%</span>
+<button class="p-1 hover:text-on-surface"><span class="material-symbols-outlined text-sm">zoom_in</span></button>
+</div>
+</div>
+</div>
+<!-- MODULAR TOOL RACK (4 COLS) -->
+<div class="lg:col-span-4 flex flex-col justify-between bg-surface-container p-space-md shadow-xl">
+<div class="flex flex-col gap-space-md">
+<!-- Modular Category Tabs -->
+<div class="grid grid-cols-3 gap-space-xs bg-surface-container-low p-1">
+<button class="tool-tab active-tool-tab py-space-xs font-label-xs text-label-xs uppercase font-bold text-center transition-all bg-primary-container text-on-primary-container shadow" data-tab="text">
+              TEXTO
+            </button>
+<button class="tool-tab py-space-xs font-label-xs text-label-xs uppercase font-bold text-center text-secondary hover:text-on-surface transition-all" data-tab="graphics">
+              GRÁFICOS
+            </button>
+<button class="tool-tab py-space-xs font-label-xs text-label-xs uppercase font-bold text-center text-secondary hover:text-on-surface transition-all" data-tab="technique">
+              MÉTODO
+            </button>
+</div>
+<!-- TAB 01: TEXT CONFIGURATION -->
+<div class="flex flex-col gap-space-md" id="tab-content-text">
+<!-- Typographic Input -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-xs text-label-xs uppercase tracking-widest text-secondary flex justify-between">
+<span class="">INSCRIPCIÓN PERSONALIZADA</span>
+<span class="text-primary" id="char-count">15/28</span>
+</label>
+<div class="relative bg-surface-container-low">
+<input class="w-full bg-transparent px-space-sm py-space-xs font-label-md text-label-md uppercase text-on-surface focus:outline-none focus:bg-surface-container-highest transition-colors" id="input-custom-text" maxlength="28" type="text" value="AFEL-09 // TOKYO">
+</div>
+</div>
+<!-- Typography Engine Selector -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-xs text-label-xs uppercase tracking-widest text-secondary">
+                TIPOGRAFÍA PROCEDURAL
+              </label>
+<div class="grid grid-cols-1 gap-1">
+<button class="font-selector-btn active-font p-space-xs bg-surface-container-low hover:bg-surface-container-high text-left flex justify-between items-center transition-colors" data-font="Syne">
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase">GOTHIC BRUTALIST</span>
+<span class="font-label-xs text-label-xs text-primary font-bold">[ACTIVO]</span>
+</button>
+<button class="font-selector-btn p-space-xs bg-surface-container-low hover:bg-surface-container-high text-left flex justify-between items-center transition-colors" data-font="Space Mono">
+<span class="font-label-lg text-label-lg text-on-surface uppercase">CYBER MONOSPACE</span>
+<span class="font-label-xs text-label-xs text-secondary">MONO</span>
+</button>
+<button class="font-selector-btn p-space-xs bg-surface-container-low hover:bg-surface-container-high text-left flex justify-between items-center transition-colors" data-font="Geist">
+<span class="font-body-md text-body-md text-on-surface uppercase font-bold tracking-widest">TACTICAL SANS</span>
+<span class="font-label-xs text-label-xs text-secondary">MINIMAL</span>
+</button>
+</div>
+</div>
+<!-- Color Palette Swatches -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-xs text-label-xs uppercase tracking-widest text-secondary">
+                PIGMENTO / COLOR DE HILO
+              </label>
+<div class="flex items-center gap-space-sm">
+<button class="swatch-btn w-8 h-8 bg-primary-container shadow-md relative" data-color="#ffb4ab" title="Crimson Red">
+<span class="absolute inset-0 ring-2 ring-on-surface ring-offset-2 ring-offset-surface-container"></span>
+</button>
+<button class="swatch-btn w-8 h-8 bg-on-surface shadow-md" data-color="#e5e1e4" title="Chalk White"></button>
+<button class="swatch-btn w-8 h-8 bg-secondary shadow-md" data-color="#c4c7c9" title="Gunmetal Silver"></button>
+<button class="swatch-btn w-8 h-8 bg-tertiary-container shadow-md" data-color="#71717a" title="Obsidian Carbon"></button>
+</div>
+</div>
+<!-- Transformation Sliders -->
+<div class="flex flex-col gap-space-sm bg-surface-container-low p-space-sm">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-label-xs text-label-xs text-secondary">
+<span class="">ESCALA VISUAL</span>
+<span class="text-on-surface" id="scale-value">100%</span>
+</div>
+<input class="w-full accent-primary-container cursor-pointer bg-surface-bright h-1" id="slider-scale" max="150" min="60" type="range" value="100">
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-label-xs text-label-xs text-secondary">
+<span class="">ROTACIÓN ANGULAR</span>
+<span class="text-on-surface" id="rotation-value">0°</span>
+</div>
+<input class="w-full accent-primary-container cursor-pointer bg-surface-bright h-1" id="slider-rotate" max="45" min="-45" type="range" value="0">
+</div>
+</div>
+</div>
+<!-- TAB 02: GRAPHICS & VECTOR INGESTION (Hidden by default) -->
+<div class="hidden flex flex-col gap-space-md" id="tab-content-graphics">
+<!-- Vector Upload Dropzone -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-xs text-label-xs uppercase tracking-widest text-secondary">
+                SUBIDA DE VECTOR PROPIO (SVG / DXF)
+              </label>
+<div class="p-space-md bg-surface-container-low flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface-container-high transition-colors group">
+<span class="material-symbols-outlined text-headline-md text-secondary group-hover:text-primary transition-colors">cloud_upload</span>
+<span class="font-label-xs text-label-xs text-on-surface mt-1 uppercase font-bold">SOLTAR ARCHIVO VECTORIAL</span>
+<span class="font-label-xs text-label-xs text-secondary mt-0.5">MAX: 25MB • ESCALA VECTORIAL 1:1</span>
+</div>
+</div>
+<!-- Brand Iconography Matrix -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-xs text-label-xs uppercase tracking-widest text-secondary">
+                RUNAS Y SÍMBOLOS AFEL
+              </label>
+<div class="grid grid-cols-4 gap-space-xs">
+<button class="vector-preset-btn p-2 bg-surface-container-low hover:bg-surface-container-highest flex items-center justify-center text-primary-container active:scale-95" data-vector="hexagon">
+<svg class="w-8 h-8 fill-current" viewBox="0 0 100 100">
+<polygon fill="none" points="50,5 95,28 95,72 50,95 5,72 5,28" stroke="currentColor" stroke-width="6"></polygon>
+<circle cx="50" cy="50" fill="currentColor" r="14"></circle>
+</svg>
+</button>
+<button class="vector-preset-btn p-2 bg-surface-container-low hover:bg-surface-container-highest flex items-center justify-center text-secondary hover:text-on-surface active:scale-95" data-vector="cross">
+<svg class="w-8 h-8 fill-current" viewBox="0 0 100 100">
+<rect height="80" width="16" x="42" y="10"></rect>
+<rect height="16" width="80" x="10" y="42"></rect>
+</svg>
+</button>
+<button class="vector-preset-btn p-2 bg-surface-container-low hover:bg-surface-container-highest flex items-center justify-center text-secondary hover:text-on-surface active:scale-95" data-vector="barcode">
+<svg class="w-8 h-8 fill-current" viewBox="0 0 100 100">
+<rect height="60" width="6" x="10" y="20"></rect>
+<rect height="60" width="12" x="22" y="20"></rect>
+<rect height="60" width="4" x="40" y="20"></rect>
+<rect height="60" width="14" x="50" y="20"></rect>
+<rect height="60" width="8" x="70" y="20"></rect>
+<rect height="60" width="6" x="84" y="20"></rect>
+</svg>
+</button>
+<button class="vector-preset-btn p-2 bg-surface-container-low hover:bg-surface-container-highest flex items-center justify-center text-secondary hover:text-on-surface active:scale-95" data-vector="triangle">
+<svg class="w-8 h-8 fill-current" viewBox="0 0 100 100">
+<polygon fill="none" points="50,15 90,85 10,85" stroke="currentColor" stroke-width="6"></polygon>
+<line stroke="currentColor" stroke-width="4" x1="25" x2="75" y1="60" y2="60"></line>
+</svg>
+</button>
+</div>
+</div>
+</div>
+<!-- TAB 03: FABRICATION TECHNIQUE (Hidden by default) -->
+<div class="hidden flex flex-col gap-space-sm" id="tab-content-technique">
+<label class="font-label-xs text-label-xs uppercase tracking-widest text-secondary">
+              MÉTODO DE IMPRESIÓN Y MANUFACTURA
+            </label>
+<label class="flex items-start gap-space-sm p-space-sm bg-surface-container-low cursor-pointer hover:bg-surface-container-high transition-colors">
+<input checked="" class="mt-1 accent-primary-container" name="technique" type="radio" value="45">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-md uppercase text-on-surface font-bold">Bordado Táctico de Alta Densidad</span>
+<span class="font-body-sm text-body-sm text-secondary">Hilo alemán Madeira 100% rayón + relieve 3D (+€45)</span>
+</div>
+</label>
+<label class="flex items-start gap-space-sm p-space-sm bg-surface-container-low cursor-pointer hover:bg-surface-container-high transition-colors">
+<input class="mt-1 accent-primary-container" name="technique" type="radio" value="30">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-md uppercase text-on-surface font-bold">Serigrafía de Tinta Térmica</span>
+<span class="font-body-sm text-body-sm text-secondary">Pigmentación reactiva al calor corporal (+€30)</span>
+</div>
+</label>
+<label class="flex items-start gap-space-sm p-space-sm bg-surface-container-low cursor-pointer hover:bg-surface-container-high transition-colors">
+<input class="mt-1 accent-primary-container" name="technique" type="radio" value="60">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-md uppercase text-on-surface font-bold">Parche de Goma Vulcanizada</span>
+<span class="font-body-sm text-body-sm text-secondary">Fijación con remaches de titanio mate (+€60)</span>
+</div>
+</label>
+</div>
+</div>
+<!-- DYNAMIC PRICING BREAKDOWN & SUBMISSION -->
+<div class="flex flex-col gap-space-sm pt-space-md mt-space-md bg-surface-container-lowest p-space-md shadow-inner">
+<div class="flex justify-between font-label-xs text-label-xs text-secondary">
+<span class="">PRENDA BASE:</span>
+<span class="text-on-surface font-bold" id="price-garment-label">€180.00</span>
+</div>
+<div class="flex justify-between font-label-xs text-label-xs text-secondary">
+<span class="">PERSONALIZACIÓN LAB:</span>
+<span class="text-primary font-bold" id="price-custom-label">€45.00</span>
+</div>
+<div class="h-px bg-surface-bright my-0.5"></div>
+<div class="flex justify-between items-baseline">
+<span class="font-label-xs text-label-xs uppercase tracking-widest text-secondary">COSTE TOTAL:</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface" id="price-total-label">€225.00</span>
+</div>
+<button class="w-full py-space-md bg-primary-container hover:bg-on-surface text-on-primary-container hover:text-surface font-label-lg text-label-lg uppercase tracking-widest font-bold shadow-lg transition-colors flex items-center justify-center gap-space-sm" id="btn-submit-order">
+<span class="material-symbols-outlined text-lg">precision_manufacturing</span>
+<span class="">PRODUCIR MI DISEÑO A MEDIDA</span>
+</button>
+<span class="font-label-xs text-label-xs text-secondary text-center">TIEMPO DE MANUFACTURA: 7 A 10 DÍAS HÁBILES</span>
+</div>
+</div>
+</div>
+</section>
+<!-- VITRINA DE CATÁLOGO Y PRODUCTOS DESTACADOS (ASYMMETRIC BENTO GRID) -->
+<section class="w-full bg-surface py-space-xl px-margin-mobile lg:px-margin" id="drops-catalog">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-space-md mb-space-xl">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-xs text-label-xs text-primary uppercase tracking-widest">[ READY-TO-WEAR &amp; ARCHIVE CAPSULES ]</span>
+<h2 class="font-headline-lg text-headline-lg uppercase text-on-surface tracking-tight">
+          PIEZAS DESTACADAS // SS25
+        </h2>
+</div>
+<a class="font-label-xs text-label-xs uppercase tracking-widest text-secondary hover:text-primary transition-colors flex items-center gap-space-xs" href="#">
+<span class="">VER CATÁLOGO COMPLETO [18 PIEZAS]</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- Asymmetric Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- HERO ITEM (Col 7) -->
+<div class="md:col-span-7 bg-surface-container-low p-space-md flex flex-col justify-between group shadow-xl relative overflow-hidden">
+<div class="flex justify-between items-start z-10">
+<span class="px-space-sm py-space-xs bg-primary-container text-on-primary-container font-label-xs text-label-xs font-bold uppercase tracking-wider">
+            PERSONALIZABLE LAB
+          </span>
+<span class="font-label-md text-label-md text-on-surface font-bold">€490</span>
+</div>
+<!-- Dynamic Product Photo with Hover Detail -->
+<div class="relative w-full h-96 my-space-md overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" data-alt="Editorial lookbook photograph of a male model wearing an extreme oversized architectural Zero-Point Heavy Parka in matte storm grey with magnetic fidlock buckles and asymmetrical storm flaps, harsh studio rim light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBmB3LCFDaN1okEJ6jdXpjISfSPxpAcI91CGlPCRZYImWnFyD9yPB0IWvQyOzPjGZHRnIafUsrn8oOIY2usnNaCkdvFah8AUKU4uofbX_2bPgJvLki6BeFpggYmQm2Raiqlqrr_vWOR4dxzhZxXqNZOJ1zy6cWOQfYOgG0TUxO2RpGYn7eENfMsSJeFMAtctimUwBSCmk8eHsEUhLnTon4tgt19hT6EogM8vizBx95zrfF8BqaqLEc">
+</div>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-space-sm z-10 pt-space-xs">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface uppercase tracking-tight">Zero-Point Heavy Parka</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Confección en 3 capas Schoeller® impermeable con cierres sellados por ultrasonido.</p>
+</div>
+<button class="shrink-0 px-space-md py-space-xs bg-surface-container-highest hover:bg-on-surface text-on-surface hover:text-surface font-label-xs text-label-xs uppercase tracking-wider font-bold transition-colors">
+            PERSONALIZAR
+          </button>
+</div>
+</div>
+<!-- ITEM 02 (Col 5) -->
+<div class="md:col-span-5 bg-surface-container-low p-space-md flex flex-col justify-between group shadow-xl">
+<div class="flex justify-between items-start">
+<span class="px-space-sm py-space-xs bg-surface-container-high text-secondary font-label-xs text-label-xs uppercase tracking-wider">
+            LIMITED [35 PCS]
+          </span>
+<span class="font-label-md text-label-md text-on-surface font-bold">€280</span>
+</div>
+<div class="relative w-full h-96 my-space-md overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" data-alt="Avant-garde female model in an Asymmetric Ribbed Knit garment with extreme distressed sleeves and raw hem in asphalt charcoal tone, minimalist brutalist runway mood, luxury dark fashion" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfnPObAd2OVpGE-x0rHnXolypRYk-u5AumcR9mVS0JMcPe3XE9td77QyFmay1JAAkKo2qcDkLn_RXtOFabhJaVXjxqtiLKhaA1m7mlOjSUYOOG2RA40f-n9tkI9S7BNqolYVtQnH6yLZGw2tlKFtQR0jrShm0288wD56WN3vP2i10iPvogk5gmHOJeoApeF_CmZsN5Ot6aSYcTtEzh1heHgC3HY6GZYQkRRu-gRrGwuXUkt9F5YeiR">
+</div>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-space-sm pt-space-xs">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-tight">Asymmetric Ribbed Knit</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Lana merino hilada a mano con cortes sesgados.</p>
+</div>
+<button class="shrink-0 px-space-md py-space-xs bg-surface-container-highest hover:bg-on-surface text-on-surface hover:text-surface font-label-xs text-label-xs uppercase tracking-wider font-bold transition-colors">
+            COMPRAR
+          </button>
+</div>
+</div>
+<!-- ITEM 03 (Col 6) -->
+<div class="md:col-span-6 bg-surface-container-low p-space-md flex flex-col justify-between group shadow-xl">
+<div class="flex justify-between items-start">
+<span class="px-space-sm py-space-xs bg-surface-container-high text-secondary font-label-xs text-label-xs uppercase tracking-wider">
+            TEJIDO JAPONÉS
+          </span>
+<span class="font-label-md text-label-md text-on-surface font-bold">€310</span>
+</div>
+<div class="relative w-full h-80 my-space-md overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" data-alt="Editorial close up photograph of Pleated Tech Trousers with complex multi-fold tailoring and deep architectural cargo compartments in washed black twill fabric" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhrltVYEMnxmowUFCGD-S1Kdu6HZa5KesUypa-n3ZilwPTUT5vtOnUU8U1DoTrIaFb0LjQKIb6ufcxsaaM3YKKa3wUpRo8-xs5yPgD4JCARusSMTcP8i-g6SlyOTc3YVKvf_cNvK18B8px27Bn2d52zKotC4jjky6KbhBawmNE9FmVskISVDEiah4F3_L5ULyebNG6lvXwnSNnL04Eg_vW7x9cxK8AXdwN_bZ6XfhH6Z64OMeJUR7B">
+</div>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-space-sm pt-space-xs">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-tight">Pleated Tech Trousers</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Doble pliegue con anclajes magnéticos internos.</p>
+</div>
+<button class="shrink-0 px-space-md py-space-xs bg-surface-container-highest hover:bg-on-surface text-on-surface hover:text-surface font-label-xs text-label-xs uppercase tracking-wider font-bold transition-colors">
+            PERSONALIZAR
+          </button>
+</div>
+</div>
+<!-- ITEM 04 (Col 6) -->
+<div class="md:col-span-6 bg-surface-container-low p-space-md flex flex-col justify-between group shadow-xl">
+<div class="flex justify-between items-start">
+<span class="px-space-sm py-space-xs bg-primary-container text-on-primary-container font-label-xs text-label-xs font-bold uppercase tracking-wider">
+            CUSTOM INITIALS
+          </span>
+<span class="font-label-md text-label-md text-on-surface font-bold">€120</span>
+</div>
+<div class="relative w-full h-80 my-space-md overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" data-alt="Minimalist luxury studio shot of a deconstructed heavy canvas cap with laser-cut ventilation eyelets, distressed peak, and industrial strapback closure in charcoal tone" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCATMhHwz1JGG0zMFm7jr4jzJJSeIoXxN0w_qtSq54t7fF82fpxWH4LNlIlxX1OUX5UIMB3iY9IEp9hgavUrbllqfAEQ80z5wJH_KlfFDaMU_dVcfrxQll-uUBpY01Tu9NJxQBxQG1JZrcZYXG3rsPkenYviw2fgSA6Lm-SizhuHyay2jG4s44A4U5SefSrW2miBrFXWNsVOmfMrnHm5Jh6CMajG0ySeMwDLxiwdkuxD72GmNduGdIJ">
+</div>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-space-sm pt-space-xs">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-tight">Deconstructed Canvas Cap</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Canvas lavado a la piedra con hebilla táctica Cobra.</p>
+</div>
+<button class="shrink-0 px-space-md py-space-xs bg-surface-container-highest hover:bg-on-surface text-on-surface hover:text-surface font-label-xs text-label-xs uppercase tracking-wider font-bold transition-colors">
+            GRABAR INICIALES
+          </button>
+</div>
+</div>
+</div>
+</section>
+<!-- LOOKBOOK EDITORIAL INTERACTIVO & COMUNIDAD #AFEL_CUSTOM -->
+<section class="w-full bg-surface-container-lowest py-space-xl px-margin-mobile lg:px-margin">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-space-md pb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-xs text-label-xs text-primary uppercase tracking-widest">[ COMMUNITY ARTIFACTS // RECIENTES ]</span>
+<h2 class="font-headline-lg text-headline-lg uppercase text-on-surface tracking-tight">
+          LOOKBOOK #AFEL_CUSTOM
+        </h2>
+</div>
+<p class="font-body-sm text-body-sm text-secondary max-w-md">
+        Piezas únicas configuradas por creadores, productores musicales y arquitectos alrededor del globo mediante nuestro motor CAD/CAM.
+      </p>
+</div>
+<!-- Triple Editorial Showcase Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Creator Card 01 -->
+<div class="bg-surface-container p-space-md flex flex-col justify-between shadow-lg">
+<div class="relative w-full aspect-[3/4] bg-surface-container-high overflow-hidden mb-space-md">
+<img class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" data-alt="Streetstyle night fashion photograph in Tokyo Shibuya neon rain of a creative wearing a custom AFEL oversized hoodie with large red embroidered brutalist typographic runes on the back" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh_Okyy4KxnHcUiPjApmSnCu9Q4n6KEmx7xrptMz6m3m4cYo1EeWfSqlHrQFGV2OL8KNamHUn98Aq47pYect4Q6QdRgL2uuvv-KQoSWDL3XrGWB9sGj_hs4AULQE0uvYjR2JGgZAxsctnYJe4S1Tkb9prR91BwIplCpfsHup59E3_iJDrxufTFGNByMJRsCY7LTQWsHONCg50dFRwkCdJ-61ZohIYD0JV0UFLYl3OluT8hQIrGQzXt">
+<div class="absolute bottom-2 left-2 px-space-sm py-space-xs bg-surface-container-lowest/90 font-label-xs text-label-xs text-primary font-bold">
+            CONF_ID: #8821_TYO
+          </div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface font-bold uppercase">KENJI S. // ART DIRECTOR</span>
+<span class="font-label-xs text-label-xs text-secondary">TOKYO, JP</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary">
+            "El gramaje de 520 GSM le da una caída escultórica impecable. La tipografía serigrafiada en relieve soporta cualquier intemperie."
+          </p>
+</div>
+</div>
+<!-- Creator Card 02 -->
+<div class="bg-surface-container p-space-md flex flex-col justify-between shadow-lg">
+<div class="relative w-full aspect-[3/4] bg-surface-container-high overflow-hidden mb-space-md">
+<img class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" data-alt="Editorial indoor portrait of an electronic sound producer inside a modular synthesizer studio wearing a customized cyber trench coat with titanium badges and typography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFoDbXZ9nGkgJYE-rrjKc8rO_Q6rAJ_6-5GlWBEzVqxwlu1iXrsA1APrn0y7zqSk-mmui3Pp39E-2czO2d3RwwmlQUvOQwxkxkQpbCBhHN6t5zIfrI4SKpu_ViJumsxhGE9-N-4ro_Ip2CLqBmTpjGtAkNzwTn6mcQkd_YxXKTwqx7WVJkF4e1lkXDuVfsOMXF_3aWH8KnQEg6sFF6ec0zBQLjC_wU8WXHGqo192hQDDE91tN8_tYS">
+<div class="absolute bottom-2 left-2 px-space-sm py-space-xs bg-surface-container-lowest/90 font-label-xs text-label-xs text-primary font-bold">
+            CONF_ID: #4019_BER
+          </div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface font-bold uppercase">VALERIA N. // SOUND DESIGN</span>
+<span class="font-label-xs text-label-xs text-secondary">BERLÍN, DE</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary">
+            "Poder subir mis propios diagramas vectoriales para el parche dorsal transformó este abrigo en una extensión de mi identidad técnica."
+          </p>
+</div>
+</div>
+<!-- Creator Card 03 -->
+<div class="bg-surface-container p-space-md flex flex-col justify-between shadow-lg">
+<div class="relative w-full aspect-[3/4] bg-surface-container-high overflow-hidden mb-space-md">
+<img class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" data-alt="Minimal brutalist editorial shot in London concrete estate of a model wearing a heavy tactical boxy tee with customized red stencil lettering and high density embroidery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzHxEFQieyaVF3CKLLCLsq75NZQgcXJC3P8nf0Qy7G8AAhILP505Mbqiefx9GJTtYAgJsHcbT1h1uU5IjbGzqjYU_fn6FEqbCRCnpNobG7rYElrw66wyvJPlg4zeMr5igWk-7SPeglzf67tGTQEBcdK-ceR26geQXTN0aWKFS4Log5LbGdT5i6fs0uxLxKchMDZXTfECAWdHGNNR2lTYyU7Xcbpp2LG6DHA_JGP3-wZnWgtUL9E8el">
+<div class="absolute bottom-2 left-2 px-space-sm py-space-xs bg-surface-container-lowest/90 font-label-xs text-label-xs text-primary font-bold">
+            CONF_ID: #1994_LDN
+          </div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface font-bold uppercase">DAMIAN K. // ARCHITECT</span>
+<span class="font-label-xs text-label-xs text-secondary">LONDRES, UK</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary">
+            "La precisión milimétrica del bordado es asombrosa. Brutalismo portátil de alta gama sin concesiones."
+          </p>
+</div>
+</div>
+</div>
+<!-- ATELIER SPEC GUARANTEE BANNER -->
+<div class="mt-space-xl p-space-lg bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md shadow-xl">
+<div class="flex items-center gap-space-md">
+<div class="p-space-md bg-surface-container-lowest text-primary">
+<span class="material-symbols-outlined text-headline-lg">verified_user</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm uppercase text-on-surface">GARANTÍA ESTRUCTURAL DE POR VIDA</span>
+<span class="font-body-sm text-body-sm text-secondary">Cada prenda personalizada se numera con código RFID único y se confecciona en nuestro taller de Madrid.</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-label-xs text-label-xs text-on-surface font-bold uppercase tracking-widest">ENVÍO EXPRÉS GLOBAL // DHL CARBON NEUTRAL</span>
+</div>
+</div>
+</section>
+<!-- CLIENT-SIDE INTERACTIVITY SCRIPT -->
+<script>
+    (function initAtelierLab() {
+      // Elements
+      const inputCustomText = document.getElementById('input-custom-text');
+      const appliedTextPreview = document.getElementById('applied-text-preview');
+      const charCount = document.getElementById('char-count');
+      const sliderScale = document.getElementById('slider-scale');
+      const scaleValue = document.getElementById('scale-value');
+      const sliderRotate = document.getElementById('slider-rotate');
+      const rotationValue = document.getElementById('rotation-value');
+      const appliedCanvasLayer = document.getElementById('applied-canvas-layer');
+      const appliedVectorArt = document.getElementById('applied-vector-art');
+      const garmentRenderImg = document.getElementById('garment-render-img');
+      const viewModeLabel = document.getElementById('view-mode-label');
+      const btnViewFront = document.getElementById('btn-view-front');
+      const btnViewBack = document.getElementById('btn-view-back');
+      const btnToggleGrid = document.getElementById('btn-toggle-grid');
+      const boundingBox = document.getElementById('interactive-bounding-box');
+      const priceGarmentLabel = document.getElementById('price-garment-label');
+      const priceCustomLabel = document.getElementById('price-custom-label');
+      const priceTotalLabel = document.getElementById('price-total-label');
+      const resetBtn = document.getElementById('reset-canvas');
+      const submitBtn = document.getElementById('btn-submit-order');
+
+      let currentGarmentPrice = 180;
+      let currentTechniquePrice = 45;
+
+      // Update total price helper
+      function recalculatePrice() {
+        const total = currentGarmentPrice + currentTechniquePrice;
+        if(priceGarmentLabel) priceGarmentLabel.textContent = '€' + currentGarmentPrice.toFixed(2);
+        if(priceCustomLabel) priceCustomLabel.textContent = '€' + currentTechniquePrice.toFixed(2);
+        if(priceTotalLabel) priceTotalLabel.textContent = '€' + total.toFixed(2);
+      }
+
+      // Realtime Text Input Handler
+      if (inputCustomText && appliedTextPreview && charCount) {
+        inputCustomText.addEventListener('input', function(e) {
+          const val = e.target.value;
+          appliedTextPreview.textContent = val.trim() === '' ? 'AFEL STUDIO' : val;
+          charCount.textContent = val.length + '/28';
+        });
+      }
+
+      // Font Selectors
+      const fontBtns = document.querySelectorAll('.font-selector-btn');
+      fontBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          fontBtns.forEach(b => {
+            b.classList.remove('bg-surface-container-high');
+            const status = b.querySelector('.font-label-xs');
+            if(status) {
+              status.textContent = b.getAttribute('data-font') === 'Space Mono' ? 'MONO' : 'MINIMAL';
+              status.classList.remove('text-primary', 'font-bold');
+              status.classList.add('text-secondary');
+            }
+          });
+          this.classList.add('bg-surface-container-high');
+          const status = this.querySelector('.font-label-xs');
+          if(status) {
+            status.textContent = '[ACTIVO]';
+            status.classList.add('text-primary', 'font-bold');
+            status.classList.remove('text-secondary');
+          }
+          const chosenFont = this.getAttribute('data-font');
+          if(appliedTextPreview) {
+            appliedTextPreview.style.fontFamily = chosenFont;
+          }
+        });
+      });
+
+      // Color Swatches
+      const swatchBtns = document.querySelectorAll('.swatch-btn');
+      swatchBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          swatchBtns.forEach(b => {
+            const ring = b.querySelector('span');
+            if (ring) ring.remove();
+          });
+          const activeRing = document.createElement('span');
+          activeRing.className = 'absolute inset-0 ring-2 ring-on-surface ring-offset-2 ring-offset-surface-container';
+          this.appendChild(activeRing);
+          const hex = this.getAttribute('data-color');
+          if(appliedTextPreview) appliedTextPreview.style.color = hex;
+          if(appliedVectorArt) appliedVectorArt.style.color = hex;
+        });
+      });
+
+      // Transform Controls (Scale & Rotation)
+      function updateTransform() {
+        if (!appliedCanvasLayer) return;
+        const scale = sliderScale ? sliderScale.value / 100 : 1;
+        const rotate = sliderRotate ? sliderRotate.value : 0;
+        appliedCanvasLayer.style.transform = `scale(${scale}) rotate(${rotate}deg)`;
+      }
+
+      if (sliderScale && scaleValue) {
+        sliderScale.addEventListener('input', function(e) {
+          scaleValue.textContent = e.target.value + '%';
+          updateTransform();
+        });
+      }
+
+      if (sliderRotate && rotationValue) {
+        sliderRotate.addEventListener('input', function(e) {
+          rotationValue.textContent = e.target.value + '°';
+          updateTransform();
+        });
+      }
+
+      // Modular Tool Tabs Navigation
+      const toolTabs = document.querySelectorAll('.tool-tab');
+      toolTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          const target = this.getAttribute('data-tab');
+          toolTabs.forEach(t => {
+            t.classList.remove('bg-primary-container', 'text-on-primary-container', 'shadow');
+            t.classList.add('text-secondary');
+          });
+          this.classList.add('bg-primary-container', 'text-on-primary-container', 'shadow');
+          this.classList.remove('text-secondary');
+
+          // Toggle visibility of panels
+          document.getElementById('tab-content-text')?.classList.toggle('hidden', target !== 'text');
+          document.getElementById('tab-content-graphics')?.classList.toggle('hidden', target !== 'graphics');
+          document.getElementById('tab-content-technique')?.classList.toggle('hidden', target !== 'technique');
+        });
+      });
+
+      // Garment Base Switcher
+      const garmentButtons = document.querySelectorAll('.custom-garment-select');
+      garmentButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          garmentButtons.forEach(b => {
+            b.classList.remove('bg-surface-container');
+            b.classList.add('bg-surface-container-low');
+            const dot = b.querySelector('.absolute.top-2.right-2');
+            if (dot) dot.remove();
+          });
+          this.classList.add('bg-surface-container');
+          this.classList.remove('bg-surface-container-low');
+          const dot = document.createElement('div');
+          dot.className = 'absolute top-2 right-2 w-2 h-2 bg-primary-container';
+          this.appendChild(dot);
+
+          currentGarmentPrice = parseFloat(this.getAttribute('data-price')) || 180;
+          recalculatePrice();
+        });
+      });
+
+      // Technique Radio Selection
+      const techniqueRadios = document.querySelectorAll('input[name="technique"]');
+      techniqueRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          currentTechniquePrice = parseFloat(this.value) || 45;
+          recalculatePrice();
+        });
+      });
+
+      // Front / Back View Switcher
+      if (btnViewFront && btnViewBack && viewModeLabel) {
+        btnViewFront.addEventListener('click', function() {
+          this.className = "px-space-md py-space-xs bg-on-surface text-surface font-label-xs text-label-xs uppercase font-bold shadow-sm";
+          btnViewBack.className = "px-space-md py-space-xs bg-surface-container text-secondary hover:text-on-surface font-label-xs text-label-xs uppercase font-bold";
+          viewModeLabel.textContent = "FRONT VIEW [ORTHOGRAPHIC]";
+        });
+        btnViewBack.addEventListener('click', function() {
+          this.className = "px-space-md py-space-xs bg-on-surface text-surface font-label-xs text-label-xs uppercase font-bold shadow-sm";
+          btnViewFront.className = "px-space-md py-space-xs bg-surface-container text-secondary hover:text-on-surface font-label-xs text-label-xs uppercase font-bold";
+          viewModeLabel.textContent = "BACK VIEW [DORSAL SPEC]";
+        });
+      }
+
+      // Drag bounding box micro-interaction
+      let isDragging = false;
+      let startX, startY, origLeft, origTop;
+
+      if (boundingBox) {
+        boundingBox.addEventListener('mousedown', function(e) {
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          origLeft = boundingBox.offsetLeft;
+          origTop = boundingBox.offsetTop;
+          boundingBox.style.transition = 'none';
+        });
+
+        window.addEventListener('mousemove', function(e) {
+          if (!isDragging || !boundingBox) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          boundingBox.style.left = (origLeft + dx) + 'px';
+          boundingBox.style.top = (origTop + dy) + 'px';
+        });
+
+        window.addEventListener('mouseup', function() {
+          if (isDragging && boundingBox) {
+            isDragging = false;
+            boundingBox.style.transition = 'all 0.15s ease-out';
+          }
+        });
+      }
+
+      // Reset Matrix Action
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          if(inputCustomText) {
+            inputCustomText.value = "AFEL-09 // TOKYO";
+            inputCustomText.dispatchEvent(new Event('input'));
+          }
+          if(sliderScale) {
+            sliderScale.value = 100;
+            if(scaleValue) scaleValue.textContent = '100%';
+          }
+          if(sliderRotate) {
+            sliderRotate.value = 0;
+            if(rotationValue) rotationValue.textContent = '0°';
+          }
+          if (boundingBox) {
+            boundingBox.style.left = '';
+            boundingBox.style.top = '';
+          }
+          updateTransform();
+        });
+      }
+
+      // Production Submit Confirmation Feedback
+      if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+          const originalText = this.innerHTML;
+          this.innerHTML = `<span class="material-symbols-outlined text-lg animate-spin">sync</span> GENERANDO PATRÓN CAD...`;
+          this.disabled = true;
+          setTimeout(() => {
+            this.innerHTML = `<span class="material-symbols-outlined text-lg">check_circle</span> ENCARGO REGISTRADO // LAB`;
+            this.classList.remove('bg-primary-container');
+            this.classList.add('bg-on-surface', 'text-surface');
+            setTimeout(() => {
+              this.innerHTML = originalText;
+              this.classList.add('bg-primary-container');
+              this.classList.remove('bg-on-surface', 'text-surface');
+              this.disabled = false;
+            }, 3000);
+          }, 1200);
+        });
+      }
+
+      // Vector Presets
+      const vectorBtns = document.querySelectorAll('.vector-preset-btn');
+      vectorBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          vectorBtns.forEach(b => {
+            b.classList.remove('text-primary-container');
+            b.classList.add('text-secondary');
+          });
+          this.classList.add('text-primary-container');
+          this.classList.remove('text-secondary');
+          const innerSvg = this.querySelector('svg');
+          if (innerSvg && appliedVectorArt) {
+            appliedVectorArt.innerHTML = innerSvg.outerHTML;
+          }
+        });
+      });
+
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest py-space-xl"><div class="w-full px-margin-mobile lg:px-margin grid grid-cols-1 md:grid-cols-12 gap-gutter"><div class="md:col-span-4 flex flex-col gap-space-md"><span class="font-headline-sm text-headline-sm uppercase tracking-widest text-on-surface">AFEL ATELIER</span><p class="font-body-sm text-body-sm text-secondary max-w-sm">Laboratorio de indumentaria experimental y sastrería brutalista. Piezas de tiraje limitado con intervención procedural y arquitectura textil de alto gramaje.</p><div class="font-label-xs text-label-xs text-primary uppercase tracking-widest">[ ATELIER SPEC: 480 GSM TO 650 GSM ]</div></div><div class="md:col-span-4 flex flex-col gap-space-sm"><span class="font-label-lg text-label-lg uppercase tracking-wider text-on-surface">VIP PROTOCOL / NEWSLETTER</span><p class="font-body-sm text-body-sm text-secondary">Acceso prioritario a cápsulas no publicadas y lanzamientos de laboratorio.</p><div class="flex items-center mt-space-xs"><input class="bg-surface-container-low font-label-xs text-label-xs text-on-surface px-space-md py-space-sm placeholder-secondary focus:outline-none w-full uppercase tracking-wider" placeholder="ENTER FREQUENCY (EMAIL)..." type="email"><button class="bg-primary-container text-on-primary-container font-label-xs text-label-xs font-bold px-space-md py-space-sm hover:bg-on-surface hover:text-surface transition-colors uppercase">JOIN</button></div></div><div class="md:col-span-4 flex flex-col gap-space-sm font-label-xs text-label-xs"><span class="font-label-lg text-label-lg uppercase tracking-wider text-on-surface">MATERIAL ETHOS</span><a class="text-secondary hover:text-on-surface transition-colors uppercase" data-path="sostenibilidad-textil" href="#">- FRENCH TERRY ORGÁNICO TRACED</a><a class="text-secondary hover:text-on-surface transition-colors uppercase" data-path="produccion-circular" href="#">- PATRONAJE DE RESIDUO CERO</a><a class="text-secondary hover:text-on-surface transition-colors uppercase" data-path="garantia-estructural" href="#">- GARANTÍA ESTRUCTURAL DE POR VIDA</a><a class="text-secondary hover:text-on-surface transition-colors uppercase" data-path="manifiesto" href="#">- MANIFIESTO DE AGRESIVIDAD ELEGANTE</a></div></div><div class="w-full px-margin-mobile lg:px-margin mt-space-xl pt-space-lg flex flex-col sm:flex-row justify-between items-center gap-space-sm font-label-xs text-label-xs text-secondary"><p class="">© 2025 AFEL ATELIER CORP. ALL RIGHTS RESERVED. ARCHITECTURAL STREETWEAR CODES.</p><div class="flex gap-space-md"><span class="text-primary">BERLIN // TOKYO // MADRID</span><span class="hover:text-on-surface cursor-pointer">LEGAL &amp; BLUEPRINTS</span></div></div></footer>
+
+<div id="cad-texture-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-surface-container-lowest/90 backdrop-blur-xl animate-fade-in select-none"><div class="relative w-full max-w-6xl max-h-[96vh] flex flex-col bg-surface-container-lowest shadow-2xl overflow-hidden border border-surface-container-highest"><div class="flex items-center justify-between px-space-md py-space-sm bg-surface-container-low border-b border-surface-container-high shrink-0"><div class="flex items-center gap-space-sm"><span class="w-2.5 h-2.5 bg-primary-container animate-ping"></span><div class="flex items-center gap-space-xs font-label-xs text-label-xs tracking-widest text-primary uppercase font-bold"><span class="material-symbols-outlined text-sm">view_in_ar</span><span class="">MODAL PROTOCOL // CAD-TEXTURE MAPPING v3.4</span></div><span class="hidden md:inline font-label-xs text-label-xs text-secondary">[UV PROJECTION LIVE CALIBRATION]</span></div><button id="close-modal-btn" class="px-space-sm py-1 bg-surface-container-highest hover:bg-primary-container text-on-surface hover:text-on-primary-container font-label-xs text-label-xs uppercase tracking-widest transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-sm">close</span><span class="">[ ESC / CERRAR MODAL ]</span></button></div><div class="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto divide-y lg:divide-y-0 lg:divide-x divide-surface-container-high"><div class="lg:col-span-3 p-space-md flex flex-col gap-space-md bg-surface-container-low"><div class="flex items-center justify-between border-b border-surface-container-high pb-space-xs"><span class="font-label-xs text-label-xs text-primary font-bold uppercase tracking-widest">[ 01 // ASSET INGESTION ]</span><span class="material-symbols-outlined text-sm text-secondary">layers</span></div><div class="flex flex-col gap-space-xs"><span class="font-label-xs text-label-xs uppercase tracking-wider text-secondary">IMPORTAR MAPA / VECTOR</span><label for="modal-file-input" class="group p-space-md bg-surface-container-lowest hover:bg-surface-container border border-dashed border-surface-container-highest hover:border-primary cursor-pointer flex flex-col items-center justify-center text-center transition-all"><span class="material-symbols-outlined text-headline-md text-secondary group-hover:text-primary transition-colors">upload_file</span><span class="font-label-xs text-label-xs text-on-surface mt-2 font-bold uppercase tracking-wider">ARRASTRA TU VECTOR O TEXTURA</span><span class="font-label-xs text-label-xs text-secondary mt-1">SVG, PNG ALFA, TIFF (MAX 45MB)</span><input id="modal-file-input" type="file" accept="image/*" class="hidden"><span class="mt-3 px-space-sm py-1 bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container font-label-xs text-label-xs text-on-surface uppercase tracking-wider font-bold transition-colors">EXPLORAR ARCHIVOS</span></label></div><div class="flex flex-col gap-space-xs"><span class="font-label-xs text-label-xs uppercase tracking-wider text-secondary">PRESETS DE MATRIZ VECTORIAL</span><div class="grid grid-cols-2 gap-space-xs"><button class="modal-preset-btn p-space-xs bg-surface-container-lowest hover:bg-surface-container border border-transparent hover:border-primary-container text-left flex flex-col gap-1 transition-all group" data-vector-type="cyber"><div class="h-12 w-full bg-surface-container-low flex items-center justify-center text-primary group-hover:scale-105 transition-transform"><svg class="w-8 h-8 fill-current" viewBox="0 0 100 100"><polygon points="50,5 95,28 95,72 50,95 5,72 5,28" fill="none" stroke="currentColor" stroke-width="4"></polygon><line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="3"></line><circle cx="50" cy="50" r="12" fill="currentColor"></circle></svg></div><span class="font-label-xs text-label-xs text-on-surface uppercase truncate font-bold">Cyber Gótico</span><span class="font-label-xs text-label-xs text-secondary">3200 PTS</span></button><button class="modal-preset-btn p-space-xs bg-surface-container-lowest hover:bg-surface-container border border-transparent hover:border-primary-container text-left flex flex-col gap-1 transition-all group" data-vector-type="rune"><div class="h-12 w-full bg-surface-container-low flex items-center justify-center text-secondary group-hover:text-primary group-hover:scale-105 transition-transform"><svg class="w-8 h-8 fill-current" viewBox="0 0 100 100"><rect x="42" y="10" width="16" height="80"></rect><rect x="10" y="42" width="80" height="16"></rect><circle cx="50" cy="50" r="8" fill="#131315"></circle></svg></div><span class="font-label-xs text-label-xs text-on-surface uppercase truncate font-bold">Emblema Geomet</span><span class="font-label-xs text-label-xs text-secondary">1850 PTS</span></button><button class="modal-preset-btn p-space-xs bg-surface-container-lowest hover:bg-surface-container border border-transparent hover:border-primary-container text-left flex flex-col gap-1 transition-all group" data-vector-type="matrix"><div class="h-12 w-full bg-surface-container-low flex items-center justify-center text-secondary group-hover:text-primary group-hover:scale-105 transition-transform"><svg class="w-8 h-8 fill-current" viewBox="0 0 100 100"><rect x="10" y="20" width="6" height="60"></rect><rect x="22" y="20" width="12" height="60"></rect><rect x="40" y="20" width="4" height="60"></rect><rect x="50" y="20" width="14" height="60"></rect><rect x="70" y="20" width="8" height="60"></rect><rect x="84" y="20" width="6" height="60"></rect></svg></div><span class="font-label-xs text-label-xs text-on-surface uppercase truncate font-bold">Matriz Táctica</span><span class="font-label-xs text-label-xs text-secondary">RAW GLYPH</span></button><button class="modal-preset-btn p-space-xs bg-surface-container-lowest hover:bg-surface-container border border-transparent hover:border-primary-container text-left flex flex-col gap-1 transition-all group" data-vector-type="holo"><div class="h-12 w-full bg-surface-container-low flex items-center justify-center text-secondary group-hover:text-primary group-hover:scale-105 transition-transform"><svg class="w-8 h-8 fill-current" viewBox="0 0 100 100"><polygon points="50,15 90,85 10,85" fill="none" stroke="currentColor" stroke-width="6"></polygon><line x1="25" y1="60" x2="75" y2="60" stroke="currentColor" stroke-width="4"></line><circle cx="50" cy="52" r="10" fill="currentColor"></circle></svg></div><span class="font-label-xs text-label-xs text-on-surface uppercase truncate font-bold">Sello Holo</span><span class="font-label-xs text-label-xs text-secondary">PRISM 4D</span></button></div></div><div class="p-space-xs bg-surface-container-lowest flex items-center gap-space-xs font-label-xs text-label-xs text-secondary"><span class="material-symbols-outlined text-sm text-primary">verified</span><span class="">INYECCIÓN DIRECTA A MOTOR CAD</span></div></div><div class="lg:col-span-6 p-space-md flex flex-col justify-between bg-surface-container-lowest relative overflow-hidden min-h-[440px]"><div class="flex items-center justify-between w-full z-20 pb-2"><div class="flex items-center gap-1 bg-surface-container-low px-space-sm py-1 font-label-xs text-label-xs"><span class="text-primary font-bold">PROYECCIÓN UV:</span><span id="modal-projection-name" class="text-on-surface uppercase font-bold">CHEST [FRONT_01]</span></div><div class="flex items-center gap-1"><button class="modal-uv-btn px-2.5 py-1 bg-on-surface text-surface font-label-xs text-label-xs uppercase font-bold" data-plane="FRONT">Frontal</button><button class="modal-uv-btn px-2.5 py-1 bg-surface-container text-secondary hover:text-on-surface font-label-xs text-label-xs uppercase font-bold" data-plane="BACK">Espalda</button><button class="modal-uv-btn px-2.5 py-1 bg-surface-container text-secondary hover:text-on-surface font-label-xs text-label-xs uppercase font-bold" data-plane="SLEEVE">Mangas</button></div></div><div class="relative flex-1 flex items-center justify-center my-space-sm select-none"><div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20"><div class="w-full h-px bg-secondary-container"></div><div class="h-full w-px bg-secondary-container absolute"></div><div class="w-72 h-72 rounded-full border border-secondary-container"></div></div><div class="relative w-[320px] sm:w-[380px] aspect-square flex items-center justify-center"><img id="modal-garment-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCupyJ55NQ1rEjoV4lPsI5OeP4qJf8zHJzDKyCq8iLnu_oXtt--WgvCfIzxeni0uN8BU0_7Gmhl6rGD1XyCeo-X6qj49rYgu8GEb9AtiKrSMq0E3F0xyuKWnzrOTHGBlVQe2xcssCZTm-5bTn9gdmGejhnE3V8Xx9vQDcU271ONERsPoaNOEYpnrTCwJDf3mLxJLwJnD2rTTqALmF41v_APMAsCsQLliOohMFIpDQbblNlKfMDi4OsN" alt="3D Garment Model" class="w-full h-full object-contain filter contrast-125 drop-shadow-2xl opacity-90"><div id="modal-bounding-box" class="absolute w-44 sm:w-52 h-44 sm:h-52 bg-surface-container-highest/20 cursor-move flex flex-col items-center justify-center shadow-[inset_0_0_15px_rgba(220,38,38,0.25)] border border-primary-container/60"><span class="absolute -top-1 -left-1 w-2.5 h-2.5 bg-primary-container"></span><span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary-container"></span><span class="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-primary-container"></span><span class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-primary-container"></span><div class="absolute -top-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center cursor-pointer"><div class="w-3 h-3 rounded-full bg-on-surface shadow-md ring-2 ring-primary-container"></div><div class="w-px h-5 bg-primary-container"></div></div><div id="modal-applied-graphic" class="flex flex-col items-center justify-center p-2 text-center transition-transform duration-75"><div id="modal-vector-slot" class="w-16 h-16 text-primary flex items-center justify-center"><svg class="w-full h-full fill-current" viewBox="0 0 100 100"><polygon points="50,5 95,28 95,72 50,95 5,72 5,28" fill="none" stroke="currentColor" stroke-width="4"></polygon><line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="3"></line><line x1="5" y1="28" x2="95" y2="72" stroke="currentColor" stroke-width="3"></line><circle cx="50" cy="50" r="14" fill="currentColor"></circle></svg></div><p id="modal-text-slot" class="font-headline-sm text-headline-sm uppercase tracking-widest text-primary-fixed-dim mt-1">AFEL 3D CAD</p><span id="modal-sub-slot" class="font-label-xs text-label-xs tracking-wider text-secondary bg-surface-container-lowest/80 px-1.5 py-0.5 mt-0.5">[ UV_ALIGN_LOCK ]</span></div></div></div></div><div class="z-20 pt-space-xs border-t border-surface-container-high flex flex-wrap items-center justify-between gap-space-sm font-label-xs text-label-xs text-secondary"><div class="flex items-center gap-space-md"><span class="flex items-center gap-1 text-on-surface"><span class="material-symbols-outlined text-sm text-primary">control_camera</span><span id="modal-coords" class="">X: +0.00 | Y: +0.00</span></span><span id="modal-rot-stat" class="">ROT: 0°</span><span id="modal-scale-stat" class="">SCL: 100%</span></div><div class="flex items-center gap-1 text-primary font-bold"><span class="material-symbols-outlined text-xs">polyline</span><span id="modal-stitch-stat" class="">PUNTADAS: 14,280</span></div></div></div><div class="lg:col-span-3 p-space-md flex flex-col justify-between gap-space-md bg-surface-container-low"><div class="flex flex-col gap-space-md"><div class="flex items-center justify-between border-b border-surface-container-high pb-space-xs"><span class="font-label-xs text-label-xs text-primary font-bold uppercase tracking-widest">[ 02 // TEXTURA &amp; ACABADO ]</span><span class="material-symbols-outlined text-sm text-secondary">tune</span></div><div class="flex flex-col gap-space-xs"><label class="font-label-xs text-label-xs uppercase tracking-wider text-secondary">TÉCNICA DE EXTRUSIÓN 3D</label><div class="flex flex-col gap-1.5"><label class="flex items-center gap-space-sm p-space-xs bg-surface-container-lowest cursor-pointer hover:bg-surface-container border border-surface-container-high"><input type="radio" name="modal-technique" value="puff" checked="" class="accent-primary-container"><div class="flex flex-col"><span class="font-label-xs text-label-xs font-bold text-on-surface uppercase">Puff Ink 3D [Relieve Alto]</span><span class="font-label-xs text-label-xs text-secondary">Extrusión térmica 1.8mm</span></div></label><label class="flex items-center gap-space-sm p-space-xs bg-surface-container-lowest cursor-pointer hover:bg-surface-container border border-surface-container-high"><input type="radio" name="modal-technique" value="jacquard" class="accent-primary-container"><div class="flex flex-col"><span class="font-label-xs text-label-xs font-bold text-on-surface uppercase">Micro-Jacquard Monofilo</span><span class="font-label-xs text-label-xs text-secondary">Hilo de poliamida mate</span></div></label><label class="flex items-center gap-space-sm p-space-xs bg-surface-container-lowest cursor-pointer hover:bg-surface-container border border-surface-container-high"><input type="radio" name="modal-technique" value="reflective" class="accent-primary-container"><div class="flex flex-col"><span class="font-label-xs text-label-xs font-bold text-on-surface uppercase">Reflectante 3M Scotchlite</span><span class="font-label-xs text-label-xs text-secondary">Retro-reflexión 500 cd/lux</span></div></label></div></div><div class="flex flex-col gap-space-xs"><label class="font-label-xs text-label-xs uppercase tracking-wider text-secondary">COLOR DE HILO / PIGMENTO</label><div class="flex items-center gap-space-sm"><button class="modal-color-swatch w-7 h-7 bg-primary-container relative" data-hex="#ffb4ab" title="Hyper Crimson"><span class="absolute inset-0 ring-2 ring-on-surface ring-offset-2 ring-offset-surface-container-low"></span></button><button class="modal-color-swatch w-7 h-7 bg-on-surface" data-hex="#e5e1e4" title="Chalk White"></button><button class="modal-color-swatch w-7 h-7 bg-secondary" data-hex="#c4c7c9" title="Gunmetal Silver"></button><button class="modal-color-swatch w-7 h-7 bg-tertiary-container" data-hex="#71717a" title="Obsidian Shadow"></button></div></div><div class="flex flex-col gap-space-sm bg-surface-container-lowest p-space-sm border border-surface-container-high"><div class="flex flex-col gap-1"><div class="flex justify-between font-label-xs text-label-xs text-secondary"><span class="">PROFUNDIDAD EXTRUSIÓN</span><span id="modal-depth-val" class="text-on-surface font-bold">1.8 mm</span></div><input id="modal-slider-depth" type="range" min="0.5" max="4.0" step="0.1" value="1.8" class="w-full accent-primary-container bg-surface-bright h-1 cursor-pointer"></div><div class="flex flex-col gap-1"><div class="flex justify-between font-label-xs text-label-xs text-secondary"><span class="">OPACIDAD MATERIAL</span><span id="modal-opacity-val" class="text-on-surface font-bold">100%</span></div><input id="modal-slider-opacity" type="range" min="30" max="100" value="100" class="w-full accent-primary-container bg-surface-bright h-1 cursor-pointer"></div></div></div><div class="flex flex-col gap-space-xs pt-space-xs"><button id="modal-btn-confirm" class="w-full py-space-sm bg-primary-container hover:bg-on-surface text-on-primary-container hover:text-surface font-label-xs text-label-xs uppercase tracking-widest font-bold shadow-lg transition-colors flex items-center justify-center gap-space-xs"><span class="material-symbols-outlined text-sm">check_circle</span><span class="">CONFIRMAR MAPEO &amp; SINCRONIZAR</span></button><span class="font-label-xs text-label-xs text-secondary text-center">CONEXIÓN ACTIVA: CAM/CNC DISPATCH</span></div></div></div></div></div><script>(function initCadTextureModal() { const modal = document.getElementById('cad-texture-modal'); const closeBtn = document.getElementById('close-modal-btn'); const confirmBtn = document.getElementById('modal-btn-confirm'); const triggers = document.querySelectorAll('.open-modal-trigger, #btn-header-3d-lab, #btn-hero-3d-lab'); function openModal(e) { if (e) e.preventDefault(); if (modal) modal.classList.remove('hidden'); } function closeModal() { if (modal) modal.classList.add('hidden'); } triggers.forEach(btn => btn.addEventListener('click', openModal)); if (closeBtn) closeBtn.addEventListener('click', closeModal); window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) { closeModal(); } }); if (confirmBtn) { confirmBtn.addEventListener('click', () => { const originalHtml = confirmBtn.innerHTML; confirmBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> <span>SINCRONIZANDO CON ATELIER...</span>'; setTimeout(() => { confirmBtn.innerHTML = '<span class="material-symbols-outlined text-sm">task_alt</span> <span>MAPEO CARGADO EXITOSAMENTE</span>'; setTimeout(() => { confirmBtn.innerHTML = originalHtml; closeModal(); }, 900); }, 900); }); } const uvBtns = document.querySelectorAll('.modal-uv-btn'); const projName = document.getElementById('modal-projection-name'); uvBtns.forEach(btn => { btn.addEventListener('click', function() { uvBtns.forEach(b => { b.className = 'modal-uv-btn px-2.5 py-1 bg-surface-container text-secondary hover:text-on-surface font-label-xs text-label-xs uppercase font-bold'; }); this.className = 'modal-uv-btn px-2.5 py-1 bg-on-surface text-surface font-label-xs text-label-xs uppercase font-bold'; const plane = this.getAttribute('data-plane'); if (projName) { projName.textContent = plane === 'FRONT' ? 'CHEST [FRONT_01]' : (plane === 'BACK' ? 'DORSAL [BACK_02]' : 'LEFT/RIGHT SLEEVE [UV_03]'); } }); }); const colorSwatches = document.querySelectorAll('.modal-color-swatch'); const vectorSlot = document.getElementById('modal-vector-slot'); const textSlot = document.getElementById('modal-text-slot'); colorSwatches.forEach(swatch => { swatch.addEventListener('click', function() { colorSwatches.forEach(s => { const r = s.querySelector('span'); if (r) r.remove(); }); const ring = document.createElement('span'); ring.className = 'absolute inset-0 ring-2 ring-on-surface ring-offset-2 ring-offset-surface-container-low'; this.appendChild(ring); const hex = this.getAttribute('data-hex'); if (vectorSlot) vectorSlot.style.color = hex; if (textSlot) textSlot.style.color = hex; }); }); const depthSlider = document.getElementById('modal-slider-depth'); const depthVal = document.getElementById('modal-depth-val'); const opSlider = document.getElementById('modal-slider-opacity'); const opVal = document.getElementById('modal-opacity-val'); const appliedGraphic = document.getElementById('modal-applied-graphic'); if (depthSlider && depthVal) { depthSlider.addEventListener('input', (e) => { depthVal.textContent = e.target.value + ' mm'; }); } if (opSlider && opVal && appliedGraphic) { opSlider.addEventListener('input', (e) => { opVal.textContent = e.target.value + '%'; appliedGraphic.style.opacity = e.target.value / 100; }); } const presetBtns = document.querySelectorAll('.modal-preset-btn'); presetBtns.forEach(btn => { btn.addEventListener('click', function() { const svg = this.querySelector('svg'); if (svg && vectorSlot) { vectorSlot.innerHTML = svg.outerHTML; } const stitchStat = document.getElementById('modal-stitch-stat'); if (stitchStat) { const points = this.querySelector('.text-secondary'); if (points && points.textContent.includes('PTS')) { stitchStat.textContent = 'PUNTADAS: ' + points.textContent.replace(' PTS', ',000'); } } }); }); const fileInput = document.getElementById('modal-file-input'); if (fileInput) { fileInput.addEventListener('change', function(e) { const file = e.target.files && e.target.files[0]; if (file && vectorSlot) { const reader = new FileReader(); reader.onload = function(evt) { vectorSlot.innerHTML = `<img src="${evt.target.result}" class="max-w-full max-h-full object-contain filter drop-shadow" alt="uploaded texture" />`; if (textSlot) textSlot.textContent = file.name.substring(0, 14).toUpperCase(); }; reader.readAsDataURL(file); } }); } const modalBounding = document.getElementById('modal-bounding-box'); const modalCoords = document.getElementById('modal-coords'); let isDraggingModal = false; let mStartX, mStartY, mOrigLeft, mOrigTop; if (modalBounding) { modalBounding.addEventListener('mousedown', (e) => { isDraggingModal = true; mStartX = e.clientX; mStartY = e.clientY; mOrigLeft = modalBounding.offsetLeft; mOrigTop = modalBounding.offsetTop; }); window.addEventListener('mousemove', (e) => { if (!isDraggingModal || !modalBounding) return; const dx = e.clientX - mStartX; const dy = e.clientY - mStartY; modalBounding.style.left = (mOrigLeft + dx) + 'px'; modalBounding.style.top = (mOrigTop + dy) + 'px'; if (modalCoords) { modalCoords.textContent = `X: ${(dx > 0 ? '+' : '') + dx} | Y: ${(dy > 0 ? '+' : '') + dy}`; } }); window.addEventListener('mouseup', () => { isDraggingModal = false; }); } })();</script></body></html>

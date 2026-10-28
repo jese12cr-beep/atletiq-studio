@@ -15,6 +15,7 @@ import {
   evaluateDecalPlacement,
 } from '../core/boundingBoxMath';
 import { computeOwayoAutoContrastHex } from '../core/designStore';
+import { drawLigaMxGraphicMm, drawLigaMxCrestMm } from './ligaMxKitsEngine';
 
 export const UV_ATLAS_WIDTH = 2048;
 export const UV_ATLAS_HEIGHT = 1024;
@@ -322,8 +323,16 @@ export function renderGarmentPanel(
     ctx.translate(cx, cy);
     ctx.rotate(((decal.rotationDeg || 0) * Math.PI) / 180);
 
-    if (decal.type === 'PRESET_CREST') {
-      drawPresetCrest(ctx, decal.presetId, wPx, hPx, design.colorZones);
+    if (decal.type === 'LIGAMX_GRAPHIC') {
+      drawLigaMxGraphicMm(ctx, decal.graphicId, wPx, hPx, design);
+    } else if (decal.type === 'LIGAMX_CREST') {
+      drawLigaMxCrestMm(ctx, decal.clubId || decal.presetId, wPx, hPx, design);
+    } else if (decal.type === 'PRESET_CREST') {
+      if (decal.presetId?.startsWith('mx_')) {
+        drawLigaMxCrestMm(ctx, decal.presetId, wPx, hPx, design);
+      } else {
+        drawPresetCrest(ctx, decal.presetId, wPx, hPx, design.colorZones);
+      }
     } else if (decal.type === 'UPLOADED_RASTER' || decal.type === 'UPLOADED_VECTOR') {
       const art = artworkRegistry[decal.artworkId];
       if (art?.imageElement) {

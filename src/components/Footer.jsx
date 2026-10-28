@@ -1,85 +1,73 @@
 import React from 'react';
-import { Mail, Phone, MapPin, ShieldCheck, Globe, Share2 } from 'lucide-react';
 
 export default function Footer({ onOpenShopifyGuide }) {
   return (
-    <footer className="bg-slate-950 border-t border-slate-800 pt-16 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-        {/* Brand */}
-        <div className="md:col-span-1">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 font-black text-lg italic">
+    <footer className="w-full bg-white border-t border-slate-200 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-8">
+        {/* Brand info */}
+        <div className="md:col-span-5 flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center font-black text-white text-base italic">
               AQ
             </div>
-            <span className="text-xl font-black text-white tracking-wider">
-              ATLETIQ <span className="text-amber-400">PRO</span>
+            <span className="font-extrabold text-lg text-slate-900">
+              ATLETIQ™ STUDIO // LAB
             </span>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed mb-4">
-            Plataforma y taller especializado en equipamiento deportivo personalizado. Diseños únicos, sublimación premium y precios mayoristas para clubes.
+          <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+            Plataforma líder en fabricación y diseño 3D de uniformes deportivos termorregulados para clubes profesionales, filiales y ligas universitarias.
           </p>
-          <div className="flex items-center gap-2 text-slate-400">
-            <Globe className="w-4 h-4 text-slate-500" />
-            <span className="text-xs">Despachos nacionales e internacionales</span>
+          <div className="text-xs font-mono text-sky-600 font-bold uppercase tracking-wider">
+            [ Homologado oficialmente RFEF / FEB / FIBA ]
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Explorar</h4>
-          <ul className="space-y-2 text-xs text-slate-400 font-semibold">
-            <li><a href="#customizer-studio" className="hover:text-amber-400 transition-colors">Estudio 3D en Vivo</a></li>
-            <li><a href="#product-catalog" className="hover:text-amber-400 transition-colors">Catálogo de Artículos</a></li>
-            <li><a href="#fabric-quality" className="hover:text-amber-400 transition-colors">Telas & Garantía</a></li>
-            <li>
-              <button onClick={onOpenShopifyGuide} className="hover:text-amber-400 text-left transition-colors">
-                Integración Shopify (Liquid / Headless)
-              </button>
-            </li>
-          </ul>
+        {/* Muestras y contacto */}
+        <div className="md:col-span-4 flex flex-col gap-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
+            Muestras Textiles para Clubes
+          </span>
+          <p className="text-xs text-slate-500">
+            Registra el correo de tu club o entidad para recibir muestras físicas y catálogo técnico.
+          </p>
+          <div className="flex items-center mt-2 max-w-sm">
+            <input
+              type="email"
+              placeholder="Email de tu club o entidad..."
+              className="bg-slate-50 border border-slate-300 text-xs text-slate-800 px-3.5 py-2.5 rounded-l-xl placeholder-slate-400 focus:outline-none focus:border-sky-500 w-full"
+            />
+            <button
+              onClick={() => alert('Entidad registrada para muestras técnicas.')}
+              className="bg-sky-600 text-white text-xs font-bold px-4 py-2.5 rounded-r-xl hover:bg-sky-700 transition-colors uppercase shrink-0 cursor-pointer"
+            >
+              Pedir
+            </button>
+          </div>
         </div>
 
-        {/* Categories */}
-        <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Deportes</h4>
-          <ul className="space-y-2 text-xs text-slate-400 font-semibold">
-            <li>Camisetas de Fútbol & Futsal</li>
-            <li>Jerseys de Baloncesto</li>
-            <li>Sudaderas & Hoodies de Club</li>
-            <li>Gorras & Snapbacks Técnicas</li>
-            <li>Termos & Botellas Grabadas</li>
-            <li>Espinilleras con Foto o Escudo</li>
-          </ul>
-        </div>
-
-        {/* Support & Contact */}
-        <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Atención al Cliente</h4>
-          <ul className="space-y-3 text-xs text-slate-400 font-medium">
-            <li className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-amber-400" />
-              <span>pedidos@atletiqpro.com</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-amber-400" />
-              <span>+1 (555) 928-4820 (WhatsApp Clubes)</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-amber-400" />
-              <span>Parque Industrial Textil, Módulo 4</span>
-            </li>
-          </ul>
+        {/* Guías y Enlaces */}
+        <div className="md:col-span-3 flex flex-col gap-2 text-xs">
+          <span className="font-bold uppercase tracking-wider text-slate-900 mb-1">
+            Información & Comercio
+          </span>
+          <button
+            onClick={onOpenShopifyGuide}
+            className="text-left text-sky-600 hover:underline font-semibold cursor-pointer"
+          >
+            - Guía de Integración Shopify
+          </button>
+          <span className="text-slate-500">- Lavado Técnico a 60°C</span>
+          <span className="text-slate-500">- Normativas de Dorsales FIFA/FIBA</span>
+          <span className="text-slate-500">- Tabla Oficial de Medidas</span>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <p>© 2026 ATLETIQ PRO™ Custom Sports Studio. Todos los derechos reservados.</p>
-        <div className="flex gap-4">
-          <span className="hover:text-slate-400 cursor-pointer">Términos de Confección</span>
-          <span>•</span>
-          <span className="hover:text-slate-400 cursor-pointer">Política de Calidad</span>
-          <span>•</span>
-          <span className="hover:text-slate-400 cursor-pointer">Guía de Tallas</span>
+      {/* Bottom Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+        <p>© 2026 ATLETIQ SPORTS. Todos los derechos reservados.</p>
+        <div className="flex flex-wrap gap-4">
+          <span className="font-semibold text-slate-700">México &amp; USA // CDMX • Monterrey • Guadalajara • Los Ángeles • Miami</span>
+          <span>Garantía Oficial de Competición</span>
         </div>
       </div>
     </footer>

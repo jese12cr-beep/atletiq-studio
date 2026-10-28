@@ -3,7 +3,13 @@ node_modules
 dist
 dist-ssr
 *.local
+*.log
 
-# Ignorar archivos .har crudos y reportes crudos con parámetros de sesión
+# Temp & OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# REA & Captures
 rea-captures/**/*.har
 rea-captures/**/*.report.json

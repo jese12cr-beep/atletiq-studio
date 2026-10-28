@@ -201,6 +201,49 @@ export const MODEL_PARTS_CATALOG = {
     },
   },
 
+  basketball_shorts_bp6: {
+    right_leg: {
+      panelId: 'right_leg',
+      partName: 'RightLeg',
+      label: 'Pierna Derecha (Muslo Frontal & Costado)',
+      shortLabel: 'Pierna Der.',
+      groesseX: 2048,
+      groesseY: 2048,
+      widthMm: 778.44,
+      heightMm: 642.64,
+      hoehenfaktor: 0.82554,
+      sperrbezirkMm: 50,
+      snapCenterU: 0.5749,
+      snapAxesU: [
+        { u: 0.5749, label: 'Muslo Frontal Der.' },
+        { u: 0.285, label: 'Costado Exterior Der.' },
+      ],
+      defaultPlaceU: 0.5749,
+      defaultPlaceV: 0.773,
+      safeMarginMm: { left: 65, right: 65, top: 80, bottom: 50 },
+    },
+    left_leg: {
+      panelId: 'left_leg',
+      partName: 'LeftLeg',
+      label: 'Pierna Izquierda (Muslo Frontal & Costado)',
+      shortLabel: 'Pierna Izq.',
+      groesseX: 2048,
+      groesseY: 2048,
+      widthMm: 778.44,
+      heightMm: 642.64,
+      hoehenfaktor: 0.82554,
+      sperrbezirkMm: 50,
+      snapCenterU: 0.4251,
+      snapAxesU: [
+        { u: 0.4251, label: 'Muslo Frontal Izq.' },
+        { u: 0.715, label: 'Costado Exterior Izq.' },
+      ],
+      defaultPlaceU: 0.4251,
+      defaultPlaceV: 0.773,
+      safeMarginMm: { left: 65, right: 65, top: 80, bottom: 50 },
+    },
+  },
+
   basketball_b7w_epic_women: {
     front: {
       panelId: 'front',
@@ -586,7 +629,8 @@ export function isJacketProduct(productModelId = '') {
 
 export function getDroppablePanelsForProduct(productModelId = 'futbol_jersey_pro_vneck') {
   const key = resolveMirlKeyForProduct(productModelId);
-  return Object.values(MODEL_PARTS_CATALOG[key]);
+  const catalog = MODEL_PARTS_CATALOG[key] || MODEL_PARTS_CATALOG.football_f3_ka;
+  return Object.values(catalog || {});
 }
 
 export function getDefaultPanelForProduct(productModelId = 'futbol_jersey_pro_vneck') {
@@ -596,8 +640,8 @@ export function getDefaultPanelForProduct(productModelId = 'futbol_jersey_pro_vn
 
 export function getPartSpec(productModelId = 'futbol_jersey_pro_vneck', panel = 'front') {
   const key = resolveMirlKeyForProduct(productModelId);
-  const table = MODEL_PARTS_CATALOG[key];
-  return table[panel] || Object.values(table)[0];
+  const table = MODEL_PARTS_CATALOG[key] || MODEL_PARTS_CATALOG.football_f3_ka;
+  return table?.[panel] || Object.values(table || {})[0];
 }
 
 export function mapMeshPartNameToPanel(partName = '') {

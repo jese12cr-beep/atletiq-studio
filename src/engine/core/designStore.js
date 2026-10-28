@@ -13,7 +13,7 @@ import {
   BASKETBALL_SHORTS_WOMEN_FISH_DESIGNS,
   JACKET_MEN_FISH_DESIGNS,
   JACKET_WOMEN_FISH_DESIGNS,
-} from './palette152';
+} from './palette152.js';
 
 export {
   PANTONE_CM5_PALETTE,
@@ -458,11 +458,11 @@ export function createDefaultDesignForProduct(productModelId = 'futbol_jersey_pr
       }
     : {
         primary: { hex: '#0033a0', pantone: 'PMS 286 C', code: 'Royal 4', owayoCode: 'A' },
-        secondary: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'B' },
+        secondary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'B' },
         accents: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'C' },
-        quaternary: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'D' },
+        quaternary: { hex: '#c8102e', pantone: 'PMS 186 C', code: 'Red 4', owayoCode: 'D' },
         collar: { hex: '#ffcd00', pantone: 'PMS 116 C', code: 'Yellow 4', owayoCode: 'K' },
-        sleeves: { hex: '#0c2340', pantone: 'PMS 289 C', code: 'Navy 5', owayoCode: 'SLL/SLR' },
+        sleeves: { hex: '#ffffff', pantone: 'PMS Bright White', code: 'White 1', owayoCode: 'SLL/SLR' },
       };
 
   let decals = [];

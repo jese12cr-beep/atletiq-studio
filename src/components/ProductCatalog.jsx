@@ -1,120 +1,159 @@
 import React, { useState } from 'react';
-import { Sparkles, Star, ArrowRight, Clock, ShieldCheck, Check } from 'lucide-react';
-import { PRODUCTS_CATALOG, SPORTS_CATEGORIES } from '../data/mockData';
+import { Box, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
 
-export default function ProductCatalog({ onSelectProduct }) {
-  const [activeCategory, setActiveCategory] = useState('all');
+const CATALOG_ITEMS = [
+  {
+    engineId: 'futbol_jersey_pro_vneck',
+    title: 'Camiseta Fútbol F3 Matchday',
+    category: 'futbol',
+    gender: 'Hombre / Unisex',
+    price: '34.00',
+    image: '/assets/stitch/ghost_mannequin.png',
+    badge: 'Best Seller',
+    description: 'Tejido transpirable TS-Tex con cuello en V reforzado y sublimación 100% integral.',
+  },
+  {
+    engineId: 'basketball_b6_hero',
+    title: 'Camiseta Baloncesto B6 Hero',
+    category: 'basket',
+    gender: 'Hombre',
+    price: '32.00',
+    image: '/assets/stitch/basketball_arena.png',
+    badge: 'FIBA Compliant',
+    description: 'Micromesh K-Tex antibacteriano, tirantes elásticos y panel de ventilación.',
+  },
+  {
+    engineId: 'basketball_b7w_epic_women',
+    title: 'Camiseta Baloncesto B7W Dama',
+    category: 'basket',
+    gender: 'Mujer (Corte Dama)',
+    price: '32.00',
+    image: '/assets/stitch/basketball_arena.png',
+    badge: 'Corte Femenino',
+    description: 'Patrón anatómico entallado femenino con sisa y pecho ergonómico.',
+  },
+  {
+    engineId: 'jacket_softshell_601m_men',
+    title: 'Chaqueta Softshell 601M',
+    category: 'chaquetas',
+    gender: 'Hombre',
+    price: '58.00',
+    image: '/assets/stitch/football_celebration.png',
+    badge: 'Técnico / Viaje',
+    description: 'Microfibra cortavientos con cremallera completa termosellada y bolsillos.',
+  },
+  {
+    engineId: 'jacket_softshell_601w_women',
+    title: 'Chaqueta Softshell 601W Dama',
+    category: 'chaquetas',
+    gender: 'Mujer (Corte Dama)',
+    price: '58.00',
+    image: '/assets/stitch/football_celebration.png',
+    badge: 'Corte Femenino',
+    description: 'Chaqueta técnica entallada repelente al agua para banquillo y paseo.',
+  },
+  {
+    engineId: 'football_shorts_fp3',
+    title: 'Pantalón Corto Fútbol FP3',
+    category: 'futbol',
+    gender: 'Hombre / Unisex',
+    price: '22.00',
+    image: '/assets/stitch/ghost_mannequin.png',
+    badge: 'A juego con F3',
+    description: 'Tejido elástico de alta movilidad con cordón interior y sin costuras laterales molestas.',
+  },
+];
 
-  const filteredProducts = activeCategory === 'all'
-    ? PRODUCTS_CATALOG
-    : PRODUCTS_CATALOG.filter(p => p.category === activeCategory);
+export default function ProductCatalog({ onSelectProduct, onOpenQuote }) {
+  const [filter, setFilter] = useState('all');
+
+  const filtered = filter === 'all'
+    ? CATALOG_ITEMS
+    : CATALOG_ITEMS.filter((item) => item.category === filter);
 
   return (
-    <section id="product-catalog" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+    <section id="drops-catalog" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
-          <span className="text-amber-400 font-mono text-xs font-bold tracking-widest uppercase block mb-1">
-            Catálogo Oficial
+          <span className="text-sky-600 font-mono text-xs font-bold tracking-widest uppercase block mb-1">
+            Catálogo Oficial de Competición
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Artículos Deportivos Personalizables
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Equipaciones Deportivas Personalizables
           </h2>
-          <p className="text-slate-400 text-sm mt-1 max-w-xl">
-            Prendas y accesorios de grado profesional listos para estampar con sublimación HD, bordado o grabado láser.
+          <p className="text-slate-600 text-sm mt-1 max-w-xl">
+            Prendas de grado profesional con patronaje oficial para clubes y atletas. Elige una prenda y configúrala en el motor 3D.
           </p>
         </div>
 
-        {/* Category Pills */}
+        {/* Filters */}
         <div className="flex flex-wrap gap-2">
-          {SPORTS_CATEGORIES.map((cat) => (
+          {[
+            { id: 'all', label: 'Todos' },
+            { id: 'futbol', label: 'Fútbol' },
+            { id: 'basket', label: 'Baloncesto' },
+            { id: 'chaquetas', label: 'Chaquetas' },
+          ].map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeCategory === cat.id
-                  ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20'
-                  : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+              onClick={() => setFilter(cat.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                filter === cat.id
+                  ? 'bg-sky-600 text-white shadow-sm'
+                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
               }`}
             >
-              {cat.name}
+              {cat.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Grid of Products */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((product) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filtered.map((item) => (
           <div
-            key={product.id}
-            className="group bg-slate-900/60 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between hover:shadow-2xl hover:shadow-amber-500/5"
+            key={item.engineId}
+            className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-sky-300 hover:shadow-xl transition-all flex flex-col justify-between"
           >
-            {/* Image & Badge */}
-            <div className="relative aspect-video overflow-hidden bg-slate-950">
+            {/* Visual Image container */}
+            <div className="relative aspect-4/3 overflow-hidden bg-slate-100 flex items-center justify-center p-4">
               <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
-                loading="lazy"
+                src={item.image}
+                alt={item.title}
+                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-
-              <span className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md border border-slate-700/80 text-amber-400 text-[11px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
-                {product.badge}
+              <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm border border-slate-200 text-slate-800 text-[11px] font-bold px-3 py-1 rounded-full shadow-xs">
+                {item.badge}
               </span>
-
-              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-amber-400 bg-slate-950/70 px-2 py-0.5 rounded-md backdrop-blur-sm">
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <span className="font-bold text-white">{product.rating}</span>
-                <span className="text-slate-400">({product.reviewsCount})</span>
-              </div>
+              <span className="absolute bottom-4 right-4 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full">
+                Desde €{item.price}
+              </span>
             </div>
 
-            {/* Content Body */}
-            <div className="p-6 flex-1 flex flex-col justify-between">
+            {/* Content info */}
+            <div className="p-6 flex flex-col flex-1 justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
-                  {product.name}
+                <span className="text-[11px] font-bold text-sky-600 uppercase tracking-wider block mb-1">
+                  {item.gender}
+                </span>
+                <h3 className="font-extrabold text-lg text-slate-900 group-hover:text-sky-600 transition-colors">
+                  {item.title}
                 </h3>
-                <p className="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed">
-                  {product.description}
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  {item.description}
                 </p>
-
-                {/* Customizable tags */}
-                <div className="flex flex-wrap gap-1.5 mb-5">
-                  {product.customizableParts.map((part, i) => (
-                    <span
-                      key={i}
-                      className="text-[10px] bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800"
-                    >
-                      ✓ {part}
-                    </span>
-                  ))}
-                </div>
               </div>
 
-              {/* Price & Action Row */}
-              <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Desde</span>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-black text-white">${product.basePrice.toFixed(2)}</span>
-                    <span className="text-xs text-slate-400">USD</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    onSelectProduct(product);
-                    const studioEl = document.getElementById('customizer-studio');
-                    studioEl?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-amber-400/10 group-hover:shadow-amber-400/30"
-                >
-                  <span>Personalizar</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+              {/* Action Button */}
+              <button
+                onClick={() => onSelectProduct(item.engineId)}
+                className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Box className="w-4 h-4" />
+                <span>Personalizar en 3D</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         ))}

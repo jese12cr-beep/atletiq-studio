@@ -31,6 +31,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   Link2,
+  Eye,
+  ChevronDown,
+  Menu,
+  User,
+  Share2,
 } from 'lucide-react';
 import Interactive2DLab from '../../engine/compositor/Interactive2DLab';
 import LayerStack25DViewer from '../../engine/compositor/LayerStack25DViewer';
@@ -44,7 +49,9 @@ import {
   FABRIC_WEAVES,
   SPORT_FONTS,
   VOLUME_TIERS,
+  createDefaultDesignForProduct,
 } from '../../engine/core/designStore';
+import { MEXICO_PRO_KITS } from '../../data/mexicoKitsData';
 import { processUploadedArtwork, calculateEffectiveDpi } from '../../engine/core/dpiValidator';
 import {
   getDroppablePanelsForProduct,
@@ -55,13 +62,44 @@ import {
   snapRotationAngle,
 } from '../../engine/core/boundingBoxMath';
 
-const GarmentCanvas3D = lazy(() => import('../../engine/viewer3d/GarmentCanvas3D'));
+import GarmentCanvas3D from '../../engine/viewer3d/GarmentCanvas3D';
+import JerseyThumbnailMiniature from './JerseyThumbnailMiniature';
 
 const OWAYO_TABS = [
   { id: 'design', label: 'Diseño', icon: Sparkles },
   { id: 'colors', label: 'Colores', icon: Palette },
-  { id: 'text', label: 'Texto', icon: Type },
+  { id: 'text', label: 'Text', icon: Type },
   { id: 'logo', label: 'Logo', icon: Shield },
+];
+
+const ESSENTIAL_SPORT_COLORS = [
+  { hex: '#FFFFFF', name: 'Blanco' },
+  { hex: '#F1F5F9', name: 'Gris Perla' },
+  { hex: '#94A3B8', name: 'Gris Medio' },
+  { hex: '#334155', name: 'Gris Carbón' },
+  { hex: '#0F172A', name: 'Negro Noche' },
+  { hex: '#000000', name: 'Negro Puro' },
+
+  { hex: '#0B1B3D', name: 'Marino Oscuro' },
+  { hex: '#1E3A8A', name: 'Azul Marino' },
+  { hex: '#1D4ED8', name: 'Azul Real' },
+  { hex: '#0284C7', name: 'Azul Eléctrico' },
+  { hex: '#38BDF8', name: 'Celeste' },
+  { hex: '#06B6D4', name: 'Turquesa' },
+
+  { hex: '#15803D', name: 'Verde Competición' },
+  { hex: '#064E3B', name: 'Verde Bosque' },
+  { hex: '#84CC16', name: 'Verde Lima' },
+  { hex: '#FACC15', name: 'Amarillo Limón' },
+  { hex: '#D97706', name: 'Oro Deportivo' },
+  { hex: '#EA580C', name: 'Naranja Flúor' },
+
+  { hex: '#DC2626', name: 'Rojo Clásico' },
+  { hex: '#991B1B', name: 'Granate' },
+  { hex: '#FB7185', name: 'Coral / Rosa' },
+  { hex: '#E11D48', name: 'Fucsia' },
+  { hex: '#7C3AED', name: 'Morado' },
+  { hex: '#4C1D95', name: 'Púrpura Oscuro' },
 ];
 
 const CUT_OPTIONS = [
@@ -141,17 +179,17 @@ function LightDismissModal({ isOpen, onClose, titleId, title, subtitle, maxWidth
       ref={dialogRef}
       closedby="any"
       aria-labelledby={titleId}
-      className={`p-0 rounded-3xl bg-slate-900 text-slate-100 border border-slate-700/80 ${maxWidthClass} w-full shadow-2xl m-auto`}
+      className={`p-0 rounded-3xl bg-white text-slate-900 border border-slate-200 ${maxWidthClass} w-full shadow-2xl m-auto backdrop:bg-slate-950/40 backdrop:backdrop-blur-xs`}
     >
       <div className="p-5 sm:p-6 flex flex-col max-h-[90dvh]">
-        <div className="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div>
             {subtitle && (
-              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block">
+              <span className="text-[10px] font-mono text-sky-600 uppercase tracking-widest block font-bold">
                 {subtitle}
               </span>
             )}
-            <h2 id={titleId} className="text-lg sm:text-xl font-black text-white">
+            <h2 id={titleId} className="text-lg sm:text-xl font-black text-slate-900">
               {title}
             </h2>
           </div>
@@ -159,7 +197,7 @@ function LightDismissModal({ isOpen, onClose, titleId, title, subtitle, maxWidth
             type="button"
             onClick={() => dialogRef.current?.close()}
             aria-label="Cerrar ventana"
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -212,6 +250,13 @@ export default function HybridStudioWorkspace({
   const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
   const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isGarmentMenuOpen, setIsGarmentMenuOpen] = useState(false);
+  const [isMexicoKitsModalOpen, setIsMexicoKitsModalOpen] = useState(false);
+  const [garmentMenuMenSection, setGarmentMenuMenSection] = useState('custom'); // 'custom' | 'ligamx'
+  const [mexicoKitSearch, setMexicoKitSearch] = useState('');
+  const [mexicoKitRegionFilter, setMexicoKitRegionFilter] = useState('all');
+  const [mexicoKitEditionFilter, setMexicoKitEditionFilter] = useState('local'); // 'local' | 'visitante' | 'all'
+  const [activeMexicoKitId, setActiveMexicoKitId] = useState(design?.mexicoKitId || null);
   const [savedDrafts, setSavedDrafts] = useState(() => {
     try {
       const raw = localStorage.getItem(DRAFTS_STORAGE_KEY);
@@ -384,16 +429,26 @@ export default function HybridStudioWorkspace({
   };
 
   const applyColorHarmony = (harmony) => {
+    if (harmony.zones) {
+      onCommitDesign({
+        ...design,
+        colorZones: {
+          ...design.colorZones,
+          ...harmony.zones,
+        },
+      });
+      return;
+    }
     const findMeta = (hex) =>
-      PANTONE_CM5_PALETTE.find((p) => p.hex.toLowerCase() === hex.toLowerCase()) || {
+      PANTONE_CM5_PALETTE.find((p) => p.hex.toLowerCase() === hex?.toLowerCase()) || {
         hex,
         pantone: 'PMS Custom',
         code: hex,
       };
-    const p = findMeta(harmony.primary);
-    const s = findMeta(harmony.secondary);
-    const a = findMeta(harmony.accents);
-    const q = findMeta(harmony.quaternary);
+    const p = findMeta(harmony.primary || harmony.zones?.primary?.hex);
+    const s = findMeta(harmony.secondary || harmony.zones?.secondary?.hex);
+    const a = findMeta(harmony.accents || harmony.zones?.accents?.hex);
+    const q = findMeta(harmony.quaternary || harmony.zones?.quaternary?.hex);
 
     onCommitDesign({
       ...design,
@@ -698,6 +753,63 @@ export default function HybridStudioWorkspace({
     }
   };
 
+  // --- Aplicar Preset de la Colección México Pro (18 Clubes) ---
+  const handleApplyMexicoKit = (kit) => {
+    setActiveMexicoKitId(kit.id);
+
+    const baseDesign =
+      designsByProduct?.['futbol_jersey_pro_vneck'] ||
+      (design.productModelId === 'futbol_jersey_pro_vneck' ? design : null) ||
+      createDefaultDesignForProduct('futbol_jersey_pro_vneck');
+
+    const nextRoster = [...roster];
+    if (nextRoster[0]) {
+      nextRoster[0] = {
+        ...nextRoster[0],
+        name: kit.sampleName,
+        number: kit.sampleNumber,
+      };
+      onUpdateRoster(nextRoster);
+    }
+
+    onCommitDesign({
+      ...baseDesign,
+      mexicoKitId: kit.id,
+      mexicoBaseClubId: kit.baseClubId,
+      productModelId: 'futbol_jersey_pro_vneck',
+      patternId: kit.patternId,
+      colorZones: {
+        ...baseDesign.colorZones,
+        ...kit.colorZones,
+      },
+      decals: kit.decals && kit.decals.length > 0 ? kit.decals : (baseDesign.decals || []),
+      surfacePatternId: kit.surfacePatternId || 'none',
+      surfacePatternOpacity: kit.surfacePatternOpacity ?? 0.16,
+      variableSlots: {
+        ...baseDesign.variableSlots,
+        playerNameBack: {
+          ...baseDesign.variableSlots?.playerNameBack,
+          fillHex: kit.numberColor,
+          outlineHex: kit.numberOutline,
+        },
+        playerNumberBack: {
+          ...baseDesign.variableSlots?.playerNumberBack,
+          fillHex: kit.numberColor,
+          outlineHex: kit.numberOutline,
+        },
+        playerNumberFront: {
+          ...baseDesign.variableSlots?.playerNumberFront,
+          fillHex: kit.numberColor,
+          outlineHex: kit.numberOutline,
+        },
+      },
+    }, true);
+
+    setIsMexicoKitsModalOpen(false);
+    setIsGarmentMenuOpen(false);
+    showToast(`Preset cargado en 3D: ${kit.name} (${kit.clubAlias})`);
+  };
+
   // --- Importador Rápido CSV para `Ejemplares` ---
   const handleImportCsvRoster = () => {
     const lines = csvQuickInput
@@ -793,6 +905,65 @@ export default function HybridStudioWorkspace({
     }
   };
 
+  const handleOpenGarmentMenuForGender = (targetGender, section = null) => {
+    if (targetGender !== genderModule) {
+      handleGenderSwitch(targetGender);
+    }
+    if (section) {
+      setGarmentMenuMenSection(section);
+    }
+    setIsGarmentMenuOpen(true);
+  };
+
+  const filteredMexicoKitsInMenu = useMemo(() => {
+    return MEXICO_PRO_KITS.filter((kit) => {
+      // Filtro de Versión: Local / Visitante / Todos
+      if (mexicoKitEditionFilter !== 'all' && kit.edition !== mexicoKitEditionFilter) {
+        return false;
+      }
+
+      const q = mexicoKitSearch.trim().toLowerCase();
+      const matchSearch =
+        !q ||
+        kit.name.toLowerCase().includes(q) ||
+        kit.clubAlias.toLowerCase().includes(q) ||
+        kit.location.toLowerCase().includes(q) ||
+        kit.description.toLowerCase().includes(q);
+
+      if (!matchSearch) return false;
+
+      if (mexicoKitRegionFilter === 'all') return true;
+      if (mexicoKitRegionFilter === 'cdmx') return kit.location === 'CDMX';
+      if (mexicoKitRegionFilter === 'jalisco') return kit.location === 'Jalisco';
+      if (mexicoKitRegionFilter === 'norte') {
+        return ['Nuevo León', 'Coahuila', 'Sinaloa', 'Baja California', 'Chihuahua'].includes(kit.location);
+      }
+      if (mexicoKitRegionFilter === 'centro_bajio') {
+        return ['Edo. de México', 'Guanajuato', 'Hidalgo', 'Aguascalientes', 'Puebla', 'Querétaro', 'San Luis Potosí'].includes(kit.location);
+      }
+      return true;
+    });
+  }, [mexicoKitSearch, mexicoKitRegionFilter, mexicoKitEditionFilter]);
+
+  // Si hay un kit de la Liga MX activo, identificamos el club y sus 2 versiones oficiales (Local y Visitante)
+  const activeMexicoClubKits = useMemo(() => {
+    const kitId = design?.mexicoKitId || activeMexicoKitId;
+    if (!kitId || design?.productModelId !== 'futbol_jersey_pro_vneck') return null;
+    const currentKit = MEXICO_PRO_KITS.find((k) => k.id === kitId);
+    if (!currentKit) return null;
+    const baseClubId = currentKit.baseClubId;
+    const homeKit = MEXICO_PRO_KITS.find((k) => k.baseClubId === baseClubId && k.edition === 'local');
+    const awayKit = MEXICO_PRO_KITS.find((k) => k.baseClubId === baseClubId && k.edition === 'visitante');
+    return {
+      currentKit,
+      homeKit,
+      awayKit,
+      baseClubId,
+      clubAlias: currentKit.clubAlias,
+      location: currentKit.location,
+    };
+  }, [design?.mexicoKitId, design?.productModelId, activeMexicoKitId]);
+
   const menBasketball = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Baloncesto');
   const menFootball = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Fútbol');
   const menJackets = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Chaquetas');
@@ -801,164 +972,94 @@ export default function HybridStudioWorkspace({
   const womenJackets = ENGINE_PRODUCTS.filter((p) => p.gender === 'women' && p.sport === 'Chaquetas');
   const accessoryProducts = ENGINE_PRODUCTS.filter((p) => p.renderMode === 'FAUX_3D_LAYERED_WEBP');
 
+  const currentSportProducts = useMemo(() => {
+    return ENGINE_PRODUCTS.filter(
+      (p) => p.gender === genderModule && p.sport === currentProduct.sport
+    );
+  }, [genderModule, currentProduct.sport]);
+
   return (
-    <div className="h-dvh flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
+    <div className="h-dvh flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans">
       {/* 1. CABECERA MULTI-PRENDA (MÓDULOS CABALLERO & DAMA: BALONCESTO, FÚTBOL, CHAQUETAS SOFTSHELL) */}
-      <header className="shrink-0 px-3 sm:px-5 py-2.5 bg-slate-900/95 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+      <header className="shrink-0 px-3 sm:px-5 py-2.5 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 shadow-xs z-30">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onSwitchToStorefront}
-            title="Volver a la vitrina comercial"
-            className="px-2.5 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-300 flex items-center gap-1.5"
+            title="Volver a la tienda principal"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 border border-slate-300 transition-colors cursor-pointer"
           >
-            <Store className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Vitrina</span>
+            <Store className="w-4 h-4 text-sky-600" />
+            <span>← Volver a la Tienda</span>
           </button>
 
-          {/* Selector de Módulo: ♂ Caballero vs ♀ Dama */}
-          <div className="flex items-center p-0.5 bg-slate-950 rounded-xl border border-slate-800 shadow-inner">
+          {/* Segmentos Independientes: ♂ Caballero vs ♀ Dama */}
+          <div className="flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200">
             <button
+              id="btn-nav-caballero"
               type="button"
-              onClick={() => handleGenderSwitch('men')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+              onClick={() => handleOpenGarmentMenuForGender('men')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
                 genderModule === 'men'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
+              title="Abrir menú interactivo para Caballero"
             >
               <span>♂ Caballero</span>
             </button>
             <button
+              id="btn-nav-dama"
               type="button"
-              onClick={() => handleGenderSwitch('women')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+              onClick={() => handleOpenGarmentMenuForGender('women')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
                 genderModule === 'women'
-                  ? 'bg-fuchsia-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-fuchsia-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
+              title="Abrir menú interactivo para Dama"
             >
               <span>♀ Dama</span>
             </button>
           </div>
 
-          {/* Módulo Caballero */}
-          {genderModule === 'men' && (
-            <>
-              {/* Kit Baloncesto Caballero */}
-              <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
-                <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-orange-400">
-                  Basket
-                </span>
-                {menBasketball.map((prod) => (
+          {/* Menú Interactivo de Deportes y Prendas */}
+          <button
+            id="btn-open-garment-menu"
+            type="button"
+            onClick={() => setIsGarmentMenuOpen(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-800 flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+            title="Abrir catálogo interactivo de deportes"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <span>
+              {currentProduct.sport}: <strong className="text-slate-900">{currentProduct.shortName || currentProduct.name}</strong>
+            </span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+          </button>
+
+          {/* Alternador Rápido de Prendas del Deporte Activo (p. ej. Camiseta ↔ Short) */}
+          {currentSportProducts.length > 1 && (
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+              {currentSportProducts.map((prod) => {
+                const isActive = design.productModelId === prod.id;
+                const label = prod.garmentCategory === 'shorts' ? 'Short' : 'Camisa';
+                return (
                   <button
                     key={prod.id}
                     type="button"
                     onClick={() => onSwitchProduct(prod.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                      design.productModelId === prod.id
-                        ? 'bg-amber-400 text-slate-950 shadow'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-sky-600 text-white shadow-xs'
+                        : 'text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    {prod.id.includes('shorts') ? 'Short BP6' : 'Camisa B6'}
+                    {label}
                   </button>
-                ))}
-              </div>
-
-              {/* Kit Fútbol Caballero */}
-              <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
-                <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">
-                  Fútbol
-                </span>
-                {menFootball.map((prod) => (
-                  <button
-                    key={prod.id}
-                    type="button"
-                    onClick={() => onSwitchProduct(prod.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                      design.productModelId === prod.id
-                        ? 'bg-amber-400 text-slate-950 shadow'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    }`}
-                  >
-                    {prod.id.includes('shorts') ? 'Short FP3' : 'Camisa F3'}
-                  </button>
-                ))}
-              </div>
-
-              {/* Chaqueta Softshell Caballero */}
-              {menJackets.length > 0 && (
-                <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
-                  <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-sky-400">
-                    Chaqueta
-                  </span>
-                  {menJackets.map((prod) => (
-                    <button
-                      key={prod.id}
-                      type="button"
-                      onClick={() => onSwitchProduct(prod.id)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                        design.productModelId === prod.id
-                          ? 'bg-amber-400 text-slate-950 shadow'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }`}
-                    >
-                      J5 Softshell
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Módulo Dama */}
-          {genderModule === 'women' && (
-            <>
-              {/* Kit Baloncesto Dama */}
-              <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
-                <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-fuchsia-400">
-                  Basket Dama
-                </span>
-                {womenBasketball.map((prod) => (
-                  <button
-                    key={prod.id}
-                    type="button"
-                    onClick={() => onSwitchProduct(prod.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                      design.productModelId === prod.id
-                        ? 'bg-amber-400 text-slate-950 shadow'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    }`}
-                  >
-                    {prod.id.includes('shorts') ? 'Short BP7W' : 'Camisa B7W Epic'}
-                  </button>
-                ))}
-              </div>
-
-              {/* Chaqueta Softshell Dama */}
-              {womenJackets.length > 0 && (
-                <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
-                  <span className="px-1.5 text-[10px] font-black uppercase tracking-wider text-rose-400">
-                    Chaqueta Dama
-                  </span>
-                  {womenJackets.map((prod) => (
-                    <button
-                      key={prod.id}
-                      type="button"
-                      onClick={() => onSwitchProduct(prod.id)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                        design.productModelId === prod.id
-                          ? 'bg-amber-400 text-slate-950 shadow'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }`}
-                    >
-                      J5W Dama
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
+                );
+              })}
+            </div>
           )}
 
           {/* Sincronizador 1-clic Camiseta ↔ Short */}
@@ -970,53 +1071,24 @@ export default function HybridStudioWorkspace({
                 showToast(`Colores copiados a ${pairedProduct.shortName}`);
               }}
               title={`Copiar la paleta actual a ${pairedProduct.name}`}
-              className="px-2.5 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/40 text-[11px] font-bold text-sky-300 flex items-center gap-1.5"
+              className="px-2.5 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-300 text-[11px] font-bold text-sky-700 flex items-center gap-1.5 cursor-pointer"
             >
-              <Link2 className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Igualar colores en {pairedProduct.shortName}</span>
+              <Link2 className="w-3.5 h-3.5 text-sky-600" />
+              <span className="hidden xl:inline">Sincronizar colores en {pairedProduct.shortName}</span>
               <span className="xl:hidden">Sincronizar Kit</span>
             </button>
           )}
         </div>
 
-        {/* Conmutador Central 3D Real vs Molde 2D Anatómico + Carrito */}
+        {/* Carrito */}
         <div className="flex items-center gap-2">
-          {!isFaux3DAccessory && (
-            <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
-              <button
-                type="button"
-                onClick={() => setViewportMode('3d')}
-                className={`px-3 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-colors ${
-                  viewportMode === '3d'
-                    ? 'bg-amber-400 text-slate-950'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Box className="w-3.5 h-3.5" />
-                Visor 3D
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewportMode('2d')}
-                className={`px-3 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-colors ${
-                  viewportMode === '2d'
-                    ? 'bg-amber-400 text-slate-950'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Scissors className="w-3.5 h-3.5" />
-                Molde 2D Real
-              </button>
-            </div>
-          )}
-
           <button
             type="button"
             onClick={onOpenCart}
-            className="relative px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5"
+            className="relative px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <ShoppingBag className="w-4 h-4 text-amber-400" />
-            <span>{cartCount}</span>
+            <ShoppingBag className="w-4 h-4 text-sky-600" />
+            <span>Cesta ({cartCount})</span>
           </button>
         </div>
       </header>
@@ -1031,73 +1103,46 @@ export default function HybridStudioWorkspace({
 
       {/* 2. CUERPO CENTRAL OWAYO EN 2 COLUMNAS: ESCENARIO INTERACTIVO (IZQ) + PANEL DE 4 PESTAÑAS (DER) */}
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-        {/* ESCENARIO 3D / 2D ANATÓMICO */}
-        <main className="flex-1 min-h-[340px] relative bg-[radial-gradient(circle_at_50%_38%,#1e293b_0%,#020617_78%)] overflow-hidden flex flex-col">
+        {/* ESCENARIO 3D INTERACTIVO CON ILUMINACIÓN PROFESIONAL DE ESTUDIO */}
+        <main className="flex-1 min-h-[340px] relative bg-[radial-gradient(circle_at_50%_38%,#ffffff_0%,#f1f5f9_60%,#e2e8f0_100%)] overflow-hidden flex flex-col">
           {isFaux3DAccessory ? (
             <LayerStack25DViewer
               design={design}
               product={currentProduct}
               artworkRegistry={artworkRegistry}
             />
-          ) : viewportMode === '3d' ? (
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center text-sm font-mono text-slate-400">
-                  Inicializando motor 3D Owayo (.mirl + .fish)...
-                </div>
-              }
-            >
-              <GarmentCanvas3D
-                design={design}
-                activePlayer={activePlayer}
-                artworkRegistry={artworkRegistry}
-                cameraPreset={cameraPreset}
-                onChangeCameraPreset={setCameraPreset}
-                autoRotate={autoRotate}
-                selectedDecalId={selectedDecalId}
-                selectedSlotKey={selectedSlotKey}
-                onSelectDecalFrom3D={handleSelectDecalFromStage}
-                onSelectSlotFrom3D={handleSelectSlotFromStage}
-                onUpdateDecalFrom3D={updateDecal}
-                onUpdateSlotFrom3D={updateVariableSlot}
-                onDeleteDecalFrom3D={deleteDecal}
-                onMirrorDecalFrom3D={mirrorDecalToSymmetricPiece}
-                canUndo={canUndo}
-                canRedo={canRedo}
-                onUndo={onUndo}
-                onRedo={onRedo}
-                canvasSnapshotRef={canvasSnapshotRef}
-              />
-            </Suspense>
           ) : (
-            <Interactive2DLab
+            <GarmentCanvas3D
               design={design}
-              panel={panel2D}
-              onChangePanel={(nextP) => {
-                setPanel2D(nextP);
-                if (PANEL_TO_CAMERA[nextP]) setCameraPreset(PANEL_TO_CAMERA[nextP]);
-              }}
               activePlayer={activePlayer}
               artworkRegistry={artworkRegistry}
+              cameraPreset={cameraPreset}
+              onChangeCameraPreset={setCameraPreset}
+              autoRotate={autoRotate}
               selectedDecalId={selectedDecalId}
               selectedSlotKey={selectedSlotKey}
-              onSelectDecal={(id) => handleSelectDecalFromStage(id, panel2D)}
-              onSelectSlot={(slotKey) => handleSelectSlotFromStage(slotKey, panel2D)}
-              onUpdateDecal={updateDecal}
-              onUpdateSlot={updateVariableSlot}
-              onDeleteDecal={deleteDecal}
-              onMirrorDecal={mirrorDecalToSymmetricPiece}
+              onSelectDecalFrom3D={handleSelectDecalFromStage}
+              onSelectSlotFrom3D={handleSelectSlotFromStage}
+              onUpdateDecalFrom3D={updateDecal}
+              onUpdateSlotFrom3D={updateVariableSlot}
+              onDeleteDecalFrom3D={deleteDecal}
+              onMirrorDecalFrom3D={mirrorDecalToSymmetricPiece}
+              canUndo={canUndo}
+              canRedo={canRedo}
+              onUndo={onUndo}
+              onRedo={onRedo}
+              canvasSnapshotRef={canvasSnapshotRef}
             />
           )}
 
           {/* Selector rápido inferior derecho de jugador de muestra + Auto-giro */}
-          <div className="pointer-events-auto absolute bottom-3 right-3 hidden xl:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-950/85 border border-slate-800 text-[11px] backdrop-blur-sm">
-            <span className="text-slate-400">Muestra:</span>
+          <div className="pointer-events-auto absolute bottom-3 right-3 hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/90 border border-slate-300 text-[11px] backdrop-blur-sm shadow-xs text-slate-800">
+            <span className="text-slate-500 font-bold">Muestra:</span>
             <select
               value={activeRosterIndex}
               onChange={(e) => setActiveRosterIndex(Number(e.target.value))}
               aria-label="Seleccionar jugador de muestra en visor"
-              className="bg-slate-900 border border-slate-700 rounded-lg px-2 py-0.5 text-amber-300 font-bold"
+              className="bg-slate-50 border border-slate-300 rounded-lg px-2 py-0.5 text-slate-900 font-bold"
             >
               {roster.map((r, idx) => (
                 <option key={r.id || idx} value={idx}>
@@ -1106,8 +1151,8 @@ export default function HybridStudioWorkspace({
               ))}
             </select>
 
-            {viewportMode === '3d' && !isFaux3DAccessory && (
-              <label className="flex items-center gap-1.5 pl-2 border-l border-slate-800 text-slate-300 cursor-pointer">
+            {!isFaux3DAccessory && (
+              <label className="flex items-center gap-1.5 pl-2 border-l border-slate-200 text-slate-700 cursor-pointer">
                 <span>Giro 360°</span>
                 <input
                   type="checkbox"
@@ -1120,110 +1165,303 @@ export default function HybridStudioWorkspace({
           </div>
         </main>
 
-        {/* PANEL LATERAL DERECHO IDÉNTICO A OWAYO (`Diseño | Colores | Texto | Logo`) */}
-        <aside className="w-full lg:w-[430px] xl:w-[465px] shrink-0 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col min-h-0 max-h-[52vh] lg:max-h-none">
-          {/* Pestañas Principales con Anchor Positioning (`ul.owayo-tabs`) */}
-          <nav aria-label="Secciones del configurador" className="shrink-0 bg-slate-950 border-b border-slate-800">
-            <ul role="tablist" className="owayo-tabs grid grid-cols-4">
+        {/* PANEL LATERAL DERECHO OWAYO (`Diseño | Colores | Text | Logo`) */}
+        <aside className="w-full lg:w-[430px] xl:w-[465px] shrink-0 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col min-h-0 max-h-[55vh] lg:max-h-none shadow-xs">
+          {/* Cabecera del Panel Owayo: Nombre Prenda + Enlace 'Cambiar producto' + Iconos (Menú, Usuario, Cesta) */}
+          <div className="shrink-0 p-4 pb-3 border-b border-slate-200 bg-white">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h2 className="text-lg font-black text-slate-900 tracking-tight leading-tight truncate">
+                  {currentProduct.name}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setIsGarmentMenuOpen(true)}
+                  className="mt-0.5 text-xs font-semibold text-slate-600 hover:text-slate-900 underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Cambiar producto</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsGarmentMenuOpen(true)}
+                  title="Catálogo interactivo de deportes"
+                  className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsRosterModalOpen(true)}
+                  title="Lista de ejemplares y tallas"
+                  className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                >
+                  <User className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={onOpenCart}
+                  title="Cesta de la compra"
+                  className="relative p-2 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-black flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Pestañas de píldora Owayo: [ Diseño ] [ Colores ] [ Text ] [ Logo ] */}
+            <div className="flex items-center gap-2 mt-3.5">
               {OWAYO_TABS.map((t) => {
-                const Icon = t.icon;
                 const isActive = activeTab === t.id;
                 return (
-                  <li key={t.id} role="presentation" className={isActive ? 'active' : ''}>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={isActive}
-                      onClick={() => {
-                        setActiveTab(t.id);
-                      }}
-                      className={`w-full py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1.5 text-xs font-black transition-colors ${
-                        isActive ? 'text-amber-400 bg-slate-900/70' : 'text-slate-400 hover:text-slate-100'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{t.label}</span>
-                    </button>
-                  </li>
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setActiveTab(t.id)}
+                    className={`flex-1 py-1.5 px-2.5 rounded-full text-xs font-bold transition-all text-center cursor-pointer ${
+                      isActive
+                        ? 'bg-[#222222] text-white shadow-xs'
+                        : 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400 hover:bg-slate-50'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
                 );
               })}
-            </ul>
-          </nav>
+            </div>
+          </div>
 
           {/* Contenido desplazable de la pestaña activa */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* ==================== PESTAÑA 1: DISEÑO ==================== */}
             {activeTab === 'design' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-black text-white">{currentProduct.name}</h3>
-                    <p className="text-[11px] text-slate-400">
-                      {availableFishDesigns.length} plantillas multicapa reales `.fish` sin marcas de agua
-                    </p>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] font-mono text-amber-300">
-                    {currentProduct.owayoCutCode}
-                  </span>
-                </div>
+                {activeMexicoClubKits ? (
+                  /* Modo Liga MX: Exclusivamente Versión Local y Visitante (2 Versiones) */
+                  <div className="space-y-3.5">
+                    {/* Cabecera del Club Activo */}
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 text-white shadow-sm border border-slate-700/60">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-sm">🇲🇽</span>
+                            <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                              {activeMexicoClubKits.clubAlias}
+                            </span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-slate-300">
+                              {activeMexicoClubKits.location}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-300 truncate mt-1">
+                            Inspiración Liga MX 2025/2026 • 100% Libre de marcas
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          id="btn-change-club-in-design"
+                          onClick={() => setIsMexicoKitsModalOpen(true)}
+                          className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold shrink-0 transition-all cursor-pointer border border-white/10 flex items-center gap-1"
+                        >
+                          <span>Cambiar Club</span>
+                          <span>↺</span>
+                        </button>
+                      </div>
+                    </div>
 
-                {/* Cuadrícula visual de plantillas `.fish` */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {availableFishDesigns.map((dMeta) => {
-                    const isSelected = design.patternId === dMeta.id;
-                    return (
-                      <button
-                        key={dMeta.id}
-                        type="button"
-                        onClick={() => onCommitDesign({ ...design, patternId: dMeta.id }, true)}
-                        className={`p-2.5 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2 ${
-                          isSelected
-                            ? 'bg-slate-800/95 border-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.4)]'
-                            : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-1">
-                          <span className="text-xs font-black text-white truncate">{dMeta.name}</span>
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-400">
-                            {dMeta.zonesCount}Z
+                    {/* Selector de 2 Versiones: Local y Visitante */}
+                    <div>
+                      <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
+                        <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                          <span>Versiones de Diseño Oficiales (2):</span>
+                        </span>
+                        <button
+                          type="button"
+                          id="btn-return-standard-cuts"
+                          onClick={() => {
+                            setActiveMexicoKitId(null);
+                            onCommitDesign({ ...design, mexicoKitId: null }, true);
+                          }}
+                          className="text-[11px] font-bold text-slate-500 hover:text-slate-800 underline cursor-pointer"
+                        >
+                          Ver cortes estándar ({availableFishDesigns.length})
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 mt-2.5">
+                        {/* Tarjeta Versión Local */}
+                        {activeMexicoClubKits.homeKit && (
+                          <button
+                            type="button"
+                            id="btn-switch-kit-local"
+                            onClick={() => handleApplyMexicoKit(activeMexicoClubKits.homeKit)}
+                            className={`p-3 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer group ${
+                              activeMexicoClubKits.currentKit.edition === 'local'
+                                ? 'bg-emerald-50/80 border-2 border-emerald-600 shadow-sm ring-2 ring-emerald-500/20'
+                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span
+                                className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                                  activeMexicoClubKits.currentKit.edition === 'local'
+                                    ? 'bg-emerald-600 text-white'
+                                    : 'bg-slate-100 text-slate-700'
+                                }`}
+                              >
+                                🏠 Local
+                              </span>
+                              {activeMexicoClubKits.currentKit.edition === 'local' ? (
+                                <span className="text-[10px] font-black text-emerald-700 bg-emerald-100/70 px-1.5 py-0.5 rounded">
+                                  ✓ Activo en 3D
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-slate-600">
+                                  Seleccionar
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="py-2 flex justify-center bg-slate-50/60 rounded-xl border border-slate-100 group-hover:bg-emerald-50/40 transition-colors">
+                              <JerseyThumbnailMiniature kit={activeMexicoClubKits.homeKit} size={64} />
+                            </div>
+
+                            <div className="border-t border-slate-100 pt-1.5">
+                              <h5 className="text-xs font-black text-slate-900 truncate" title={activeMexicoClubKits.homeKit.name}>
+                                {activeMexicoClubKits.homeKit.name}
+                              </h5>
+                              <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5 font-medium">
+                                Corte: {activeMexicoClubKits.homeKit.patternId}
+                              </p>
+                            </div>
+                          </button>
+                        )}
+
+                        {/* Tarjeta Versión Visitante */}
+                        {activeMexicoClubKits.awayKit && (
+                          <button
+                            type="button"
+                            id="btn-switch-kit-away"
+                            onClick={() => handleApplyMexicoKit(activeMexicoClubKits.awayKit)}
+                            className={`p-3 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer group ${
+                              activeMexicoClubKits.currentKit.edition === 'visitante'
+                                ? 'bg-sky-50/80 border-2 border-sky-600 shadow-sm ring-2 ring-sky-500/20'
+                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span
+                                className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                                  activeMexicoClubKits.currentKit.edition === 'visitante'
+                                    ? 'bg-sky-600 text-white'
+                                    : 'bg-slate-100 text-slate-700'
+                                }`}
+                              >
+                                ✈️ Visita
+                              </span>
+                              {activeMexicoClubKits.currentKit.edition === 'visitante' ? (
+                                <span className="text-[10px] font-black text-sky-700 bg-sky-100/70 px-1.5 py-0.5 rounded">
+                                  ✓ Activo en 3D
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-slate-600">
+                                  Seleccionar
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="py-2 flex justify-center bg-slate-50/60 rounded-xl border border-slate-100 group-hover:bg-sky-50/40 transition-colors">
+                              <JerseyThumbnailMiniature kit={activeMexicoClubKits.awayKit} size={64} />
+                            </div>
+
+                            <div className="border-t border-slate-100 pt-1.5">
+                              <h5 className="text-xs font-black text-slate-900 truncate" title={activeMexicoClubKits.awayKit.name}>
+                                {activeMexicoClubKits.awayKit.name}
+                              </h5>
+                              <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5 font-medium">
+                                Corte: {activeMexicoClubKits.awayKit.patternId}
+                              </p>
+                            </div>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Modo Normal: Todos los estilos de corte CAD (16 cortes) */
+                  <>
+                    {/* Banner de Acceso a Presets México Pro */}
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-rose-50 border border-slate-200 shadow-xs flex items-center justify-between gap-2.5">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-base">🇲🇽</span>
+                          <span className="text-xs font-black text-slate-900 uppercase tracking-tight">
+                            Presets México Pro (36 Uniformes)
                           </span>
                         </div>
-                        {/* Vista previa cromática viva de las zonas activas del diseño */}
-                        <div className="h-3.5 w-full rounded-full overflow-hidden flex border border-slate-700/70">
-                          <span
-                            style={{ backgroundColor: design.colorZones.primary?.hex }}
-                            className="flex-1 h-full"
-                          />
-                          {dMeta.zonesCount >= 2 && (
-                            <span
-                              style={{ backgroundColor: design.colorZones.secondary?.hex }}
-                              className="flex-1 h-full"
-                            />
-                          )}
-                          {dMeta.zonesCount >= 3 && (
-                            <span
-                              style={{ backgroundColor: design.colorZones.accents?.hex }}
-                              className="w-4 h-full"
-                            />
-                          )}
-                          {dMeta.zonesCount >= 4 && (
-                            <span
-                              style={{ backgroundColor: design.colorZones.quaternary?.hex }}
-                              className="w-3 h-full"
-                            />
-                          )}
-                        </div>
-                        <span className="text-[10px] text-slate-400 line-clamp-1">{dMeta.subtitle}</span>
+                        <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                          18 Locales + 18 Visitantes • 100% legales para Shopify
+                        </p>
+                      </div>
+                      <button
+                        id="btn-open-mexico-kits"
+                        type="button"
+                        onClick={() => setIsMexicoKitsModalOpen(true)}
+                        className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shrink-0 transition-all cursor-pointer shadow-xs hover:scale-102"
+                      >
+                        Ver 36 Kits
                       </button>
-                    );
-                  })}
-                </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                      <span className="text-xs font-bold text-slate-700">
+                        Estilos de corte disponibles ({availableFishDesigns.length}):
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-500 font-semibold">
+                        {currentProduct.owayoCutCode}
+                      </span>
+                    </div>
+
+                    {/* Cuadrícula Limpia Owayo: Solo Nombres de Estilos de Diseño (Sin imagen) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {availableFishDesigns.map((dMeta) => {
+                        const isSelected = design.patternId === dMeta.id;
+                        return (
+                          <button
+                            key={dMeta.id}
+                            type="button"
+                            onClick={() => {
+                              setActiveMexicoKitId(null);
+                              onCommitDesign({ ...design, patternId: dMeta.id, mexicoKitId: null }, true);
+                            }}
+                            className={`px-3 py-3 rounded-xl border text-center transition-all flex items-center justify-center cursor-pointer min-h-[46px] ${
+                              isSelected
+                                ? 'bg-slate-100 border-2 border-slate-900 text-slate-950 font-black shadow-xs'
+                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold'
+                            }`}
+                          >
+                            <span className="text-xs truncate w-full tracking-tight">
+                              {dMeta.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
 
                 {/* Textura Geométrica Opcional sobre Zona A */}
-                <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-200">Trama Sublimada en Zona A</span>
-                    <span className="text-[10px] font-mono text-amber-300">
+                    <span className="text-xs font-bold text-slate-800">Trama Sublimada en Zona A</span>
+                    <span className="text-[10px] font-mono text-blue-600 font-bold">
                       {Math.round((design.surfacePatternOpacity ?? 0.16) * 100)}%
                     </span>
                   </div>
@@ -1233,10 +1471,10 @@ export default function HybridStudioWorkspace({
                         key={pat.id}
                         type="button"
                         onClick={() => onCommitDesign({ ...design, surfacePatternId: pat.id }, true)}
-                        className={`px-2 py-1.5 rounded-xl text-[11px] font-bold border truncate ${
+                        className={`px-2 py-1.5 rounded-xl text-[11px] font-bold border truncate cursor-pointer transition-colors ${
                           (design.surfacePatternId || 'none') === pat.id
-                            ? 'bg-amber-400 text-slate-950 border-amber-300'
-                            : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'
+                            ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
                         }`}
                       >
                         {pat.name}
@@ -1256,56 +1494,33 @@ export default function HybridStudioWorkspace({
                           false
                         )
                       }
-                      className="studio-range"
+                      className="studio-range w-full"
                     />
                   )}
                 </div>
 
-                {/* Tejido Técnico Real (Bump Maps extraídos) */}
-                <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                  <span className="text-xs font-bold text-slate-200 block">Tejido Técnico (Micro-Relieve 3D)</span>
+                {/* Tejido Técnico Real */}
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <span className="text-xs font-bold text-slate-800 block">Tejido Técnico (Micro-Relieve 3D)</span>
                   <div className="space-y-1.5">
                     {FABRIC_WEAVES.map((w) => (
                       <button
                         key={w.id}
                         type="button"
                         onClick={() => onCommitDesign({ ...design, fabricWeaveId: w.id }, true)}
-                        className={`w-full p-2 rounded-xl border text-left flex items-center justify-between ${
+                        className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between cursor-pointer transition-colors ${
                           design.fabricWeaveId === w.id
-                            ? 'bg-slate-800 border-amber-400 text-white'
-                            : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                            ? 'bg-blue-50 border-blue-600 text-blue-950 font-bold'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
                         }`}
                       >
                         <div>
                           <div className="text-xs font-bold">{w.name}</div>
-                          <div className="text-[10px] text-slate-400">{w.subtitle}</div>
+                          <div className="text-[10px] text-slate-500">{w.subtitle}</div>
                         </div>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 text-amber-300">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold">
                           {w.gsm}g
                         </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Accesorios adicionales 2.5D */}
-                <div className="pt-2 border-t border-slate-800">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-2">
-                    Otros Artículos (Capas 2.5D)
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {accessoryProducts.map((acc) => (
-                      <button
-                        key={acc.id}
-                        type="button"
-                        onClick={() => onSwitchProduct(acc.id)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
-                          design.productModelId === acc.id
-                            ? 'bg-amber-400 text-slate-950 border-amber-300'
-                            : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
-                        }`}
-                      >
-                        {acc.shortName}
                       </button>
                     ))}
                   </div>
@@ -1313,46 +1528,156 @@ export default function HybridStudioWorkspace({
               </div>
             )}
 
-            {/* ==================== PESTAÑA 2: COLORES (167 CM5 + PANTONE) ==================== */}
+            {/* ==================== PESTAÑA 2: COLORES SIMPLIFICADOS (OWAYO STYLE) ==================== */}
             {activeTab === 'colors' && (
-              <div className="space-y-3.5">
-                {/* Selector de Zona Activa */}
-                <div className="grid grid-cols-2 gap-1.5">
-                  {colorZonesMeta.map((z) => {
-                    const zVal = design.colorZones[z.id] || { hex: '#1d4ed8', pantone: 'Custom' };
-                    const isSelected = activeColorZone === z.id;
-                    return (
+              <div className="space-y-4">
+                {/* Bloques Horizontales de Color: Principal, Secundario, Cuello */}
+                <div className="space-y-3">
+                  {/* Fila 1: Color Principal + Patrón */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveColorZone('primary')}
+                      className={`flex-1 p-2 rounded-xl border text-left transition-all cursor-pointer relative ${
+                        activeColorZone === 'primary'
+                          ? 'border-2 border-slate-900 shadow-xs'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <div
+                        className="w-full h-8 rounded-lg border border-black/10 shadow-inner"
+                        style={{ backgroundColor: design.colorZones.primary?.hex || '#ffffff' }}
+                      />
+                      <div className="flex items-center justify-between mt-1 px-0.5">
+                        <span className="text-xs font-bold text-slate-800">Color principal</span>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase">
+                          {design.colorZones.primary?.hex}
+                        </span>
+                      </div>
+                      {activeColorZone === 'primary' && (
+                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-900 z-10" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('design')}
+                      title="Ver o cambiar patrón de diseño"
+                      className="w-20 p-2 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center cursor-pointer transition-colors"
+                    >
+                      <div className="w-full h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600">
+                        <Sparkles className="w-4 h-4 text-slate-500" />
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-700 mt-1">Patrón</span>
+                    </button>
+                  </div>
+
+                  {/* Fila 2: Segundo Color + Contorno */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveColorZone('secondary')}
+                      className={`flex-1 p-2 rounded-xl border text-left transition-all cursor-pointer relative ${
+                        activeColorZone === 'secondary'
+                          ? 'border-2 border-slate-900 shadow-xs'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <div
+                        className="w-full h-8 rounded-lg border border-black/10 shadow-inner"
+                        style={{ backgroundColor: design.colorZones.secondary?.hex || '#1d4ed8' }}
+                      />
+                      <div className="flex items-center justify-between mt-1 px-0.5">
+                        <span className="text-xs font-bold text-slate-800">Segundo color</span>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase">
+                          {design.colorZones.secondary?.hex}
+                        </span>
+                      </div>
+                      {activeColorZone === 'secondary' && (
+                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-900 z-10" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveColorZone('accents')}
+                      title="Color de detalles y contornos"
+                      className={`w-20 p-2 rounded-xl border transition-all cursor-pointer flex flex-col items-center justify-center ${
+                        activeColorZone === 'accents'
+                          ? 'border-2 border-slate-900 bg-white'
+                          : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+                      }`}
+                    >
+                      <div
+                        className="w-full h-8 rounded-lg border border-black/10 shadow-inner"
+                        style={{ backgroundColor: design.colorZones.accents?.hex || '#facc15' }}
+                      />
+                      <span className="text-[11px] font-bold text-slate-700 mt-1">Contorno</span>
+                    </button>
+                  </div>
+
+                  {/* Fila 3: Color Cuello (+ Mangas si aplica) */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveColorZone('collar')}
+                      className={`flex-1 p-2 rounded-xl border text-left transition-all cursor-pointer relative ${
+                        activeColorZone === 'collar'
+                          ? 'border-2 border-slate-900 shadow-xs'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <div
+                        className="w-full h-8 rounded-lg border border-black/10 shadow-inner"
+                        style={{
+                          backgroundColor:
+                            design.colorZones.collar?.hex ||
+                            design.colorZones.accents?.hex ||
+                            design.colorZones.primary?.hex ||
+                            '#101820',
+                        }}
+                      />
+                      <div className="flex items-center justify-between mt-1 px-0.5">
+                        <span className="text-xs font-bold text-slate-800">
+                          {currentProduct.garmentShape === 'basketball_tank' ? 'Ribetes Sisa / Cuello' : 'Color cuello'}
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase">
+                          {design.colorZones.collar?.hex || design.colorZones.accents?.hex}
+                        </span>
+                      </div>
+                      {activeColorZone === 'collar' && (
+                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-900 z-10" />
+                      )}
+                    </button>
+
+                    {/* Zona adicional si la prenda tiene mangas (sleeves) */}
+                    {design.colorZones.sleeves && (
                       <button
-                        key={z.id}
                         type="button"
-                        onClick={() => setActiveColorZone(z.id)}
-                        className={`p-2 rounded-xl border text-left flex items-center gap-2 transition-all ${
-                          isSelected
-                            ? 'bg-slate-800 border-amber-400 shadow'
-                            : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
+                        onClick={() => setActiveColorZone('sleeves')}
+                        title="Mangas / Puños"
+                        className={`w-20 p-2 rounded-xl border transition-all cursor-pointer flex flex-col items-center justify-center ${
+                          activeColorZone === 'sleeves'
+                            ? 'border-2 border-slate-900 bg-white'
+                            : 'border-slate-200 hover:border-slate-300 bg-slate-50'
                         }`}
                       >
-                        <span
-                          style={{ '--swatch-bg': zVal.hex }}
-                          className="pantone-dynamic-chip w-7 h-7 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-black border border-white/20"
-                        >
-                          {z.short}
-                        </span>
-                        <div className="min-w-0">
-                          <div className="text-[11px] font-bold text-white truncate">{z.label}</div>
-                          <div className="text-[9px] font-mono text-slate-400 truncate">
-                            {zVal.pantone || zVal.hex}
-                          </div>
-                        </div>
+                        <div
+                          className="w-full h-8 rounded-lg border border-black/10 shadow-inner"
+                          style={{ backgroundColor: design.colorZones.sleeves?.hex || '#ffffff' }}
+                        />
+                        <span className="text-[11px] font-bold text-slate-700 mt-1">Mangas</span>
                       </button>
-                    );
-                  })}
+                    )}
+                  </div>
                 </div>
 
-                {/* Armonías Deportivas 1-Clic + Invertir A/B */}
-                <div className="p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                {/* Paleta Oficial de 24 Colores Deportivos Owayo */}
+                <div className="pt-3 border-t border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-300">Combinaciones Rápidas Pro</span>
+                    <span className="text-xs font-bold text-slate-700">
+                      Paleta Deportiva ({activeColorZone === 'primary' ? 'Color principal' : activeColorZone === 'secondary' ? 'Segundo color' : 'Color cuello'}):
+                    </span>
                     <button
                       type="button"
                       onClick={() =>
@@ -1368,101 +1693,65 @@ export default function HybridStudioWorkspace({
                           true
                         )
                       }
-                      className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-amber-300 flex items-center gap-1"
+                      className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[10px] font-bold text-slate-700 flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Invertir Color Principal y Segundo Color"
                     >
                       <RefreshCw className="w-3 h-3" />
-                      Invertir A ↔ B
+                      <span>Invertir A ↔ B</span>
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {COLOR_HARMONY_SUGGESTIONS.map((h) => (
-                      <button
-                        key={h.id}
-                        type="button"
-                        onClick={() => applyColorHarmony(h)}
-                        className="px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center gap-2 text-left"
-                      >
-                        <span className="flex shrink-0 rounded overflow-hidden border border-white/15">
-                          <i style={{ background: h.primary }} className="w-2.5 h-4 block" />
-                          <i style={{ background: h.secondary }} className="w-2.5 h-4 block" />
-                          <i style={{ background: h.accents }} className="w-2.5 h-4 block" />
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-200 truncate">{h.name}</span>
-                      </button>
-                    ))}
+
+                  <div className="grid grid-cols-6 gap-2">
+                    {ESSENTIAL_SPORT_COLORS.map((c) => {
+                      const isCur =
+                        design.colorZones[activeColorZone]?.hex?.toUpperCase() === c.hex.toUpperCase();
+                      const isLight = ['#FFFFFF', '#F1F5F9', '#94A3B8', '#FACC15', '#38BDF8'].includes(c.hex.toUpperCase());
+                      return (
+                        <button
+                          key={c.hex}
+                          type="button"
+                          onClick={() =>
+                            updateColorZone(activeColorZone, {
+                              hex: c.hex,
+                              name: c.name,
+                              code: c.hex,
+                            })
+                          }
+                          title={c.name}
+                          className={`w-full aspect-square rounded-xl transition-all cursor-pointer flex items-center justify-center relative ${
+                            isCur
+                              ? 'ring-2 ring-slate-900 scale-105 shadow-md z-10'
+                              : 'hover:scale-105 border border-slate-300/80 shadow-xs'
+                          }`}
+                          style={{ backgroundColor: c.hex }}
+                        >
+                          {isCur && (
+                            <Check className={`w-4 h-4 ${isLight ? 'text-slate-900' : 'text-white'}`} />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
 
-                {/* Buscador y Filtros CM5 / Pantone */}
-                <div className="flex items-center gap-1.5">
-                  <div className="relative flex-1">
-                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="search"
-                      value={colorSearch}
-                      onChange={(e) => setColorSearch(e.target.value)}
-                      placeholder="Buscar Pantone, CM5 o HEX..."
-                      className="w-full pl-8 pr-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-400"
-                    />
+                  {/* Selector RGB / HEX Libre para colores corporativos exactos */}
+                  <div className="pt-2 flex items-center justify-between border-t border-slate-200">
+                    <span className="text-[11px] text-slate-500 font-medium">¿Tono institucional exacto?</span>
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-xl cursor-pointer shadow-xs transition-colors">
+                      <span>Selector Libre</span>
+                      <input
+                        type="color"
+                        value={design.colorZones[activeColorZone]?.hex || '#1d4ed8'}
+                        onChange={(e) =>
+                          updateColorZone(activeColorZone, {
+                            hex: e.target.value,
+                            name: 'Personalizado',
+                            code: e.target.value.toUpperCase(),
+                          })
+                        }
+                        className="w-5 h-5 rounded cursor-pointer border-0"
+                      />
+                    </label>
                   </div>
-                  <input
-                    type="color"
-                    value={design.colorZones[activeColorZone]?.hex || '#1d4ed8'}
-                    onChange={(e) =>
-                      updateColorZone(activeColorZone, {
-                        hex: e.target.value,
-                        pantone: 'RGB Libre',
-                        code: e.target.value.toUpperCase(),
-                      })
-                    }
-                    title="Selector RGB libre"
-                    className="w-9 h-8 rounded-lg bg-slate-950 border border-slate-700 cursor-pointer"
-                  />
-                </div>
-
-                <div className="flex gap-1">
-                  {[
-                    { id: 'all', label: 'Todos (167)' },
-                    { id: 'cm5', label: 'CM5 Sublimación' },
-                    { id: 'special', label: 'Neón & Metálicos' },
-                  ].map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setPaletteFilterMode(f.id)}
-                      className={`flex-1 py-1 rounded-lg text-[10px] font-bold border ${
-                        paletteFilterMode === f.id
-                          ? 'bg-amber-400 text-slate-950 border-amber-300'
-                          : 'bg-slate-950 text-slate-400 border-slate-800'
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Muestrario Oficial de 167 Colores */}
-                <div className="grid grid-cols-7 sm:grid-cols-8 gap-1.5 max-h-[300px] overflow-y-auto p-1">
-                  {filteredPalette.map((sw) => {
-                    const isCurrent =
-                      design.colorZones[activeColorZone]?.hex?.toLowerCase() === sw.hex.toLowerCase();
-                    return (
-                      <button
-                        key={sw.id}
-                        type="button"
-                        onClick={() => updateColorZone(activeColorZone, sw)}
-                        title={`${sw.name} (${sw.pantone}) • ${sw.hex}`}
-                        style={{ '--swatch-bg': sw.hex }}
-                        className={`pantone-dynamic-chip aspect-square rounded-xl flex flex-col items-center justify-center text-[8px] font-mono font-bold border transition-transform hover:scale-105 ${
-                          isCurrent
-                            ? 'ring-2 ring-amber-400 border-white scale-105'
-                            : 'border-white/15'
-                        }`}
-                      >
-                        {isCurrent ? <Check className="w-3.5 h-3.5" /> : sw.code}
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
             )}
@@ -1950,14 +2239,133 @@ export default function HybridStudioWorkspace({
                   </div>
                 ) : (
                   /* VISTA GENERAL DE TEXTOS: SLOTS DEL EQUIPO + TEXTOS FIJOS */
-                  <div className="space-y-3">
+                  <div className="space-y-3.5">
+                    {/* Bloque Destacado 1: Edición Directa de Dorsal y Nombre en Espalda */}
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs space-y-3.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
+                          <span className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                            Dorsal &amp; Nombre en Espalda
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setCameraPreset('back')}
+                          className="text-[11px] font-bold text-sky-600 hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Girar a Espalda</span>
+                        </button>
+                      </div>
+
+                      {/* Nombre o Apellido */}
+                      <div>
+                        <label className="text-xs font-bold text-slate-700 block mb-1">
+                          Nombre o Apellidos en la Espalda:
+                        </label>
+                        <input
+                          type="text"
+                          value={activePlayer.name || ''}
+                          onChange={(e) => {
+                            const nextName = e.target.value.toUpperCase();
+                            const nextRoster = [...roster];
+                            if (nextRoster[activeRosterIndex]) {
+                              nextRoster[activeRosterIndex] = { ...nextRoster[activeRosterIndex], name: nextName };
+                            } else if (nextRoster[0]) {
+                              nextRoster[0] = { ...nextRoster[0], name: nextName };
+                            }
+                            onUpdateRoster(nextRoster);
+                            if (!design.variableSlots?.playerNameBack?.enabled) {
+                              updateVariableSlot('playerNameBack', { ...design.variableSlots?.playerNameBack, enabled: true }, false);
+                            }
+                          }}
+                          placeholder="Ej: RODRÍGUEZ, VALVERDE, etc."
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 font-extrabold text-sm text-slate-900 uppercase focus:outline-none focus:border-sky-500 shadow-xs"
+                        />
+                      </div>
+
+                      {/* Número Dorsal */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">Número Dorsal:</label>
+                          <input
+                            type="text"
+                            maxLength={3}
+                            value={activePlayer.number || ''}
+                            onChange={(e) => {
+                              const nextNum = e.target.value;
+                              const nextRoster = [...roster];
+                              if (nextRoster[activeRosterIndex]) {
+                                nextRoster[activeRosterIndex] = { ...nextRoster[activeRosterIndex], number: nextNum };
+                              } else if (nextRoster[0]) {
+                                nextRoster[0] = { ...nextRoster[0], number: nextNum };
+                              }
+                              onUpdateRoster(nextRoster);
+                              if (!design.variableSlots?.playerNumberBack?.enabled) {
+                                updateVariableSlot('playerNumberBack', { ...design.variableSlots?.playerNumberBack, enabled: true }, false);
+                              }
+                            }}
+                            placeholder="10"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 font-black text-slate-900 text-center text-lg focus:outline-none focus:border-sky-500 shadow-xs"
+                          />
+                        </div>
+
+                        {/* Color del Dorsal */}
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">Color del Dorsal:</label>
+                          <div className="flex items-center gap-1.5 h-[46px]">
+                            {['#ffffff', '#000000', '#facc15', '#ccff00', '#dc2626', '#1d4ed8'].map((c) => (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => {
+                                  updateVariableSlot('playerNumberBack', { ...design.variableSlots?.playerNumberBack, fillHex: c }, true);
+                                  updateVariableSlot('playerNameBack', { ...design.variableSlots?.playerNameBack, fillHex: c }, true);
+                                }}
+                                className={`w-7 h-7 rounded-lg border-2 cursor-pointer transition-transform hover:scale-110 ${
+                                  design.variableSlots?.playerNumberBack?.fillHex === c ? 'border-sky-600 scale-105 shadow-xs' : 'border-slate-300'
+                                }`}
+                                style={{ backgroundColor: c }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tipografía Atlética */}
+                      <div>
+                        <label className="text-xs font-bold text-slate-700 block mb-1.5">Tipografía Atlética Oficial:</label>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {SPORT_FONTS.slice(0, 6).map((f) => (
+                            <button
+                              key={f.id}
+                              type="button"
+                              style={{ fontFamily: f.family }}
+                              onClick={() => {
+                                updateVariableSlot('playerNumberBack', { ...design.variableSlots?.playerNumberBack, fontFamily: f.family }, true);
+                                updateVariableSlot('playerNameBack', { ...design.variableSlots?.playerNameBack, fontFamily: f.family }, true);
+                              }}
+                              className={`py-2 px-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer truncate ${
+                                design.variableSlots?.playerNumberBack?.fontFamily === f.family
+                                  ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                                  : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'
+                              }`}
+                            >
+                              {f.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
                     <button
                       type="button"
                       onClick={handleAddStaticText}
-                      className="w-full py-2.5 px-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow"
+                      className="w-full py-2.5 px-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-900 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                     >
-                      <Plus className="w-4 h-4" />
-                      Añadir nuevo texto / lema / patrocinador
+                      <Plus className="w-4 h-4 text-sky-600" />
+                      <span>Añadir texto adicional / lema / sponsor</span>
                     </button>
 
                     {/* Bloque 1: Nombres y Números individuales por jugador (`Ejemplares`) */}
@@ -2580,71 +2988,93 @@ export default function HybridStudioWorkspace({
               </div>
             )}
           </div>
+
+          {/* BARRA INFERIOR OWAYO DENTRO DEL PANEL LATERAL */}
+          <div className="shrink-0 border-t border-slate-200 bg-white p-3 sm:p-4 space-y-3">
+            {/* 5 Acciones: Guardar | Mis bocetos | Ejemplares | Revisión del diseño | Compartir diseño */}
+            <div className="grid grid-cols-5 gap-1 text-center">
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                title="Guardar diseño actual"
+              >
+                <Save className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Guardar</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsDraftsModalOpen(true)}
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                title="Abrir mis bocetos guardados"
+              >
+                <FolderOpen className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Mis bocetos</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsRosterModalOpen(true)}
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                title="Lista de ejemplares y tallas"
+              >
+                <Users className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Ejemplares</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsReviewModalOpen(true)}
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                title="Revisar resolución y reglas de costura"
+              >
+                <ClipboardCheck
+                  className={`w-5 h-5 group-hover:scale-110 transition-transform ${
+                    designReviewChecks.hasWarnings ? 'text-amber-500' : 'text-slate-600 group-hover:text-slate-900'
+                  }`}
+                />
+                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Revisión</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(window.location.href);
+                  }
+                  showToast('Enlace de diseño copiado para compartir');
+                }}
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                title="Compartir enlace de este diseño"
+              >
+                <Share2 className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Compartir</span>
+              </button>
+            </div>
+
+            {/* Resumen de Precio y Botón Prominente Añadir a la Cesta */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[11px] text-slate-500 font-medium">
+                  {totalUnits} uds • ${unitPrice.toFixed(2)} c/u
+                </div>
+                <div className="text-base font-black text-slate-900">
+                  ${totalPrice.toFixed(2)} USD
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenProductionModal}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Añadir a la cesta</span>
+              </button>
+            </div>
+          </div>
         </aside>
       </div>
-
-      {/* 3. BARRA INFERIOR DE ACCIONES OWAYO (`Guardar | Mis bocetos | Ejemplares | Revisión del diseño | Añadir a la cesta`) */}
-      <footer className="shrink-0 px-3 sm:px-5 py-2.5 bg-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            onClick={handleSaveDraft}
-            className="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5"
-          >
-            <Save className="w-3.5 h-3.5 text-amber-400" />
-            <span>Guardar</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsDraftsModalOpen(true)}
-            className="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5"
-          >
-            <FolderOpen className="w-3.5 h-3.5 text-sky-400" />
-            <span>Mis bocetos ({savedDrafts.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsRosterModalOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-400/40 text-xs font-black text-amber-300 flex items-center gap-1.5"
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>Ejemplares / Tallas ({totalUnits})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsReviewModalOpen(true)}
-            className="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5"
-          >
-            <ClipboardCheck
-              className={`w-3.5 h-3.5 ${
-                designReviewChecks.hasWarnings ? 'text-rose-400' : 'text-emerald-400'
-              }`}
-            />
-            <span className="hidden sm:inline">Revisión del diseño</span>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3 ml-auto">
-          <div className="text-right hidden sm:block">
-            <span className="text-[10px] text-slate-400 block">
-              {totalUnits} uds • ${unitPrice.toFixed(2)} c/u ({currentTier.label})
-            </span>
-            <span className="text-base font-black text-white">${totalPrice.toFixed(2)} USD</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={onOpenProductionModal}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Añadir a la cesta</span>
-          </button>
-        </div>
-      </footer>
 
       {/* ==================== MODAL 1: EJEMPLARES (LISTA DE TALLAS, NOMBRES Y NÚMEROS OWAYO) ==================== */}
       <LightDismissModal
@@ -2926,6 +3356,640 @@ export default function HybridStudioWorkspace({
               </div>
             </div>
           ))}
+        </div>
+      </LightDismissModal>
+
+      {/* ==================== MODAL 4: MENÚ INTERACTIVO DE DEPORTES Y PRENDAS (CABALLERO / DAMA) ==================== */}
+      <LightDismissModal
+        isOpen={isGarmentMenuOpen}
+        onClose={() => setIsGarmentMenuOpen(false)}
+        titleId="garment-menu-title"
+        title={genderModule === 'men' ? 'Catálogo Caballero: Deportes & Liga MX' : 'Catálogo Dama: Patronaje Femenino'}
+        subtitle={
+          genderModule === 'men'
+            ? 'Personaliza desde cero tus prendas o carga los 18 uniformes inspirados en la Liga MX'
+            : 'Prendas con patronaje ergonómico adaptado a la morfología femenina'
+        }
+        maxWidthClass="max-w-4xl"
+      >
+        <div className="space-y-6">
+          {/* Segment switch inside modal: Caballero vs Dama */}
+          <div className="flex items-center justify-center p-1 bg-slate-100 rounded-2xl border border-slate-200 max-w-sm mx-auto">
+            <button
+              id="modal-tab-caballero"
+              type="button"
+              onClick={() => handleGenderSwitch('men')}
+              className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                genderModule === 'men'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              ♂ Segmento Caballero
+            </button>
+            <button
+              id="modal-tab-dama"
+              type="button"
+              onClick={() => handleGenderSwitch('women')}
+              className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                genderModule === 'women'
+                  ? 'bg-fuchsia-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              ♀ Segmento Dama
+            </button>
+          </div>
+
+          {/* ==================== SECCIÓN CABALLERO ==================== */}
+          {genderModule === 'men' && (
+            <div className="space-y-5">
+              {/* Sub-navegador Caballero: Personaliza a tu Gusto vs Inspirados en la Liga MX */}
+              <div className="flex flex-wrap items-center justify-between border-b border-slate-200 pb-3 gap-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    id="btn-men-tab-custom"
+                    type="button"
+                    onClick={() => setGarmentMenuMenSection('custom')}
+                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+                      garmentMenuMenSection === 'custom'
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Palette className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Personaliza a tu Gusto</span>
+                  </button>
+                  <button
+                    id="btn-men-tab-ligamx"
+                    type="button"
+                    onClick={() => setGarmentMenuMenSection('ligamx')}
+                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+                      garmentMenuMenSection === 'ligamx'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                    }`}
+                  >
+                    <span>🇲🇽 Inspirados en la Liga MX</span>
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-white/30 text-white">
+                      18
+                    </span>
+                  </button>
+                </div>
+
+                <span className="text-[11px] font-mono text-slate-500 font-semibold hidden sm:inline">
+                  {garmentMenuMenSection === 'custom' ? 'Moldes CAD en blanco' : '18 Clubes Primera División'}
+                </span>
+              </div>
+
+              {/* VISTA 1: PERSONALIZA A TU GUSTO (MOLDES CAD EN BLANCO) */}
+              {garmentMenuMenSection === 'custom' && (
+                <div className="space-y-5">
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed flex items-center justify-between gap-3">
+                    <div>
+                      <strong className="text-slate-900">Personalización Completa desde Cero:</strong> Selecciona una prenda para diseñar tus propios cortes, armonías de colores, escudos y patrocinadores en 3D.
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setGarmentMenuMenSection('ligamx')}
+                      className="text-xs font-black text-emerald-700 hover:text-emerald-800 underline shrink-0 cursor-pointer"
+                    >
+                      Ver Liga MX (18) →
+                    </button>
+                  </div>
+
+                  {/* Fútbol */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Fútbol Matchday (2 Piezas)
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {menFootball.map((p) => {
+                        const isCur = design.productModelId === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              onSwitchProduct(p.id);
+                              setIsGarmentMenuOpen(false);
+                            }}
+                            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                              isCur
+                                ? 'bg-sky-50 border-2 border-sky-600 text-sky-950 shadow-sm'
+                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div>
+                              <span className="text-xs font-black text-slate-900 block">{p.name}</span>
+                              <span className="text-[11px] text-slate-500 block mt-0.5">{p.badge}</span>
+                            </div>
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                              isCur ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'
+                            }`}>
+                              {isCur ? 'Activo en 3D' : 'Cargar'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Baloncesto */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-orange-600" />
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Baloncesto Arena (2 Piezas)
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {menBasketball.map((p) => {
+                        const isCur = design.productModelId === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              onSwitchProduct(p.id);
+                              setIsGarmentMenuOpen(false);
+                            }}
+                            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                              isCur
+                                ? 'bg-sky-50 border-2 border-sky-600 text-sky-950 shadow-sm'
+                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div>
+                              <span className="text-xs font-black text-slate-900 block">{p.name}</span>
+                              <span className="text-[11px] text-slate-500 block mt-0.5">{p.badge}</span>
+                            </div>
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                              isCur ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'
+                            }`}>
+                              {isCur ? 'Activo en 3D' : 'Cargar'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Chaqueta */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Chaquetas Técnicas &amp; Paseo
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {menJackets.map((p) => {
+                        const isCur = design.productModelId === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              onSwitchProduct(p.id);
+                              setIsGarmentMenuOpen(false);
+                            }}
+                            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                              isCur
+                                ? 'bg-sky-50 border-2 border-sky-600 text-sky-950 shadow-sm'
+                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div>
+                              <span className="text-xs font-black text-slate-900 block">{p.name}</span>
+                              <span className="text-[11px] text-slate-500 block mt-0.5">{p.badge}</span>
+                            </div>
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                              isCur ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'
+                            }`}>
+                              {isCur ? 'Activo en 3D' : 'Cargar'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Banner inferior para ir a Liga MX */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="space-y-0.5 text-center sm:text-left">
+                      <h5 className="text-xs font-black text-slate-900 flex items-center gap-1.5 justify-center sm:justify-start">
+                        <span>🇲🇽</span>
+                        <span>Colección de Fútbol México Pro (18 Clubes)</span>
+                      </h5>
+                      <p className="text-[11px] text-slate-600">
+                        Cortes y colores de la Primera División sin marcas comerciales para venta legal en Shopify.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setGarmentMenuMenSection('ligamx')}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-xs shrink-0 cursor-pointer transition-all"
+                    >
+                      Explorar 18 Kits →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* VISTA 2: COLECCIÓN INSPIRADA EN LA LIGA MX (18 CLUBES) */}
+              {garmentMenuMenSection === 'ligamx' && (
+                <div className="space-y-4">
+                  {/* Banner explicativo legal */}
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">🇲🇽</span>
+                        <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wide">
+                          18 Uniformes Inspirados en la Liga MX
+                        </h4>
+                        <span className="text-[10px] font-bold bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-full">
+                          Shopify Legal
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-800 leading-relaxed">
+                        Inspiraciones clásicas sin marcas de fabricantes (Nike/Adidas/Puma) ni patrocinadores registrados. Carga cualquier kit y personalízalo con tu propio nombre, dorsal y logotipo.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setGarmentMenuMenSection('custom')}
+                      className="text-xs font-bold text-emerald-800 hover:text-emerald-950 underline shrink-0 cursor-pointer"
+                    >
+                      ← Personaliza a tu gusto
+                    </button>
+                  </div>
+
+                  {/* Selector de Edición (Local vs Visitante) y Búsqueda */}
+                  <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
+                    {/* Switcher Local vs Visitante */}
+                    <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setMexicoKitEditionFilter('local')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                          mexicoKitEditionFilter === 'local'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🏠</span>
+                        <span>Local (18)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMexicoKitEditionFilter('visitante')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                          mexicoKitEditionFilter === 'visitante'
+                            ? 'bg-sky-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>✈️</span>
+                        <span>Visitante (18)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMexicoKitEditionFilter('all')}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          mexicoKitEditionFilter === 'all'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        }`}
+                      >
+                        Todos (36)
+                      </button>
+                    </div>
+
+                    {/* Barra de Búsqueda */}
+                    <div className="relative flex-1 max-w-sm">
+                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={mexicoKitSearch}
+                        onChange={(e) => setMexicoKitSearch(e.target.value)}
+                        placeholder="Buscar por club, estado o corte..."
+                        className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-medium focus:border-emerald-500 focus:outline-none"
+                      />
+                      {mexicoKitSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setMexicoKitSearch('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filtros de Región */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                      {[
+                        { id: 'all', label: 'Todas las Regiones' },
+                        { id: 'cdmx', label: 'CDMX (3)' },
+                        { id: 'jalisco', label: 'Jalisco (2)' },
+                        { id: 'norte', label: 'Norte (5)' },
+                        { id: 'centro_bajio', label: 'Centro / Bajío (8)' },
+                      ].map((reg) => (
+                        <button
+                          key={reg.id}
+                          type="button"
+                          onClick={() => setMexicoKitRegionFilter(reg.id)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 transition-colors cursor-pointer ${
+                            mexicoKitRegionFilter === reg.id
+                              ? 'bg-slate-900 text-white'
+                              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {reg.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Grid de Uniformes con Miniatura Realista 2D */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[58vh] overflow-y-auto pr-1">
+                    {filteredMexicoKitsInMenu.map((kit) => (
+                      <div
+                        key={kit.id}
+                        className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between gap-3 group"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Miniatura Vectorial Realista de la Camiseta */}
+                          <div className="p-1.5 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-emerald-50/50 transition-colors flex items-center justify-center shrink-0">
+                            <JerseyThumbnailMiniature kit={kit} size={54} />
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-[9px] font-mono uppercase font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
+                                {kit.location}
+                              </span>
+                              <span
+                                className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                                  kit.edition === 'local'
+                                    ? 'text-emerald-700 bg-emerald-50 border border-emerald-200/60'
+                                    : 'text-sky-700 bg-sky-50 border border-sky-200/60'
+                                }`}
+                              >
+                                {kit.edition === 'local' ? '🏠 Local' : '✈️ Visita'}
+                              </span>
+                            </div>
+
+                            <h4
+                              className="text-xs font-black text-slate-900 group-hover:text-emerald-700 transition-colors mt-1 leading-snug line-clamp-1"
+                              title={kit.name}
+                            >
+                              {kit.name}
+                            </h4>
+                            <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-tight">
+                              {kit.description}
+                            </p>
+                            <div className="mt-1 text-[10px] font-mono text-slate-400">
+                              Inspiración: <strong className="text-slate-700">{kit.clubAlias}</strong>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <div className="text-[10px] font-mono text-slate-400">
+                            Corte: <strong className="text-slate-600">{kit.patternId}</strong>
+                          </div>
+                          <button
+                            id={`btn-menu-kit-${kit.id}`}
+                            type="button"
+                            onClick={() => {
+                              handleApplyMexicoKit(kit);
+                              setIsGarmentMenuOpen(false);
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:scale-102 flex items-center gap-1"
+                          >
+                            <span>Cargar en 3D</span>
+                            <span>→</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {filteredMexicoKitsInMenu.length === 0 && (
+                    <div className="py-8 text-center text-slate-500 text-xs bg-slate-50 rounded-2xl border border-slate-200">
+                      No se encontraron uniformes con ese filtro. Prueba borrando el texto de búsqueda.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ==================== SECCIÓN DAMA ==================== */}
+          {genderModule === 'women' && (
+            <div className="space-y-5">
+              <div className="p-3.5 rounded-2xl bg-fuchsia-50 border border-fuchsia-200 text-xs text-fuchsia-950 leading-relaxed">
+                <strong>Patronaje Anatómico Dama:</strong> Moldes independientes diseñados especialmente para la silueta femenina, con sisa adaptada, cintura entallada y costuras ergonómicas.
+              </div>
+
+              {/* Baloncesto Dama */}
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-fuchsia-600" />
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    Baloncesto Dama (Patronaje Anatómico Femenino)
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {womenBasketball.map((p) => {
+                    const isCur = design.productModelId === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => {
+                          onSwitchProduct(p.id);
+                          setIsGarmentMenuOpen(false);
+                        }}
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                          isCur
+                            ? 'bg-fuchsia-50 border-2 border-fuchsia-600 text-fuchsia-950 shadow-sm'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div>
+                          <span className="text-xs font-black text-slate-900 block">{p.name}</span>
+                          <span className="text-[11px] text-slate-500 block mt-0.5">{p.badge}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                          isCur ? 'bg-fuchsia-600 text-white' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {isCur ? 'Activo en 3D' : 'Cargar'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Chaqueta Dama */}
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600" />
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    Chaquetas Técnicas Dama (Corte Entallado)
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {womenJackets.map((p) => {
+                    const isCur = design.productModelId === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => {
+                          onSwitchProduct(p.id);
+                          setIsGarmentMenuOpen(false);
+                        }}
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                          isCur
+                            ? 'bg-fuchsia-50 border-2 border-fuchsia-600 text-fuchsia-950 shadow-sm'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div>
+                          <span className="text-xs font-black text-slate-900 block">{p.name}</span>
+                          <span className="text-[11px] text-slate-500 block mt-0.5">{p.badge}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                          isCur ? 'bg-fuchsia-600 text-white' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {isCur ? 'Activo en 3D' : 'Cargar'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </LightDismissModal>
+
+      {/* ==================== MODAL: COLECCIÓN PRESETS MÉXICO PRO (36 UNIFORMES) ==================== */}
+      <LightDismissModal
+        isOpen={isMexicoKitsModalOpen}
+        onClose={() => setIsMexicoKitsModalOpen(false)}
+        titleId="mexico-kits-modal-title"
+        subtitle="Colección Comercial Libre de Copyright • 36 Uniformes (18 Locales + 18 Visitantes)"
+        title="🇲🇽 Presets de Fútbol México Pro"
+        maxWidthClass="max-w-5xl"
+      >
+        <div className="space-y-4">
+          <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <strong>100% Comercializable para Shopify:</strong> Plantillas de la Temporada 2026/2027 inspiradas en los 18 clubes de Primera División (versiones Local y Visitante). Libres de marcas de fabricantes (Nike/Adidas/Puma) y sin patrocinios.
+            </div>
+            {/* Switcher Local vs Visitante en Modal */}
+            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-blue-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setMexicoKitEditionFilter('local')}
+                className={`px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                  mexicoKitEditionFilter === 'local'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>🏠</span>
+                <span>Local (18)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMexicoKitEditionFilter('visitante')}
+                className={`px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                  mexicoKitEditionFilter === 'visitante'
+                    ? 'bg-sky-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>✈️</span>
+                <span>Visitante (18)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMexicoKitEditionFilter('all')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  mexicoKitEditionFilter === 'all'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Todos (36)
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+            {filteredMexicoKitsInMenu.map((kit) => (
+              <button
+                key={kit.id}
+                id={`btn-kit-${kit.id}`}
+                type="button"
+                onClick={() => handleApplyMexicoKit(kit)}
+                className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md transition-all text-left flex flex-col justify-between gap-3 shadow-xs cursor-pointer group"
+              >
+                <div className="flex items-start gap-3">
+                  {/* Miniatura Vectorial Realista de la Camiseta */}
+                  <div className="p-1.5 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-blue-50/50 transition-colors flex items-center justify-center shrink-0">
+                    <JerseyThumbnailMiniature kit={kit} size={54} />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[9px] font-mono uppercase font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
+                        {kit.location}
+                      </span>
+                      <span
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                          kit.edition === 'local'
+                            ? 'text-emerald-700 bg-emerald-50 border border-emerald-200/60'
+                            : 'text-sky-700 bg-sky-50 border border-sky-200/60'
+                        }`}
+                      >
+                        {kit.edition === 'local' ? '🏠 Local' : '✈️ Visita'}
+                      </span>
+                    </div>
+
+                    <h4 className="text-xs font-black text-slate-900 group-hover:text-blue-600 transition-colors mt-1 leading-snug line-clamp-1" title={kit.name}>
+                      {kit.name}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-tight">
+                      {kit.description}
+                    </p>
+                    <div className="mt-1 text-[10px] font-mono text-slate-400">
+                      Inspiración: <strong className="text-slate-700">{kit.clubAlias}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Corte: <strong className="text-slate-600">{kit.patternId}</strong>
+                  </span>
+                  <span className="text-xs font-bold text-blue-600 group-hover:underline flex items-center gap-1">
+                    <span>Cargar en 3D</span>
+                    <span>→</span>
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </LightDismissModal>
     </div>

@@ -13,6 +13,7 @@
 import { getPartSpec, resolveMirlKeyForProduct, computeAutoCondenseScaleX } from '../core/boundingBoxMath';
 import { getDesignsForProduct } from '../core/designStore';
 import { getFilteredArtworkDrawable } from '../core/dpiValidator';
+import { drawLigaMxGraphicMm, drawLigaMxCrestMm } from './ligaMxKitsEngine';
 
 // Caché de máscaras decodificadas `.fish`: key = `${fishUrl}` -> Promise<Map<partName, { width, height, zones: Uint8Array }>>
 const decodedFishCache = new Map();
@@ -59,7 +60,7 @@ function targetResolutionForPart(partName, nativeW = 0, nativeH = 0) {
     partName === 'LinkesBeinhinten' ||
     partName === 'RechtesBeinhinten'
   ) {
-    return [1536, 1536];
+    return [2048, 2048];
   }
   if (partName === 'LeftArm' || partName === 'RightArm') return [1024, 1024];
   if (partName.includes('Seitenteil') || partName.includes('Seitenstreifen') || partName.includes('Unterarm')) {
@@ -319,14 +320,22 @@ function drawSurfacePatternOverlay(ctx, w, h, patternId, opacity = 0.16) {
 function getOrRenderBasePartCanvas(mirlKey, partName, maskEntry, design) {
   const cacheSlotKey = `${mirlKey}|${partName}`;
   const zonesSig = JSON.stringify(design.colorZones);
-  const sig = `${design.productModelId}|${design.patternId}|${zonesSig}|${design.surfacePatternId || 'none'}|${design.surfacePatternOpacity || 0.16}`;
+  const hasMask = Boolean(maskEntry?.zones);
+  const maskSig = hasMask ? `mask_${maskEntry.width}x${maskEntry.height}` : 'no_mask';
+  const sig = `${design.productModelId}|${design.patternId}|${zonesSig}|${design.surfacePatternId || 'none'}|${design.surfacePatternOpacity || 0.16}|${maskSig}`;
 
   let slot = baseLayerCanvasCache.get(cacheSlotKey);
   const [fallbackW, fallbackH] = targetResolutionForPart(partName);
   const w = maskEntry?.width || fallbackW;
   const h = maskEntry?.height || fallbackH;
 
-  if (slot && slot.keySignature === sig && slot.canvas.width === w && slot.canvas.height === h) {
+  if (
+    slot &&
+    slot.keySignature === sig &&
+    slot.hasMask === hasMask &&
+    slot.canvas.width === w &&
+    slot.canvas.height === h
+  ) {
     return slot.canvas;
   }
 
@@ -395,7 +404,7 @@ function getOrRenderBasePartCanvas(mirlKey, partName, maskEntry, design) {
     drawSurfacePatternOverlay(ctx, w, h, design.surfacePatternId, design.surfacePatternOpacity ?? 0.16);
   }
 
-  baseLayerCanvasCache.set(cacheSlotKey, { keySignature: sig, canvas });
+  baseLayerCanvasCache.set(cacheSlotKey, { keySignature: sig, hasMask, canvas });
   return canvas;
 }
 
@@ -409,6 +418,11 @@ function drawPresetVectorCrestMm(ctx, presetId, wMm, hMm, design, tintHex = '') 
   const r = Math.min(wMm, hMm) / 2;
 
   ctx.save();
+  if (presetId?.startsWith('mx_')) {
+    drawLigaMxCrestMm(ctx, presetId, wMm, hMm, design);
+    ctx.restore();
+    return;
+  }
   if (presetId === 'eagle_hex') {
     ctx.beginPath();
     for (let i = 0; i < 6; i++) {
@@ -720,7 +734,11 @@ export function composeGarmentPartCanvas(
     drawCtx.rotate(((decal.rotationDeg || 0) * Math.PI) / 180);
     drawCtx.scale(decal.flipX ? -1 : 1, decal.flipY ? -1 : 1);
 
-    if (decal.type === 'PRESET_CREST') {
+    if (decal.type === 'LIGAMX_GRAPHIC') {
+      drawLigaMxGraphicMm(drawCtx, decal.graphicId, wMm, hMm, design);
+    } else if (decal.type === 'LIGAMX_CREST') {
+      drawLigaMxCrestMm(drawCtx, decal.clubId || decal.presetId, wMm, hMm, design);
+    } else if (decal.type === 'PRESET_CREST') {
       drawPresetVectorCrestMm(drawCtx, decal.presetId, wMm, hMm, design, decal.tintHex);
     } else if (decal.type === 'STATIC_TEXT') {
       drawStyledTextMm(drawCtx, {
