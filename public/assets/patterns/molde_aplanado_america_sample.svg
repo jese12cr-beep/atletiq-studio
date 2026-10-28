@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 3543.31 3401.57" width="1250mm" height="1200mm">
+  <defs>
+    <style>
+      .cut-line { fill: none; stroke: #111111; stroke-width: 2.2; stroke-dasharray: 8 5; }
+      .seam-line { fill: none; stroke: #0088cc; stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.7; }
+      .label-text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 800; fill: #334155; }
+      .number-stroke { font-family: 'Arial Black', Impact, sans-serif; font-weight: 900; }
+    </style>
+
+    <!-- 1. ClipPath de Delantero -->
+    <clipPath id="mold-clip-front">
+      <path d="M1696.25,1839.99c-115.97-72.21-137.49-188.38-145.49-315.14-6.82-121.39,16.51-249.79,59.6-363.19l-412.37-122.53c-3.95,79.49-28.89,164.03-73.84,230.11-25.15,36.14-56.09,67-92.41,89.5-50.93,31.55-115.47,31.55-166.39,0-36.32-22.5-67.26-53.36-92.42-89.5-44.94-66.08-69.89-150.62-73.84-230.11l-412.37,122.53c43.09,113.4,66.42,241.8,59.6,363.19-8,126.76-29.51,242.93-145.49,315.14l-1.13,1358.15c237.54,7.64,511.01,6.93,748.84,6.91,237.83.02,511.3.73,748.84-6.91L1696.25,1839.99Z" />
+    </clipPath>
+
+    <!-- 2. ClipPath de Trasero -->
+    <clipPath id="mold-clip-back">
+      <path d="M3342.55,1839.49c-120.49-74.57-145.36-205.39-138.05-337.6,8.42-122,26.92-247.98,57.83-366.38l-402.45-119.69c-32.38,42.84-72.11,90.62-122.03,113.24-42.57,18.25-97.01,28.35-143.12,30.47-46.11-2.12-100.55-12.22-143.11-30.47-49.93-22.62-89.66-70.4-122.03-113.24l-402.45,119.69c30.9,118.4,49.4,244.38,57.82,366.38,7.31,132.21-17.56,263.03-138.04,337.6l-1.07,1358.15,150.24,4.33c152.53,2.95,335.49,2.65,487.7,3.26h221.88c152.11-.61,335.3-.31,487.7-3.26l150.24-4.33L3342.55,1839.49Z" />
+    </clipPath>
+
+    <!-- 3. ClipPath de Manga Izquierda -->
+    <clipPath id="mold-clip-sleeve-left">
+      <path d="M1586.97,570.15l-25.72-10.63c-90.79-39.97-162.57-120.95-230.88-190.21-31.3-34.56-70.93-78.58-109.78-104.45-78.16-53.54-178.63-72.06-272.05-67.97-93.42-4.09-193.89,14.43-272.05,67.97-38.84,25.87-78.48,69.89-109.78,104.45-68.31,69.26-140.09,150.24-230.88,190.21l-25.72,10.63c36.15,43.9,58.86,103.48,78.87,156.04,11.56,30.09,24.45,72.15,31.54,103.61l-10.63,52.87h1077.3l-10.63-52.87c7.09-31.46,19.98-73.52,31.54-103.61C1528.11,673.63,1550.83,614.05,1586.97,570.15Z" />
+    </clipPath>
+
+    <!-- 4. ClipPath de Manga Derecha -->
+    <clipPath id="mold-clip-sleeve-right">
+      <path d="M3233.16,570.15l-25.72-10.63c-90.79-39.97-162.57-120.95-230.88-190.21-31.3-34.56-70.93-78.58-109.78-104.45-78.16-53.54-178.63-72.06-272.05-67.97-93.42-4.09-193.89,14.43-272.05,67.97-38.84,25.87-78.48,69.89-109.78,104.45-68.31,69.26-140.09,150.24-230.88,190.21l-25.72,10.63c36.15,43.9,58.86,103.48,78.87,156.04,11.56,30.09,24.45,72.15,31.54,103.61l-10.63,52.87h1077.3l-10.63-52.87c7.09-31.46,19.98-73.52,31.54-103.61C3174.3,673.63,3197.02,614.05,3233.16,570.15Z" />
+    </clipPath>
+
+    <!-- 5. ClipPath de Cuello -->
+    <clipPath id="mold-clip-collar">
+      <rect x="1700" y="823" width="145" height="1397" />
+    </clipPath>
+  </defs>
+
+  <!-- ==================== CAPA 1: FONDO & GUÍAS DE CALIBRACIÓN ==================== -->
+  <g id="BACKGROUND_CALIBRATION">
+    <!-- Marco de Hoja de Plotter de 1250 x 1200 mm -->
+    <rect x="0" y="0" width="3543.31" height="3401.57" fill="#fafafa" stroke="#e2e8f0" stroke-width="2" />
+
+    <!-- Barra de Metadatos de la Orden Superior -->
+    <rect x="50" y="30" width="3443" height="50" rx="10" fill="#0f172a" />
+    <text x="80" y="62" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="900" fill="#38bdf8" letter-spacing="1.5">
+      ATLETIQ SUBLIMATION PRINT ENGINE v5.0 • PLIEGO DE PRODUCCIÓN TEXTIL 1:1 (TALLA M)
+    </text>
+    <text x="2100" y="62" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#e2e8f0">
+      MODELO: <tspan fill="#4ade80">Club América</tspan> | JUGADOR: <tspan fill="#fde047">VALVERDE #10</tspan> | ANCHO PLIEGO: 1250 mm
+    </text>
+
+    
+      <!-- Cruces de Registro en las 4 esquinas del pliego -->
+      <g stroke="#000000" stroke-width="1.5" fill="none">
+        <!-- Esquina Superior Izquierda -->
+        <circle cx="80" cy="140" r="16" />
+        <line x1="50" y1="140" x2="110" y2="140" />
+        <line x1="80" y1="110" x2="80" y2="170" />
+
+        <!-- Esquina Superior Derecha -->
+        <circle cx="3460" cy="140" r="16" />
+        <line x1="3430" y1="140" x2="3490" y2="140" />
+        <line x1="3460" y1="110" x2="3460" y2="170" />
+
+        <!-- Esquina Inferior Izquierda -->
+        <circle cx="80" cy="3320" r="16" />
+        <line x1="50" y1="3320" x2="110" y2="3320" />
+        <line x1="80" y1="3290" x2="80" y2="3350" />
+
+        <!-- Esquina Inferior Derecha -->
+        <circle cx="3460" cy="3320" r="16" />
+        <line x1="3430" y1="3320" x2="3490" y2="3320" />
+        <line x1="3460" y1="3290" x2="3460" y2="3350" />
+      </g>
+
+      <!-- Barra de Control de Color CMYK en Pie de Página -->
+      <g transform="translate(1500, 3280)">
+        <rect x="0" y="0" width="80" height="40" fill="#00ffff" stroke="#000" stroke-width="1" />
+        <rect x="80" y="0" width="80" height="40" fill="#ff00ff" stroke="#000" stroke-width="1" />
+        <rect x="160" y="0" width="80" height="40" fill="#ffff00" stroke="#000" stroke-width="1" />
+        <rect x="240" y="0" width="80" height="40" fill="#000000" stroke="#000" stroke-width="1" />
+        <text x="340" y="27" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="#333">CMYK RIP CONTROL • 100% ESCALA REAL</text>
+      </g>
+    
+  </g>
+
+  <!-- ==================== CAPA 2: GRÁFICOS SUBLIMADOS DENTRO DE CADA PIEZA ==================== -->
+  <g id="SUBLIMATION_GRAPHICS">
+    <!-- 1. PIEZA DELANTERO (FRENTE) -->
+    <g id="PIECE_FRONT">
+      <g clip-path="url(#mold-clip-front)">
+        <!-- Fondo base con sangrado de 20 mm -->
+        <rect x="135.6" y="979" width="1620.65" height="2286" fill="#FFF0B5" />
+
+        <!-- Patrón Geométrico Sublimado -->
+        
+        <!-- Club América Chevron Azteca -->
+        <g id="pat-america-chevron">
+          <!-- Hombreras Marina -->
+          <polygon points="155.6,999 1736.25,999 1736.25,1319 945.9,1799 155.6,1319" fill="#0B1B3D" />
+          <!-- Plumas Tricolores en V -->
+          <polygon points="945.9,1799 805.9,1679 875.9,1739" fill="#C8102E" />
+          <polygon points="945.9,1799 1085.9,1679 1015.9,1739" fill="#C8102E" />
+          <polygon points="805.9,1679 665.9,1559 735.9,1619" fill="#C8102E" />
+          <polygon points="1085.9,1679 1225.9,1559 1155.9,1619" fill="#C8102E" />
+          <polygon points="665.9,1559 525.9,1439 595.9,1499" fill="#C8102E" />
+          <polygon points="1225.9,1559 1365.9,1439 1295.9,1499" fill="#C8102E" />
+          <!-- Rombo de remate central -->
+          <polygon points="945.9,1839 990.9,1904 945.9,1969 900.9,1904" fill="#C8102E" stroke="#FFD100" stroke-width="4" />
+        </g>
+      
+
+        <!-- Escudo en Pecho Izquierdo -->
+        <g id="front-crest" transform="translate(670, 1620)">
+          <circle cx="0" cy="0" r="46" fill="#ffffff" stroke="#0B1B3D" stroke-width="6" />
+          <circle cx="0" cy="0" r="36" fill="#0B1B3D" />
+          <circle cx="0" cy="0" r="22" fill="#C8102E" />
+          <text x="0" y="9" font-family="'Arial Black', sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">MX</text>
+        </g>
+
+        <!-- Número Chico Frontal Derecho (Opcional) -->
+        <text x="1220" y="1645" font-family="'Arial Black', Impact, sans-serif" font-size="75" font-weight="900" fill="#0B1B3D" stroke="#ffffff" stroke-width="5" text-anchor="middle">
+          10
+        </text>
+      </g>
+
+      <!-- Línea de Costura & Corte del Delantero -->
+      <path d="M1696.25,1839.99c-115.97-72.21-137.49-188.38-145.49-315.14-6.82-121.39,16.51-249.79,59.6-363.19l-412.37-122.53c-3.95,79.49-28.89,164.03-73.84,230.11-25.15,36.14-56.09,67-92.41,89.5-50.93,31.55-115.47,31.55-166.39,0-36.32-22.5-67.26-53.36-92.42-89.5-44.94-66.08-69.89-150.62-73.84-230.11l-412.37,122.53c43.09,113.4,66.42,241.8,59.6,363.19-8,126.76-29.51,242.93-145.49,315.14l-1.13,1358.15c237.54,7.64,511.01,6.93,748.84,6.91,237.83.02,511.3.73,748.84-6.91L1696.25,1839.99Z" class="cut-line" />
+
+      <!-- Etiqueta de Confección -->
+      
+        <text x="945.9" y="3250" class="label-text" text-anchor="middle">
+          [ 1. DELANTERO • TALLA M • CORTE PURE ]
+        </text>
+      
+    </g>
+
+    <!-- 2. PIEZA TRASERO (ESPALDA) -->
+    <g id="PIECE_BACK">
+      <g clip-path="url(#mold-clip-back)">
+        <!-- Fondo base con sangrado de 20 mm -->
+        <rect x="1785.3" y="979" width="1617.2500000000002" height="2286" fill="#FFF0B5" />
+
+        <!-- Hombreras en Espalda si aplica -->
+        <polygon points="1805.3,999 3382.55,999 3382.55,1319 1805.3,1319" fill="#0B1B3D" />
+
+        <!-- Nombre del Jugador (Tipografía Atlética Condensada) -->
+        <g id="back-player-name" transform="translate(2593.9, 1530)">
+          <text x="0" y="0" font-family="'Arial Black', sans-serif" font-size="82" font-weight="900" fill="#0B1B3D" stroke="#ffffff" stroke-width="8" paint-order="stroke fill" text-anchor="middle" letter-spacing="5">
+            VALVERDE
+          </text>
+        </g>
+
+        <!-- Dorsal Grande Oficial (250 mm de altura) -->
+        <g id="back-player-number" transform="translate(2593.9, 1980)">
+          <text x="0" y="80" font-family="'Arial Black', Impact, sans-serif" font-size="360" font-weight="900" fill="#0B1B3D" stroke="#ffffff" stroke-width="22" paint-order="stroke fill" text-anchor="middle" letter-spacing="8">
+            10
+          </text>
+        </g>
+      </g>
+
+      <!-- Línea de Costura & Corte del Trasero -->
+      <path d="M3342.55,1839.49c-120.49-74.57-145.36-205.39-138.05-337.6,8.42-122,26.92-247.98,57.83-366.38l-402.45-119.69c-32.38,42.84-72.11,90.62-122.03,113.24-42.57,18.25-97.01,28.35-143.12,30.47-46.11-2.12-100.55-12.22-143.11-30.47-49.93-22.62-89.66-70.4-122.03-113.24l-402.45,119.69c30.9,118.4,49.4,244.38,57.82,366.38,7.31,132.21-17.56,263.03-138.04,337.6l-1.07,1358.15,150.24,4.33c152.53,2.95,335.49,2.65,487.7,3.26h221.88c152.11-.61,335.3-.31,487.7-3.26l150.24-4.33L3342.55,1839.49Z" class="cut-line" />
+
+      <!-- Etiqueta de Confección -->
+      
+        <text x="2593.9" y="3250" class="label-text" text-anchor="middle">
+          [ 2. TRASERO • TALLA M • #10 VALVERDE ]
+        </text>
+      
+    </g>
+
+    <!-- 3. PIEZA MANGA IZQUIERDA -->
+    <g id="PIECE_LEFT_SLEEVE">
+      <g clip-path="url(#mold-clip-sleeve-left)">
+        <!-- Fondo base con sangrado -->
+        <rect x="449.6" y="125" width="1197.4" height="672" fill="#0B1B3D" />
+
+        <!-- Ribete de Puño Inferior (40 mm) -->
+        <rect x="469.6" y="647" width="1157.4" height="100" fill="#0B1B3D" />
+        <rect x="469.6" y="632" width="1157.4" height="15" fill="#C8102E" />
+      </g>
+
+      <path d="M1586.97,570.15l-25.72-10.63c-90.79-39.97-162.57-120.95-230.88-190.21-31.3-34.56-70.93-78.58-109.78-104.45-78.16-53.54-178.63-72.06-272.05-67.97-93.42-4.09-193.89,14.43-272.05,67.97-38.84,25.87-78.48,69.89-109.78,104.45-68.31,69.26-140.09,150.24-230.88,190.21l-25.72,10.63c36.15,43.9,58.86,103.48,78.87,156.04,11.56,30.09,24.45,72.15,31.54,103.61l-10.63,52.87h1077.3l-10.63-52.87c7.09-31.46,19.98-73.52,31.54-103.61C1528.11,673.63,1550.83,614.05,1586.97,570.15Z" class="cut-line" />
+
+      
+        <text x="1048.3" y="782" class="label-text" text-anchor="middle">
+          [ 3. MANGA IZQUIERDA • TALLA M ]
+        </text>
+      
+    </g>
+
+    <!-- 4. PIEZA MANGA DERECHA -->
+    <g id="PIECE_RIGHT_SLEEVE">
+      <g clip-path="url(#mold-clip-sleeve-right)">
+        <!-- Fondo base con sangrado -->
+        <rect x="2095.8" y="125" width="1197.3999999999996" height="672" fill="#0B1B3D" />
+
+        <!-- Ribete de Puño Inferior (40 mm) -->
+        <rect x="2115.8" y="647" width="1157.3999999999996" height="100" fill="#0B1B3D" />
+        <rect x="2115.8" y="632" width="1157.3999999999996" height="15" fill="#C8102E" />
+      </g>
+
+      <path d="M3233.16,570.15l-25.72-10.63c-90.79-39.97-162.57-120.95-230.88-190.21-31.3-34.56-70.93-78.58-109.78-104.45-78.16-53.54-178.63-72.06-272.05-67.97-93.42-4.09-193.89,14.43-272.05,67.97-38.84,25.87-78.48,69.89-109.78,104.45-68.31,69.26-140.09,150.24-230.88,190.21l-25.72,10.63c36.15,43.9,58.86,103.48,78.87,156.04,11.56,30.09,24.45,72.15,31.54,103.61l-10.63,52.87h1077.3l-10.63-52.87c7.09-31.46,19.98-73.52,31.54-103.61C3174.3,673.63,3197.02,614.05,3233.16,570.15Z" class="cut-line" />
+
+      
+        <text x="2694.5" y="782" class="label-text" text-anchor="middle">
+          [ 4. MANGA DERECHA • TALLA M ]
+        </text>
+      
+    </g>
+
+    <!-- 5. PIEZA CUELLO / RIBETE -->
+    <g id="PIECE_COLLAR">
+      <g clip-path="url(#mold-clip-collar)">
+        <!-- Fondo del cuello -->
+        <rect x="1670" y="793" width="205" height="1457" fill="#0B1B3D" />
+        <!-- Línea central de acento -->
+        <rect x="1760" y="793" width="25" height="1457" fill="#C8102E" />
+      </g>
+
+      
+        <rect x="1700" y="823" width="145" height="1397" class="cut-line" />
+      
+
+      
+        <text x="1772.5" y="2265" class="label-text" text-anchor="middle">
+          [ 5. CUELLO ]
+        </text>
+      
+    </g>
+  </g>
+</svg>

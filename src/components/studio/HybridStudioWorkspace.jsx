@@ -64,6 +64,7 @@ import {
 
 import GarmentCanvas3D from '../../engine/viewer3d/GarmentCanvas3D';
 import JerseyThumbnailMiniature from './JerseyThumbnailMiniature';
+import ProductionMoldModal from './ProductionMoldModal';
 
 const OWAYO_TABS = [
   { id: 'design', label: 'Diseño', icon: Sparkles },
@@ -252,6 +253,7 @@ export default function HybridStudioWorkspace({
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isGarmentMenuOpen, setIsGarmentMenuOpen] = useState(false);
   const [isMexicoKitsModalOpen, setIsMexicoKitsModalOpen] = useState(false);
+  const [isProductionMoldModalOpen, setIsProductionMoldModalOpen] = useState(false);
   const [garmentMenuMenSection, setGarmentMenuMenSection] = useState('custom'); // 'custom' | 'ligamx'
   const [mexicoKitSearch, setMexicoKitSearch] = useState('');
   const [mexicoKitRegionFilter, setMexicoKitRegionFilter] = useState('all');
@@ -3039,6 +3041,17 @@ export default function HybridStudioWorkspace({
 
               <button
                 type="button"
+                id="btn-open-production-mold"
+                onClick={() => setIsProductionMoldModalOpen(true)}
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-blue-700 hover:text-blue-950 hover:bg-blue-50 transition-colors cursor-pointer group border border-blue-200/80 shadow-xs"
+                title="Abrir molde 2D de confección y corte a escala real 1:1 (MOLDE CAMISA.svg)"
+              >
+                <Scissors className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black tracking-tight text-blue-700 leading-none">Molde 2D</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => {
                   if (navigator.clipboard) {
                     navigator.clipboard.writeText(window.location.href);
@@ -3992,6 +4005,14 @@ export default function HybridStudioWorkspace({
           </div>
         </div>
       </LightDismissModal>
+
+      {/* ==================== MODAL 6: MOLDES 2D DE CONFECCIÓN Y CORTE A ESCALA REAL 1:1 ==================== */}
+      <ProductionMoldModal
+        isOpen={isProductionMoldModalOpen}
+        onClose={() => setIsProductionMoldModalOpen(false)}
+        design={design}
+        roster={roster}
+      />
     </div>
   );
 }
