@@ -1,13 +1,18 @@
 /**
- * ATLETIQ Engine — Motor de Aplanado 3D a 2D y Generador de Moldes de Confección
+ * ATLETIQ Engine — Motor de Aplanado 3D a 2D y Generador de Moldes de Confección Textil (Grado Industrial)
  *
- * Mapea y proyecta las personalizaciones 3D (colores, patrones geométricos de Liga MX,
- * cortes CAD, escudos heráldicos, nombres, dorsales y parches) directamente sobre
- * los moldes físicos de patronaje y corte textil basados en MOLDE CAMISA.svg (Talla M, escala 1:1).
+ * Proyecta con precisión milimétrica 1:1 cualquier diseño 3D personalizado (18 Clubes de Liga MX Local/Visita
+ * y uniformes a medida) sobre los 4 moldes físicos de patronaje extraídos de MOLDE CAMISA.svg (Talla M).
  *
  * Dimensiones físicas del pliego: 1250 mm x 1200 mm (viewBox="0 0 3543.31 3401.57")
  * Factor de conversión: 1 mm = 2.83464567 pt (72 pt/in / 25.4 mm/in)
  */
+
+import {
+  MOLDE_CAMISA_STYLE,
+  MOLDE_CAMISA_BACKGROUND_INNER,
+  MOLDE_PATHS,
+} from './moldeCamisaTemplate';
 
 export const MOLD_CONSTANTS = {
   VIEWBOX: '0 0 3543.31 3401.57',
@@ -17,472 +22,490 @@ export const MOLD_CONSTANTS = {
   HEIGHT_MM: 1200,
   PT_PER_MM: 2.83464567,
 
-  // Geometría y centros de cada pieza anatómica en el pliego
   PIECES: {
     FRONT: {
       id: 'front',
       name: 'Delantero / Frente',
-      tag: 'TALLA M • FRENTE',
-      pathD:
-        'M1696.25,1839.99c-115.97-72.21-137.49-188.38-145.49-315.14-6.82-121.39,16.51-249.79,59.6-363.19l-412.37-122.53c-3.95,79.49-28.89,164.03-73.84,230.11-25.15,36.14-56.09,67-92.41,89.5-50.93,31.55-115.47,31.55-166.39,0-36.32-22.5-67.26-53.36-92.42-89.5-44.94-66.08-69.89-150.62-73.84-230.11l-412.37,122.53c43.09,113.4,66.42,241.8,59.6,363.19-8,126.76-29.51,242.93-145.49,315.14l-1.13,1358.15c237.54,7.64,511.01,6.93,748.84,6.91,237.83.02,511.3.73,748.84-6.91L1696.25,1839.99Z',
-      bounds: { minX: 195.6, maxX: 1696.25, minY: 1039, maxY: 3205 },
-      centerX: 945.9,
-      centerY: 2122,
-      widthMm: 529.4,
-      heightMm: 764.1,
-      chestY: 1580, // Altura del esternón/pecho para escudo y patrocinador
-      crestPos: { x: 670, y: 1620, radius: 46 }, // Escudo lado izquierdo (corazón)
-      numberPos: { x: 1220, y: 1620, size: 90 }, // Número chico frente derecho
-      centerChestY: 1720,
+      tag: '[ 1. DELANTERO / FRENTE • TALLA M ]',
+      pathD: MOLDE_PATHS.FRENTE,
+      bounds: { x: 199.7, y: 1039.13, width: 1497.68, height: 2165.95 },
+      centerX: 948.54,
+      centerY: 2122.1,
+      chestY: 1630,
+      crestX: 690,
+      crestY: 1630,
+      crestRadius: 115,
+      frontNumX: 1210,
+      frontNumY: 1630,
     },
     BACK: {
       id: 'back',
       name: 'Trasero / Espalda',
-      tag: 'TALLA M • ESPALDA',
-      pathD:
-        'M3342.55,1839.49c-120.49-74.57-145.36-205.39-138.05-337.6,8.42-122,26.92-247.98,57.83-366.38l-402.45-119.69c-32.38,42.84-72.11,90.62-122.03,113.24-42.57,18.25-97.01,28.35-143.12,30.47-46.11-2.12-100.55-12.22-143.11-30.47-49.93-22.62-89.66-70.4-122.03-113.24l-402.45,119.69c30.9,118.4,49.4,244.38,57.82,366.38,7.31,132.21-17.56,263.03-138.04,337.6l-1.07,1358.15,150.24,4.33c152.53,2.95,335.49,2.65,487.7,3.26h221.88c152.11-.61,335.3-.31,487.7-3.26l150.24-4.33L3342.55,1839.49Z',
-      bounds: { minX: 1845.3, maxX: 3342.55, minY: 1039, maxY: 3205 },
-      centerX: 2593.9,
-      centerY: 2122,
-      widthMm: 528.2,
-      heightMm: 764.1,
-      nameY: 1530, // Posición del nombre del jugador en hombros
-      numberY: 1980, // Centro del dorsal grande (250 mm)
+      tag: '[ 2. TRASERO / ESPALDA • TALLA M ]',
+      pathD: MOLDE_PATHS.TRASERO,
+      bounds: { x: 1845.85, y: 1015.82, width: 1497.76, height: 2189.41 },
+      centerX: 2594.73,
+      centerY: 2110.53,
+      nameY: 1530,
+      numberY: 2050,
     },
     LEFT_SLEEVE: {
       id: 'left_sleeve',
       name: 'Manga Izquierda',
-      tag: 'TALLA M • MANGA IZQ',
-      pathD:
-        'M1586.97,570.15l-25.72-10.63c-90.79-39.97-162.57-120.95-230.88-190.21-31.3-34.56-70.93-78.58-109.78-104.45-78.16-53.54-178.63-72.06-272.05-67.97-93.42-4.09-193.89,14.43-272.05,67.97-38.84,25.87-78.48,69.89-109.78,104.45-68.31,69.26-140.09,150.24-230.88,190.21l-25.72,10.63c36.15,43.9,58.86,103.48,78.87,156.04,11.56,30.09,24.45,72.15,31.54,103.61l-10.63,52.87h1077.3l-10.63-52.87c7.09-31.46,19.98-73.52,31.54-103.61C1528.11,673.63,1550.83,614.05,1586.97,570.15Z',
-      bounds: { minX: 509.6, maxX: 1587, minY: 185, maxY: 737 },
-      centerX: 1048.3,
-      centerY: 461,
-      hemY: 737,
+      tag: '[ 3. MANGA IZQUIERDA • TALLA M ]',
+      pathD: MOLDE_PATHS.MANGA_IZQUIERDA,
+      bounds: { x: 310.11, y: 196.34, width: 1276.86, height: 686.33 },
+      centerX: 948.54,
+      centerY: 539.51,
+      cuffY: 800,
     },
     RIGHT_SLEEVE: {
       id: 'right_sleeve',
       name: 'Manga Derecha',
-      tag: 'TALLA M • MANGA DER',
-      pathD:
-        'M3233.16,570.15l-25.72-10.63c-90.79-39.97-162.57-120.95-230.88-190.21-31.3-34.56-70.93-78.58-109.78-104.45-78.16-53.54-178.63-72.06-272.05-67.97-93.42-4.09-193.89,14.43-272.05,67.97-38.84,25.87-78.48,69.89-109.78,104.45-68.31,69.26-140.09,150.24-230.88,190.21l-25.72,10.63c36.15,43.9,58.86,103.48,78.87,156.04,11.56,30.09,24.45,72.15,31.54,103.61l-10.63,52.87h1077.3l-10.63-52.87c7.09-31.46,19.98-73.52,31.54-103.61C3174.3,673.63,3197.02,614.05,3233.16,570.15Z',
-      bounds: { minX: 2155.8, maxX: 3233.2, minY: 185, maxY: 737 },
-      centerX: 2694.5,
-      centerY: 461,
-      hemY: 737,
-    },
-    COLLAR: {
-      id: 'collar',
-      name: 'Cuello / Ribete',
-      tag: 'TALLA M • CUELLO',
-      // Rectángulo original rotado 90 grados: x: 1700 a 1845, y: 823 a 2220
-      bounds: { minX: 1700, maxX: 1845, minY: 823, maxY: 2220 },
-      widthPt: 144.35,
-      heightPt: 1397.62,
-      transform: 'translate(2666.7948 -876.4772) rotate(90)',
+      tag: '[ 4. MANGA DERECHA • TALLA M ]',
+      pathD: MOLDE_PATHS.MANGA_DERECHA,
+      bounds: { x: 1956.3, y: 196.34, width: 1276.86, height: 686.33 },
+      centerX: 2594.73,
+      centerY: 539.51,
+      cuffY: 800,
     },
   },
 };
 
 /**
- * Genera el marcado SVG de patrones gráficos de la Liga MX para incrustar dentro del molde plano.
+ * Genera el arte vectorial de un club de la Liga MX o patrón personalizado.
  */
-function generateLigaMxSvgPattern(graphicId, piece, design) {
-  const isAway = design.mexicoKitId?.includes('away') || design.colorZones?.primary?.hex?.toLowerCase() === '#0b1b3d';
-  const primary = design.colorZones?.primary?.hex || '#ffffff';
-  const secondary = design.colorZones?.secondary?.hex || '#0f172a';
-  const accents = design.colorZones?.accents?.hex || '#ffcd00';
+function generateFrontAndBackGraphics(design, frenteCenterX, traseroCenterX, isAway) {
+  let graphicId = null;
+  let crestId = null;
 
-  const cx = piece.centerX;
-  const cy = piece.centerY;
-  const b = piece.bounds;
-  const w = b.maxX - b.minX;
-  const h = b.maxY - b.minY;
+  (design?.decals || []).forEach((d) => {
+    if (d.type === 'LIGAMX_GRAPHIC') graphicId = d.graphicId;
+    if (d.type === 'LIGAMX_CREST') crestId = d.clubId || d.presetId;
+    if (d.type === 'PRESET_CREST') crestId = d.presetId;
+  });
 
-  switch (graphicId) {
-    case 'mx_america_aztec_chevron': {
-      // Chevron Azteca V tricolor gigante centrado en el pecho
-      const chevronY = b.minY + 280;
-      const vDepth = 480;
-      return `
-        <!-- Club América Chevron Azteca -->
-        <g id="pat-america-chevron">
-          <!-- Hombreras Marina -->
-          <polygon points="${b.minX - 40},${b.minY - 40} ${b.maxX + 40},${b.minY - 40} ${b.maxX + 40},${chevronY} ${cx},${chevronY + vDepth} ${b.minX - 40},${chevronY}" fill="${secondary}" />
-          <!-- Plumas Tricolores en V -->
-          <polygon points="${cx},${chevronY + vDepth} ${cx - 140},${chevronY + vDepth - 120} ${cx - 70},${chevronY + vDepth - 60}" fill="${accents}" />
-          <polygon points="${cx},${chevronY + vDepth} ${cx + 140},${chevronY + vDepth - 120} ${cx + 70},${chevronY + vDepth - 60}" fill="${accents}" />
-          <polygon points="${cx - 140},${chevronY + vDepth - 120} ${cx - 280},${chevronY + vDepth - 240} ${cx - 210},${chevronY + vDepth - 180}" fill="${accents}" />
-          <polygon points="${cx + 140},${chevronY + vDepth - 120} ${cx + 280},${chevronY + vDepth - 240} ${cx + 210},${chevronY + vDepth - 180}" fill="${accents}" />
-          <polygon points="${cx - 280},${chevronY + vDepth - 240} ${cx - 420},${chevronY + vDepth - 360} ${cx - 350},${chevronY + vDepth - 300}" fill="${accents}" />
-          <polygon points="${cx + 280},${chevronY + vDepth - 240} ${cx + 420},${chevronY + vDepth - 360} ${cx + 350},${chevronY + vDepth - 300}" fill="${accents}" />
-          <!-- Rombo de remate central -->
-          <polygon points="${cx},${chevronY + vDepth + 40} ${cx + 45},${chevronY + vDepth + 105} ${cx},${chevronY + vDepth + 170} ${cx - 45},${chevronY + vDepth + 105}" fill="${accents}" stroke="#FFD100" stroke-width="4" />
-        </g>
-      `;
-    }
-
-    case 'mx_chivas_stripes': {
-      // 5 Rayas rojas y 4 blancas tradicionales
-      const stripeW = w / 9;
-      let stripesSvg = '<g id="pat-chivas-stripes">';
-      for (let i = 0; i < 9; i++) {
-        const fill = i % 2 === 0 ? secondary : primary;
-        const sx = b.minX + i * stripeW;
-        stripesSvg += `<rect x="${sx}" y="${b.minY - 30}" width="${stripeW + 2}" height="${h + 60}" fill="${fill}" />`;
-      }
-      stripesSvg += '</g>';
-      return stripesSvg;
-    }
-
-    case 'mx_pumas_giant_feline': {
-      // Gran silueta felina en pecho
-      const pumaSize = 340;
-      return `
-        <!-- Pumas Cabeza Felina Monumental -->
-        <g id="pat-pumas-feline" transform="translate(${cx}, ${piece.chestY + 120}) scale(${pumaSize / 100})">
-          <path d="M-40 -40 Q0 -34 40 -40 Q62 -35 62 -10 Q58 35 0 55 Q-58 35 -62 -10 Q-62 -35 -40 -40 Z" fill="${secondary}" stroke="${accents}" stroke-width="4" />
-          <!-- Ojos y Nariz -->
-          <polygon points="-22,-5 -10,-10 -22,-15" fill="${primary}" />
-          <polygon points="22,-5 10,-10 22,-15" fill="${primary}" />
-          <polygon points="0,5 8,24 -8,24" fill="${primary}" />
-        </g>
-      `;
-    }
-
-    case 'mx_tigres_chest_bar': {
-      // Franja horizontal en pecho
-      const barY = piece.chestY + 40;
-      return `
-        <!-- Tigres Franja Horizontal Pecho -->
-        <g id="pat-tigres-bar">
-          <rect x="${b.minX - 40}" y="${barY}" width="${w + 80}" height="140" fill="${secondary}" />
-          <rect x="${b.minX - 40}" y="${barY}" width="${w + 80}" height="8" fill="#ffffff" />
-          <rect x="${b.minX - 40}" y="${barY + 132}" width="${w + 80}" height="8" fill="#ffffff" />
-          <text x="${cx}" y="${barY + 95}" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="900" fill="${primary}" text-anchor="middle" letter-spacing="8">TIGRES</text>
-        </g>
-      `;
-    }
-
-    case 'mx_puebla_franja_sash': {
-      // La legendaria Franja Diagonal a -32°
-      return `
-        <!-- Puebla Franja Diagonal -->
-        <g id="pat-puebla-sash">
-          <polygon points="${b.minX + 80},${b.minY} ${b.minX + 380},${b.minY} ${b.maxX},${b.maxY - 400} ${b.maxX - 300},${b.maxY - 400}" fill="${secondary}" />
-          <line x1="${b.minX + 80}" y1="${b.minY}" x2="${b.maxX - 300}" y2="${b.maxY - 400}" stroke="#ffffff" stroke-width="8" />
-          <line x1="${b.minX + 380}" y1="${b.minY}" x2="${b.maxX}" y2="${b.maxY - 400}" stroke="#ffffff" stroke-width="8" />
-        </g>
-      `;
-    }
-
-    case 'mx_atlas_half_split': {
-      // División vertical 50/50 roja y negra
-      return `
-        <!-- Atlas 50/50 -->
-        <g id="pat-atlas-half">
-          <rect x="${b.minX - 40}" y="${b.minY - 40}" width="${w / 2 + 40}" height="${h + 80}" fill="${primary}" />
-          <rect x="${cx}" y="${b.minY - 40}" width="${w / 2 + 40}" height="${h + 80}" fill="${secondary}" />
-          <line x1="${cx}" y1="${b.minY - 40}" x2="${cx}" y2="${b.maxY + 40}" stroke="#ffffff" stroke-width="3" opacity="0.6" />
-        </g>
-      `;
-    }
-
-    default:
-      return '';
+  if (!graphicId && design?.mexicoKitId) {
+    const k = design.mexicoKitId.toLowerCase();
+    if (k.includes('america')) graphicId = 'mx_america_aztec_chevron';
+    else if (k.includes('chivas')) graphicId = 'mx_chivas_stripes';
+    else if (k.includes('pumas')) graphicId = 'mx_pumas_puma_face';
+    else if (k.includes('tigres')) graphicId = 'mx_tigres_chest_bar';
+    else if (k.includes('cruz_azul')) graphicId = 'mx_cruz_azul_front';
+    else if (k.includes('monterrey')) graphicId = 'mx_monterrey_stripes';
+    else if (k.includes('atlas')) graphicId = 'mx_atlas_50_50';
+    else if (k.includes('puebla')) graphicId = 'mx_puebla_sash';
+    else if (k.includes('santos')) graphicId = 'mx_santos_hoops';
+    else if (k.includes('toluca')) graphicId = 'mx_toluca_front';
+    else if (k.includes('leon')) graphicId = 'mx_leon_front';
+    else if (k.includes('pachuca')) graphicId = 'mx_pachuca_stripes';
+    else if (k.includes('tijuana')) graphicId = 'mx_tijuana_xolos';
+    else if (k.includes('necaxa')) graphicId = 'mx_necaxa_stripes';
+    else if (k.includes('juarez')) graphicId = 'mx_juarez_front';
+    else if (k.includes('mazatlan')) graphicId = 'mx_mazatlan_front';
+    else if (k.includes('queretaro')) graphicId = 'mx_queretaro_stripes';
+    else if (k.includes('san_luis')) graphicId = 'mx_atletico_san_luis_stripes';
   }
+
+  if (!crestId && design?.mexicoKitId) {
+    const k = design.mexicoKitId.toLowerCase();
+    if (k.includes('america')) crestId = 'mx_america';
+    else if (k.includes('chivas')) crestId = 'mx_chivas';
+    else if (k.includes('pumas')) crestId = 'mx_pumas';
+    else if (k.includes('tigres')) crestId = 'mx_tigres';
+    else if (k.includes('cruz_azul')) crestId = 'mx_cruz_azul';
+    else if (k.includes('monterrey')) crestId = 'mx_monterrey';
+    else if (k.includes('atlas')) crestId = 'mx_atlas';
+    else if (k.includes('puebla')) crestId = 'mx_puebla';
+    else if (k.includes('santos')) crestId = 'mx_santos';
+    else if (k.includes('toluca')) crestId = 'mx_toluca';
+    else if (k.includes('leon')) crestId = 'mx_leon';
+    else if (k.includes('pachuca')) crestId = 'mx_pachuca';
+    else if (k.includes('tijuana')) crestId = 'mx_tijuana';
+    else if (k.includes('necaxa')) crestId = 'mx_necaxa';
+    else if (k.includes('juarez')) crestId = 'mx_juarez';
+    else if (k.includes('mazatlan')) crestId = 'mx_mazatlan';
+    else if (k.includes('queretaro')) crestId = 'mx_queretaro';
+    else if (k.includes('san_luis')) crestId = 'mx_san_luis';
+  }
+
+  const primaryColor = design?.colorZones?.primary?.hex || '#FFF0B5';
+  const secondaryColor = design?.colorZones?.secondary?.hex || '#0A1A3A';
+  const accentsColor = design?.colorZones?.accents?.hex || '#F5A800';
+
+  let frontGraphicSvg = '';
+  let backGraphicSvg = '';
+
+  // 1. CLUB AMÉRICA: V Azteca Plumaje Tri-color
+  if (graphicId === 'mx_america_aztec_chevron') {
+    const vApexX = frenteCenterX;
+    const vApexY = 1860;
+    const vLeftWingX = 180;
+    const vLeftWingY = 1460;
+    const vRightWingX = 1715;
+    const vRightWingY = 1460;
+
+    const yokeColor = isAway ? '#FFF0B5' : secondaryColor;
+    const redColor = '#C8102E';
+    const blueColor = isAway ? '#C8102E' : '#003DA5';
+    const yellowColor = isAway ? '#0A1A3A' : '#F5A800';
+
+    const yokePath = `M170,1010 L1725,1010 L${vRightWingX},${vRightWingY} L${vApexX},${vApexY} L${vLeftWingX},${vLeftWingY} Z`;
+
+    const count = 9;
+    let tRow1 = '';
+    let tRow2 = '';
+    let tRow3 = '';
+
+    for (let i = 0; i < count; i++) {
+      const t0 = i / count;
+      const t1 = (i + 1) / count;
+
+      const lx0 = vLeftWingX + t0 * (vApexX - vLeftWingX);
+      const ly0 = vLeftWingY + t0 * (vApexY - vLeftWingY);
+      const lx1 = vLeftWingX + t1 * (vApexX - vLeftWingX);
+      const ly1 = vLeftWingY + t1 * (vApexY - vLeftWingY);
+      const lmidX = (lx0 + lx1) / 2;
+
+      const rx0 = vApexX + t0 * (vRightWingX - vApexX);
+      const ry0 = vApexY - t0 * (vApexY - vRightWingY);
+      const rx1 = vApexX + t1 * (vRightWingX - vApexX);
+      const ry1 = vApexY - t1 * (vApexY - vRightWingY);
+      const rmidX = (rx0 + rx1) / 2;
+
+      // Fila 1: Carmesí
+      const r1H = 55;
+      tRow1 += `<polygon points="${lx0.toFixed(1)},${ly0.toFixed(1)} ${lx1.toFixed(1)},${ly1.toFixed(1)} ${lmidX.toFixed(1)},${(ly0 + r1H).toFixed(1)}" fill="${redColor}" />`;
+      tRow1 += `<polygon points="${rx0.toFixed(1)},${ry0.toFixed(1)} ${rx1.toFixed(1)},${ry1.toFixed(1)} ${rmidX.toFixed(1)},${(ry0 + r1H).toFixed(1)}" fill="${redColor}" />`;
+
+      // Fila 2: Azul Rey
+      const r2Off = 28;
+      const r2H = 50;
+      tRow2 += `<polygon points="${lx0.toFixed(1)},${(ly0 + r2Off).toFixed(1)} ${lx1.toFixed(1)},${(ly1 + r2Off).toFixed(1)} ${lmidX.toFixed(1)},${(ly0 + r2Off + r2H).toFixed(1)}" fill="${blueColor}" />`;
+      tRow2 += `<polygon points="${rx0.toFixed(1)},${(ry0 + r2Off).toFixed(1)} ${rx1.toFixed(1)},${(ry1 + r2Off).toFixed(1)} ${rmidX.toFixed(1)},${(ry0 + r2Off + r2H).toFixed(1)}" fill="${blueColor}" />`;
+
+      // Fila 3: Amarillo Oro
+      const r3Off = 52;
+      const r3H = 44;
+      tRow3 += `<polygon points="${lx0.toFixed(1)},${(ly0 + r3Off).toFixed(1)} ${lx1.toFixed(1)},${(ly1 + r3Off).toFixed(1)} ${lmidX.toFixed(1)},${(ly0 + r3Off + r3H).toFixed(1)}" fill="${yellowColor}" />`;
+      tRow3 += `<polygon points="${rx0.toFixed(1)},${(ry0 + r3Off).toFixed(1)} ${rx1.toFixed(1)},${(ry1 + r3Off).toFixed(1)} ${rmidX.toFixed(1)},${(ry0 + r3Off + r3H).toFixed(1)}" fill="${yellowColor}" />`;
+    }
+
+    const diamondSvg = `
+      <polygon points="${vApexX},${vApexY + 45} ${vApexX + 50},${vApexY + 115} ${vApexX},${vApexY + 185} ${vApexX - 50},${vApexY + 115}" fill="${redColor}" />
+      <polygon points="${vApexX},${vApexY + 65} ${vApexX + 32},${vApexY + 115} ${vApexX},${vApexY + 165} ${vApexX - 32},${vApexY + 115}" fill="${yellowColor}" />
+    `;
+
+    frontGraphicSvg = `
+      <path d="${yokePath}" fill="${yokeColor}" />
+      <g id="aztec_t1">${tRow1}</g>
+      <g id="aztec_t2">${tRow2}</g>
+      <g id="aztec_t3">${tRow3}</g>
+      ${diamondSvg}
+    `;
+
+    backGraphicSvg = `
+      <rect x="1815" y="985" width="1560" height="420" fill="${yokeColor}" />
+    `;
+  } else if (graphicId === 'mx_chivas_stripes' || graphicId === 'mx_monterrey_stripes' || graphicId === 'mx_pachuca_stripes') {
+    // Franjas verticales
+    const isChivas = graphicId === 'mx_chivas_stripes';
+    const numStripes = isChivas ? 9 : 7;
+    const stripeW = 1500 / numStripes;
+    const colA = isChivas ? '#C8102E' : '#0B1B3D';
+    const colB = '#FFFFFF';
+    let sFront = '';
+    let sBack = '';
+
+    for (let i = 0; i < numStripes; i++) {
+      const col = i % 2 === 0 ? colA : colB;
+      sFront += `<rect x="${190 + i * stripeW}" y="1010" width="${stripeW + 1}" height="2225" fill="${col}" />`;
+      sBack += `<rect x="${1840 + i * stripeW}" y="985" width="${stripeW + 1}" height="2250" fill="${col}" />`;
+    }
+
+    frontGraphicSvg = `
+      ${sFront}
+      <rect x="170" y="1010" width="1560" height="380" fill="#0B1B3D" />
+    `;
+    backGraphicSvg = `
+      ${sBack}
+      <rect x="1815" y="985" width="1560" height="380" fill="#0B1B3D" />
+    `;
+  } else if (graphicId === 'mx_pumas_puma_face') {
+    // Silueta monumental felina UNAM
+    const pumaColor = isAway ? '#0A1A3A' : '#C89A3C';
+    const px = frenteCenterX;
+    const py = 2050;
+    const scale = 2.4;
+    frontGraphicSvg = `
+      <g transform="translate(${px}, ${py}) scale(${scale})">
+        <path d="M0,-160 C75,-160 145,-120 180,-50 C195,-20 205,25 205,75 C205,140 160,195 90,215 C45,225 -45,225 -90,215 C-160,195 -205,140 -205,75 C-205,25 -195,-20 -180,-50 C-145,-120 -75,-160 0,-160 Z" fill="${pumaColor}" />
+        <path d="M0,-115 C52,-115 102,-85 125,-35 C135,-15 142,18 142,55 C142,100 110,140 60,155 C30,162 -30,162 -60,155 C-110,140 -142,100 -142,55 C-142,18 -135,-15 -125,-35 C-102,-85 -52,-115 0,-115 Z" fill="${primaryColor}" />
+        <polygon points="0,20 -38,70 38,70" fill="${pumaColor}" />
+        <polygon points="0,-45 -48,-10 48,-10" fill="${pumaColor}" />
+      </g>
+    `;
+  } else if (graphicId === 'mx_tigres_chest_bar') {
+    // Barra de pecho universitaria UANL
+    frontGraphicSvg = `
+      <rect x="170" y="1720" width="1560" height="230" fill="#003DA5" />
+      <rect x="170" y="1710" width="1560" height="12" fill="#FFFFFF" />
+      <rect x="170" y="1950" width="1560" height="12" fill="#FFFFFF" />
+      <text x="${frenteCenterX}" y="1845" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="115" letter-spacing="18" fill="#FDB913">TIGRES</text>
+    `;
+  } else if (graphicId === 'mx_atlas_50_50') {
+    // Bipartición vertical 50/50
+    frontGraphicSvg = `<rect x="${frenteCenterX}" y="1010" width="800" height="2225" fill="#000000" />`;
+    backGraphicSvg = `<rect x="${traseroCenterX}" y="985" width="800" height="2250" fill="#000000" />`;
+  } else if (graphicId === 'mx_puebla_sash') {
+    // Franja diagonal Puebla
+    frontGraphicSvg = `
+      <polygon points="1200,1010 1600,1010 400,3205 180,3205" fill="#003DA5" />
+      <polygon points="1180,1010 1200,1010 180,3205 160,3205" fill="#C89A3C" />
+      <polygon points="1600,1010 1620,1010 420,3205 400,3205" fill="#C89A3C" />
+    `;
+  } else if (graphicId === 'mx_santos_hoops') {
+    // Franjas horizontales Santos
+    let hoops = '';
+    for (let y = 1100; y < 3100; y += 220) {
+      hoops += `<rect x="170" y="${y}" width="1560" height="110" fill="#00843D" />`;
+    }
+    frontGraphicSvg = hoops;
+  }
+
+  // -------------------------------------------------------------
+  // ESCUDO DEL CLUB
+  // -------------------------------------------------------------
+  let crestSvg = '';
+  const crestX = MOLD_CONSTANTS.PIECES.FRONT.crestX;
+  const crestY = MOLD_CONSTANTS.PIECES.FRONT.crestY;
+  const r = MOLD_CONSTANTS.PIECES.FRONT.crestRadius;
+
+  if (crestId === 'mx_america') {
+    crestSvg = `
+      <g id="crest_america" transform="translate(${crestX}, ${crestY})">
+        <circle cx="0" cy="0" r="${r}" fill="#FFF0B5" stroke="#0B1B3D" stroke-width="${r * 0.14}" />
+        <path d="M${-r * 0.24},${-r * 0.55} L${r * 0.14},${-r * 0.52} L${r * 0.22},${-r * 0.2} L0,${-r * 0.05} L${-r * 0.04},${r * 0.08} L${r * 0.28},${r * 0.22} L${r * 0.18},${r * 0.6} L0,${r * 0.72} L${-r * 0.14},${r * 0.3} Z" fill="#003DA5" />
+        <text x="0" y="${r * 0.14}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${r * 0.75}" fill="#C8102E">CA</text>
+      </g>
+    `;
+  } else if (crestId === 'mx_chivas') {
+    crestSvg = `
+      <g id="crest_chivas" transform="translate(${crestX}, ${crestY})">
+        <path d="M0,${-r} L${r * 0.9},${-r * 0.5} L${r * 0.9},${r * 0.2} C${r * 0.9},${r * 0.7} 0,${r * 1.05} 0,${r * 1.05} C0,${r * 1.05} ${-r * 0.9},${r * 0.7} ${-r * 0.9},${r * 0.2} L${-r * 0.9},${-r * 0.5} Z" fill="#C8102E" stroke="#0B1B3D" stroke-width="${r * 0.12}" />
+        <rect x="${-r * 0.4}" y="${-r * 0.3}" width="${r * 0.25}" height="${r * 0.9}" fill="#FFFFFF" />
+        <rect x="${r * 0.15}" y="${-r * 0.3}" width="${r * 0.25}" height="${r * 0.9}" fill="#FFFFFF" />
+        <path d="M0,${-r} L${r * 0.85},${-r * 0.5} L${-r * 0.85},${-r * 0.5} Z" fill="#003DA5" />
+      </g>
+    `;
+  } else if (crestId === 'mx_pumas') {
+    crestSvg = `
+      <g id="crest_pumas" transform="translate(${crestX}, ${crestY})">
+        <polygon points="0,${-r * 0.95} ${r * 0.9},${r * 0.7} ${-r * 0.9},${r * 0.7}" fill="#0A1A3A" stroke="#C89A3C" stroke-width="${r * 0.14}" />
+        <polygon points="0,${-r * 0.5} ${r * 0.5},${r * 0.4} ${-r * 0.5},${r * 0.4}" fill="#C89A3C" />
+      </g>
+    `;
+  } else if (crestId === 'mx_tigres') {
+    crestSvg = `
+      <g id="crest_tigres" transform="translate(${crestX}, ${crestY})">
+        <polygon points="0,${-r} ${r * 0.9},${-r * 0.5} ${r * 0.9},${r * 0.3} 0,${r} ${-r * 0.9},${r * 0.3} ${-r * 0.9},${-r * 0.5}" fill="#FDB913" stroke="#003DA5" stroke-width="${r * 0.12}" />
+        <text x="0" y="4" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${r * 0.9}" fill="#003DA5">T</text>
+      </g>
+    `;
+  } else if (crestId) {
+    crestSvg = `
+      <g id="crest_generic" transform="translate(${crestX}, ${crestY})">
+        <circle cx="0" cy="0" r="${r}" fill="${secondaryColor}" stroke="${accentsColor}" stroke-width="${r * 0.12}" />
+        <text x="0" y="2" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${r * 0.62}" fill="#FFFFFF">MX</text>
+      </g>
+    `;
+  }
+
+  return { frontGraphicSvg, backGraphicSvg, crestSvg };
 }
 
 /**
- * Genera el SVG completo 1:1 del molde de corte con todas las piezas y gráficos sublimados proyectados.
+ * Genera la cadena completa SVG del molde de producción textil 1:1 a partir del diseño y el jugador activo.
  */
-export function generateProductionMoldSvgString(design, activePlayer = null, options = {}) {
+export function generateProductionMoldSvgString(design, activePlayer = {}, options = {}) {
   const {
     showCutLines = true,
-    showSeamAllowance = true,
-    showRegistrationMarks = true,
-    showProductionLabels = true,
-    showBackgroundGuides = true,
+    showLabels = true,
   } = options;
 
-  const P = MOLD_CONSTANTS.PIECES;
+  const frenteCenterX = MOLD_CONSTANTS.PIECES.FRONT.centerX;
+  const traseroCenterX = MOLD_CONSTANTS.PIECES.BACK.centerX;
 
-  const primaryColor = design?.colorZones?.primary?.hex || '#ffffff';
-  const secondaryColor = design?.colorZones?.secondary?.hex || '#0f172a';
-  const accentsColor = design?.colorZones?.accents?.hex || '#ffcd00';
-  const collarColor = design?.colorZones?.collar?.hex || secondaryColor;
+  const isAway =
+    design?.mexicoKitId?.includes('away') ||
+    design?.colorZones?.primary?.hex?.toLowerCase() === '#0b1b3d' ||
+    design?.colorZones?.primary?.hex?.toLowerCase() === '#0a1a3a';
+
+  const primaryColor = design?.colorZones?.primary?.hex || '#FFF0B5';
+  const secondaryColor = design?.colorZones?.secondary?.hex || '#0A1A3A';
   const sleevesColor = design?.colorZones?.sleeves?.hex || primaryColor;
 
-  const playerName = (activePlayer?.name || design?.sampleName || 'MARTÍN').toUpperCase();
-  const playerNumber = String(activePlayer?.number || design?.sampleNumber || '21');
-  const clubAlias = design?.clubAlias || 'ATLETIQ PRO';
+  const playerName = (activePlayer?.name || design?.sampleName || 'VALVERDE').toUpperCase();
+  const playerNumber = String(activePlayer?.number || design?.sampleNumber || '10');
 
-  // Buscar decal del escudo o gráfico especial
-  const graphicDecal = design?.decals?.find((d) => d.type === 'LIGAMX_GRAPHIC')?.graphicId;
+  // Configuración de slots variables (respetando estado 3D)
+  const slots = design?.variableSlots || {};
+  const frontNumberEnabled = Boolean(slots.playerNumberFront?.enabled);
+  const backNameEnabled = slots.playerNameBack?.enabled !== false;
+  const backNumberEnabled = slots.playerNumberBack?.enabled !== false;
+
+  const { frontGraphicSvg, backGraphicSvg, crestSvg } = generateFrontAndBackGraphics(
+    design,
+    frenteCenterX,
+    traseroCenterX,
+    isAway
+  );
+
+  // Dorsal de pecho (solo si está activo en 3D)
+  let frontNumSvg = '';
+  if (frontNumberEnabled && playerNumber) {
+    const fnX = MOLD_CONSTANTS.PIECES.FRONT.frontNumX;
+    const fnY = MOLD_CONSTANTS.PIECES.FRONT.frontNumY;
+    frontNumSvg = `
+      <text x="${fnX}" y="${fnY}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="130" fill="${primaryColor}" stroke="${secondaryColor}" stroke-width="12" paint-order="stroke fill">${playerNumber}</text>
+    `;
+  }
+
+  // Nombre y Dorsal de Espalda
+  let backNameSvg = '';
+  if (backNameEnabled && playerName) {
+    const ny = MOLD_CONSTANTS.PIECES.BACK.nameY;
+    backNameSvg = `
+      <text x="${traseroCenterX}" y="${ny}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="145" letter-spacing="6" fill="${secondaryColor}" stroke="#ffffff" stroke-width="14" paint-order="stroke fill">${playerName}</text>
+    `;
+  }
+
+  let backNumberSvg = '';
+  if (backNumberEnabled && playerNumber) {
+    const numY = MOLD_CONSTANTS.PIECES.BACK.numberY;
+    backNumberSvg = `
+      <text x="${traseroCenterX}" y="${numY}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="620" fill="${secondaryColor}" stroke="#ffffff" stroke-width="32" paint-order="stroke fill">${playerNumber}</text>
+    `;
+  }
+
+  // Ribete de mangas
+  const sleeveTrimHeight = 85;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="${MOLD_CONSTANTS.VIEWBOX}" width="1250mm" height="1200mm">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="${MOLD_CONSTANTS.VIEWBOX}">
+  <!-- Generator: ATLETIQ Industrial Sublimation Engine v5.0 (Adobe Illustrator 1:1) -->
   <defs>
-    <style>
-      .cut-line { fill: none; stroke: #111111; stroke-width: 2.2; stroke-dasharray: 8 5; }
-      .seam-line { fill: none; stroke: #0088cc; stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.7; }
-      .label-text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 800; fill: #334155; }
-      .number-stroke { font-family: 'Arial Black', Impact, sans-serif; font-weight: 900; }
-    </style>
-
-    <!-- 1. ClipPath de Delantero -->
-    <clipPath id="mold-clip-front">
-      <path d="${P.FRONT.pathD}" />
+    <style><![CDATA[
+      ${MOLDE_CAMISA_STYLE}
+      .cut-line { stroke: #010101; stroke-width: 2.2; fill: none; stroke-miterlimit: 10; }
+      .piece-tag { font-family: 'Arial Black', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 2px; fill: #475569; }
+    ]]></style>
+    <clipPath id="clip-frente">
+      <path d="${MOLDE_PATHS.FRENTE}" />
     </clipPath>
-
-    <!-- 2. ClipPath de Trasero -->
-    <clipPath id="mold-clip-back">
-      <path d="${P.BACK.pathD}" />
+    <clipPath id="clip-trasero">
+      <path d="${MOLDE_PATHS.TRASERO}" />
     </clipPath>
-
-    <!-- 3. ClipPath de Manga Izquierda -->
-    <clipPath id="mold-clip-sleeve-left">
-      <path d="${P.LEFT_SLEEVE.pathD}" />
+    <clipPath id="clip-manga-der">
+      <path d="${MOLDE_PATHS.MANGA_DERECHA}" />
     </clipPath>
-
-    <!-- 4. ClipPath de Manga Derecha -->
-    <clipPath id="mold-clip-sleeve-right">
-      <path d="${P.RIGHT_SLEEVE.pathD}" />
-    </clipPath>
-
-    <!-- 5. ClipPath de Cuello -->
-    <clipPath id="mold-clip-collar">
-      <rect x="${P.COLLAR.bounds.minX}" y="${P.COLLAR.bounds.minY}" width="${P.COLLAR.bounds.maxX - P.COLLAR.bounds.minX}" height="${P.COLLAR.bounds.maxY - P.COLLAR.bounds.minY}" />
+    <clipPath id="clip-manga-izq">
+      <path d="${MOLDE_PATHS.MANGA_IZQUIERDA}" />
     </clipPath>
   </defs>
 
-  <!-- ==================== CAPA 1: FONDO & GUÍAS DE CALIBRACIÓN ==================== -->
-  <g id="BACKGROUND_CALIBRATION">
-    <!-- Marco de Hoja de Plotter de 1250 x 1200 mm -->
-    <rect x="0" y="0" width="${MOLD_CONSTANTS.WIDTH_PT}" height="${MOLD_CONSTANTS.HEIGHT_PT}" fill="#fafafa" stroke="#e2e8f0" stroke-width="2" />
-
-    <!-- Barra de Metadatos de la Orden Superior -->
-    <rect x="50" y="30" width="3443" height="50" rx="10" fill="#0f172a" />
-    <text x="80" y="62" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="900" fill="#38bdf8" letter-spacing="1.5">
-      ATLETIQ SUBLIMATION PRINT ENGINE v5.0 • PLIEGO DE PRODUCCIÓN TEXTIL 1:1 (TALLA M)
-    </text>
-    <text x="2100" y="62" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#e2e8f0">
-      MODELO: <tspan fill="#4ade80">${clubAlias}</tspan> | JUGADOR: <tspan fill="#fde047">${playerName} #${playerNumber}</tspan> | ANCHO PLIEGO: 1250 mm
-    </text>
-
-    ${
-      showRegistrationMarks
-        ? `
-      <!-- Cruces de Registro en las 4 esquinas del pliego -->
-      <g stroke="#000000" stroke-width="1.5" fill="none">
-        <!-- Esquina Superior Izquierda -->
-        <circle cx="80" cy="140" r="16" />
-        <line x1="50" y1="140" x2="110" y2="140" />
-        <line x1="80" y1="110" x2="80" y2="170" />
-
-        <!-- Esquina Superior Derecha -->
-        <circle cx="3460" cy="140" r="16" />
-        <line x1="3430" y1="140" x2="3490" y2="140" />
-        <line x1="3460" y1="110" x2="3460" y2="170" />
-
-        <!-- Esquina Inferior Izquierda -->
-        <circle cx="80" cy="3320" r="16" />
-        <line x1="50" y1="3320" x2="110" y2="3320" />
-        <line x1="80" y1="3290" x2="80" y2="3350" />
-
-        <!-- Esquina Inferior Derecha -->
-        <circle cx="3460" cy="3320" r="16" />
-        <line x1="3430" y1="3320" x2="3490" y2="3320" />
-        <line x1="3460" y1="3290" x2="3460" y2="3350" />
-      </g>
-
-      <!-- Barra de Control de Color CMYK en Pie de Página -->
-      <g transform="translate(1500, 3280)">
-        <rect x="0" y="0" width="80" height="40" fill="#00ffff" stroke="#000" stroke-width="1" />
-        <rect x="80" y="0" width="80" height="40" fill="#ff00ff" stroke="#000" stroke-width="1" />
-        <rect x="160" y="0" width="80" height="40" fill="#ffff00" stroke="#000" stroke-width="1" />
-        <rect x="240" y="0" width="80" height="40" fill="#000000" stroke="#000" stroke-width="1" />
-        <text x="340" y="27" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="#333">CMYK RIP CONTROL • 100% ESCALA REAL</text>
-      </g>
-    `
-        : ''
-    }
+  <!-- 1. CAPA MASTER DE PATRONAJE (FONDO ORIGINAL ADOBE ILLUSTRATOR) -->
+  <g id="BACKGROUND">
+    ${MOLDE_CAMISA_BACKGROUND_INNER}
   </g>
 
-  <!-- ==================== CAPA 2: GRÁFICOS SUBLIMADOS DENTRO DE CADA PIEZA ==================== -->
-  <g id="SUBLIMATION_GRAPHICS">
-    <!-- 1. PIEZA DELANTERO (FRENTE) -->
-    <g id="PIECE_FRONT">
-      <g clip-path="url(#mold-clip-front)">
-        <!-- Fondo base con sangrado de 20 mm -->
-        <rect x="${P.FRONT.bounds.minX - 60}" y="${P.FRONT.bounds.minY - 60}" width="${P.FRONT.bounds.maxX - P.FRONT.bounds.minX + 120}" height="${P.FRONT.bounds.maxY - P.FRONT.bounds.minY + 120}" fill="${primaryColor}" />
-
-        <!-- Patrón Geométrico Sublimado -->
-        ${generateLigaMxSvgPattern(graphicDecal, P.FRONT, design)}
-
-        <!-- Escudo en Pecho Izquierdo -->
-        <g id="front-crest" transform="translate(${P.FRONT.crestPos.x}, ${P.FRONT.crestPos.y})">
-          <circle cx="0" cy="0" r="${P.FRONT.crestPos.radius}" fill="#ffffff" stroke="${secondaryColor}" stroke-width="6" />
-          <circle cx="0" cy="0" r="${P.FRONT.crestPos.radius - 10}" fill="${secondaryColor}" />
-          <circle cx="0" cy="0" r="${P.FRONT.crestPos.radius - 24}" fill="${accentsColor}" />
-          <text x="0" y="9" font-family="'Arial Black', sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">MX</text>
-        </g>
-
-        <!-- Número Chico Frontal Derecho (Opcional) -->
-        <text x="${P.FRONT.numberPos.x}" y="${P.FRONT.numberPos.y + 25}" font-family="'Arial Black', Impact, sans-serif" font-size="75" font-weight="900" fill="${secondaryColor}" stroke="#ffffff" stroke-width="5" text-anchor="middle">
-          ${playerNumber}
-        </text>
+  <!-- 2. CAPA DE PRODUCCIÓN TEXTIL 1:1 (DISEÑO 3D APLANADO) -->
+  <g id="DESIGN">
+    <!-- ==================== PIEZA 1: DELANTERO / FRENTE ==================== -->
+    <g id="PIECE_FRENTE">
+      <g clip-path="url(#clip-frente)">
+        <!-- Fondo Base con Sangrado 10mm -->
+        <rect x="170" y="1010" width="1560" height="2225" fill="${primaryColor}" />
+        <!-- Patrón Gráfico Oficial -->
+        ${frontGraphicSvg}
+        <!-- Escudo Heráldico Pecho Izquierdo -->
+        ${crestSvg}
+        <!-- Dorsal Pecho (solo si está activo en 3D) -->
+        ${frontNumSvg}
       </g>
 
-      <!-- Línea de Costura & Corte del Delantero -->
-      ${showCutLines ? `<path d="${P.FRONT.pathD}" class="cut-line" />` : ''}
+      <!-- Trazo de Corte Físico (Línea de confección) -->
+      ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.FRENTE}" />` : ''}
 
-      <!-- Etiqueta de Confección -->
-      ${
-        showProductionLabels
-          ? `
-        <text x="${P.FRONT.centerX}" y="${P.FRONT.bounds.maxY + 45}" class="label-text" text-anchor="middle">
-          [ 1. DELANTERO • TALLA M • CORTE ${design.patternId?.toUpperCase() || 'PRO'} ]
-        </text>
-      `
-          : ''
-      }
+      <!-- Identificación de Pieza -->
+      ${showLabels ? `<text x="${frenteCenterX}" y="3255" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.FRONT.tag}</text>` : ''}
     </g>
 
-    <!-- 2. PIEZA TRASERO (ESPALDA) -->
-    <g id="PIECE_BACK">
-      <g clip-path="url(#mold-clip-back)">
-        <!-- Fondo base con sangrado de 20 mm -->
-        <rect x="${P.BACK.bounds.minX - 60}" y="${P.BACK.bounds.minY - 60}" width="${P.BACK.bounds.maxX - P.BACK.bounds.minX + 120}" height="${P.BACK.bounds.maxY - P.BACK.bounds.minY + 120}" fill="${primaryColor}" />
-
-        <!-- Hombreras en Espalda si aplica -->
-        ${
-          graphicDecal === 'mx_america_aztec_chevron'
-            ? `<polygon points="${P.BACK.bounds.minX - 40},${P.BACK.bounds.minY - 40} ${P.BACK.bounds.maxX + 40},${P.BACK.bounds.minY - 40} ${P.BACK.bounds.maxX + 40},${P.BACK.bounds.minY + 280} ${P.BACK.bounds.minX - 40},${P.BACK.bounds.minY + 280}" fill="${secondaryColor}" />`
-            : ''
-        }
-
-        <!-- Nombre del Jugador (Tipografía Atlética Condensada) -->
-        <g id="back-player-name" transform="translate(${P.BACK.centerX}, ${P.BACK.nameY})">
-          <text x="0" y="0" font-family="'Arial Black', sans-serif" font-size="82" font-weight="900" fill="${secondaryColor}" stroke="#ffffff" stroke-width="8" paint-order="stroke fill" text-anchor="middle" letter-spacing="5">
-            ${playerName}
-          </text>
-        </g>
-
-        <!-- Dorsal Grande Oficial (250 mm de altura) -->
-        <g id="back-player-number" transform="translate(${P.BACK.centerX}, ${P.BACK.numberY})">
-          <text x="0" y="80" font-family="'Arial Black', Impact, sans-serif" font-size="360" font-weight="900" fill="${secondaryColor}" stroke="#ffffff" stroke-width="22" paint-order="stroke fill" text-anchor="middle" letter-spacing="8">
-            ${playerNumber}
-          </text>
-        </g>
+    <!-- ==================== PIEZA 2: TRASERO / ESPALDA ==================== -->
+    <g id="PIECE_TRASERO">
+      <g clip-path="url(#clip-trasero)">
+        <!-- Fondo Base con Sangrado 10mm -->
+        <rect x="1815" y="985" width="1560" height="2250" fill="${primaryColor}" />
+        <!-- Yugo Posterior Superior -->
+        ${backGraphicSvg}
+        <!-- Nombre de Jugador -->
+        ${backNameSvg}
+        <!-- Dorsal de Jugador Atlético (250 mm) -->
+        ${backNumberSvg}
       </g>
 
-      <!-- Línea de Costura & Corte del Trasero -->
-      ${showCutLines ? `<path d="${P.BACK.pathD}" class="cut-line" />` : ''}
+      <!-- Trazo de Corte Físico -->
+      ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.TRASERO}" />` : ''}
 
-      <!-- Etiqueta de Confección -->
-      ${
-        showProductionLabels
-          ? `
-        <text x="${P.BACK.centerX}" y="${P.BACK.bounds.maxY + 45}" class="label-text" text-anchor="middle">
-          [ 2. TRASERO • TALLA M • #${playerNumber} ${playerName} ]
-        </text>
-      `
-          : ''
-      }
+      <!-- Identificación de Pieza -->
+      ${showLabels ? `<text x="${traseroCenterX}" y="3255" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.BACK.tag}</text>` : ''}
     </g>
 
-    <!-- 3. PIEZA MANGA IZQUIERDA -->
-    <g id="PIECE_LEFT_SLEEVE">
-      <g clip-path="url(#mold-clip-sleeve-left)">
-        <!-- Fondo base con sangrado -->
-        <rect x="${P.LEFT_SLEEVE.bounds.minX - 60}" y="${P.LEFT_SLEEVE.bounds.minY - 60}" width="${P.LEFT_SLEEVE.bounds.maxX - P.LEFT_SLEEVE.bounds.minX + 120}" height="${P.LEFT_SLEEVE.bounds.maxY - P.LEFT_SLEEVE.bounds.minY + 120}" fill="${sleevesColor}" />
-
-        <!-- Ribete de Puño Inferior (40 mm) -->
-        <rect x="${P.LEFT_SLEEVE.bounds.minX - 40}" y="${P.LEFT_SLEEVE.hemY - 90}" width="${P.LEFT_SLEEVE.bounds.maxX - P.LEFT_SLEEVE.bounds.minX + 80}" height="100" fill="${secondaryColor}" />
-        <rect x="${P.LEFT_SLEEVE.bounds.minX - 40}" y="${P.LEFT_SLEEVE.hemY - 105}" width="${P.LEFT_SLEEVE.bounds.maxX - P.LEFT_SLEEVE.bounds.minX + 80}" height="15" fill="${accentsColor}" />
+    <!-- ==================== PIEZA 3: MANGA IZQUIERDA ==================== -->
+    <g id="PIECE_MANGA_IZQUIERDA">
+      <g clip-path="url(#clip-manga-izq)">
+        <!-- Fondo Manga con Sangrado -->
+        <rect x="280" y="165" width="1335" height="745" fill="${sleevesColor}" />
+        <!-- Ribete de Puño -->
+        <rect x="280" y="${882.7 - sleeveTrimHeight}" width="1335" height="${sleeveTrimHeight + 20}" fill="${secondaryColor}" />
       </g>
 
-      ${showCutLines ? `<path d="${P.LEFT_SLEEVE.pathD}" class="cut-line" />` : ''}
+      <!-- Trazo de Corte Físico -->
+      ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.MANGA_IZQUIERDA}" />` : ''}
 
-      ${
-        showProductionLabels
-          ? `
-        <text x="${P.LEFT_SLEEVE.centerX}" y="${P.LEFT_SLEEVE.bounds.maxY + 45}" class="label-text" text-anchor="middle">
-          [ 3. MANGA IZQUIERDA • TALLA M ]
-        </text>
-      `
-          : ''
-      }
+      <!-- Identificación -->
+      ${showLabels ? `<text x="${frenteCenterX}" y="920" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.LEFT_SLEEVE.tag}</text>` : ''}
     </g>
 
-    <!-- 4. PIEZA MANGA DERECHA -->
-    <g id="PIECE_RIGHT_SLEEVE">
-      <g clip-path="url(#mold-clip-sleeve-right)">
-        <!-- Fondo base con sangrado -->
-        <rect x="${P.RIGHT_SLEEVE.bounds.minX - 60}" y="${P.RIGHT_SLEEVE.bounds.minY - 60}" width="${P.RIGHT_SLEEVE.bounds.maxX - P.RIGHT_SLEEVE.bounds.minX + 120}" height="${P.RIGHT_SLEEVE.bounds.maxY - P.RIGHT_SLEEVE.bounds.minY + 120}" fill="${sleevesColor}" />
-
-        <!-- Ribete de Puño Inferior (40 mm) -->
-        <rect x="${P.RIGHT_SLEEVE.bounds.minX - 40}" y="${P.RIGHT_SLEEVE.hemY - 90}" width="${P.RIGHT_SLEEVE.bounds.maxX - P.RIGHT_SLEEVE.bounds.minX + 80}" height="100" fill="${secondaryColor}" />
-        <rect x="${P.RIGHT_SLEEVE.bounds.minX - 40}" y="${P.RIGHT_SLEEVE.hemY - 105}" width="${P.RIGHT_SLEEVE.bounds.maxX - P.RIGHT_SLEEVE.bounds.minX + 80}" height="15" fill="${accentsColor}" />
+    <!-- ==================== PIEZA 4: MANGA DERECHA ==================== -->
+    <g id="PIECE_MANGA_DERECHA">
+      <g clip-path="url(#clip-manga-der)">
+        <!-- Fondo Manga con Sangrado -->
+        <rect x="1925" y="165" width="1335" height="745" fill="${sleevesColor}" />
+        <!-- Ribete de Puño -->
+        <rect x="1925" y="${882.7 - sleeveTrimHeight}" width="1335" height="${sleeveTrimHeight + 20}" fill="${secondaryColor}" />
       </g>
 
-      ${showCutLines ? `<path d="${P.RIGHT_SLEEVE.pathD}" class="cut-line" />` : ''}
+      <!-- Trazo de Corte Físico -->
+      ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.MANGA_DERECHA}" />` : ''}
 
-      ${
-        showProductionLabels
-          ? `
-        <text x="${P.RIGHT_SLEEVE.centerX}" y="${P.RIGHT_SLEEVE.bounds.maxY + 45}" class="label-text" text-anchor="middle">
-          [ 4. MANGA DERECHA • TALLA M ]
-        </text>
-      `
-          : ''
-      }
-    </g>
-
-    <!-- 5. PIEZA CUELLO / RIBETE -->
-    <g id="PIECE_COLLAR">
-      <g clip-path="url(#mold-clip-collar)">
-        <!-- Fondo del cuello -->
-        <rect x="${P.COLLAR.bounds.minX - 30}" y="${P.COLLAR.bounds.minY - 30}" width="${P.COLLAR.bounds.maxX - P.COLLAR.bounds.minX + 60}" height="${P.COLLAR.bounds.maxY - P.COLLAR.bounds.minY + 60}" fill="${collarColor}" />
-        <!-- Línea central de acento -->
-        <rect x="${P.COLLAR.bounds.minX + 60}" y="${P.COLLAR.bounds.minY - 30}" width="25" height="${P.COLLAR.bounds.maxY - P.COLLAR.bounds.minY + 60}" fill="${accentsColor}" />
-      </g>
-
-      ${
-        showCutLines
-          ? `
-        <rect x="${P.COLLAR.bounds.minX}" y="${P.COLLAR.bounds.minY}" width="${P.COLLAR.bounds.maxX - P.COLLAR.bounds.minX}" height="${P.COLLAR.bounds.maxY - P.COLLAR.bounds.minY}" class="cut-line" />
-      `
-          : ''
-      }
-
-      ${
-        showProductionLabels
-          ? `
-        <text x="${(P.COLLAR.bounds.minX + P.COLLAR.bounds.maxX) / 2}" y="${P.COLLAR.bounds.maxY + 45}" class="label-text" text-anchor="middle">
-          [ 5. CUELLO ]
-        </text>
-      `
-          : ''
-      }
+      <!-- Identificación -->
+      ${showLabels ? `<text x="${traseroCenterX}" y="920" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.RIGHT_SLEEVE.tag}</text>` : ''}
     </g>
   </g>
 </svg>`;
 }
 
 /**
- * Dispara la descarga del SVG en el navegador.
+ * Descarga el archivo SVG del molde de producción textil 1:1.
  */
-export function downloadProductionMoldSvg(design, activePlayer = null, filename = null) {
-  const svgText = generateProductionMoldSvgString(design, activePlayer);
-  const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+export function downloadProductionMoldSvg(design, activePlayer, filename) {
+  const svgStr = generateProductionMoldSvgString(design, activePlayer);
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const safeName = (design?.clubAlias || 'atletiq').toLowerCase().replace(/\s+/g, '_');
-  const playerName = (activePlayer?.name || design?.sampleName || 'custom').toLowerCase().replace(/\s+/g, '_');
   a.href = url;
-  a.download = filename || `MOLDE_CONFECCION_1A1_${safeName}_${playerName}.svg`;
+  a.download = filename || `${design?.designId || 'ATLETIQ'}_MOLDE_REAL_TALLA_M_1A1.svg`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

@@ -801,6 +801,7 @@ export default function HybridStudioWorkspace({
         },
         playerNumberFront: {
           ...baseDesign.variableSlots?.playerNumberFront,
+          enabled: false,
           fillHex: kit.numberColor,
           outlineHex: kit.numberOutline,
         },

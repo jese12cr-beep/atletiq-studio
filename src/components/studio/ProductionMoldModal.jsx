@@ -115,7 +115,7 @@ export default function ProductionMoldModal({
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Proyección exacta de las 5 piezas (Frente, Espalda, Mangas y Cuello) listas para sublimación y corte.
+                Proyección exacta 1:1 de los 4 moldes físicos de confección (Frente, Espalda, Manga Izq., Manga Der.) extraídos de MOLDE CAMISA.svg.
               </p>
             </div>
           </div>

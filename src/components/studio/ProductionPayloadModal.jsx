@@ -182,7 +182,7 @@ export default function ProductionPayloadModal({
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="font-bold text-white">
-                    Molde Físico de Confección Talla M (5 Piezas Vectorizadas a Medida)
+                    Molde Físico de Confección Talla M (4 Piezas Oficiales MOLDE CAMISA.svg 1:1)
                   </span>
                   <span className="text-slate-400 text-[11px] font-mono">
                     (1250 x 1200 mm • Sangrado 10mm • Cruz de Registro)
