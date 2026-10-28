@@ -137,7 +137,7 @@ export default function ProductionPayloadModal({
             }`}
           >
             <Scissors className="w-4 h-4 text-slate-950" />
-            1. Molde Real Confección 1:1 (MOLDE CAMISA.svg)
+            1. Plantilla de Confección 1:1 (MOLDE CAMISA.svg)
           </button>
 
           <button

@@ -136,6 +136,7 @@ export async function processUploadedArtwork(file) {
     });
 
     const aspect = (img.naturalWidth || width) / Math.max(1, img.naturalHeight || height);
+    const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
     return {
       artworkId,
       fileName: file.name,
@@ -146,6 +147,7 @@ export async function processUploadedArtwork(file) {
       heightPx: Math.round(3200 / aspect),
       aspectRatio: aspect,
       previewUrl: blobUrl,
+      dataUrl,
       imageElement: img,
       svgSource: svgText,
     };
@@ -204,6 +206,7 @@ export async function processUploadedArtwork(file) {
   outCtx.drawImage(scanCanvas, minX, minY, trimW, trimH, 0, 0, outW, outH);
 
   const proxyBlob = await new Promise((res) => outCanvas.toBlob(res, 'image/png'));
+  const dataUrl = outCanvas.toDataURL('image/png');
   URL.revokeObjectURL(rawBlobUrl);
   const proxyUrl = URL.createObjectURL(proxyBlob);
 
@@ -224,6 +227,7 @@ export async function processUploadedArtwork(file) {
     heightPx: trimH,
     aspectRatio: trimW / trimH,
     previewUrl: proxyUrl,
+    dataUrl,
     imageElement: proxyImg,
   };
 }

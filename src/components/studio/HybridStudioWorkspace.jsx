@@ -3045,10 +3045,10 @@ export default function HybridStudioWorkspace({
                 id="btn-open-production-mold"
                 onClick={() => setIsProductionMoldModalOpen(true)}
                 className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-blue-700 hover:text-blue-950 hover:bg-blue-50 transition-colors cursor-pointer group border border-blue-200/80 shadow-xs"
-                title="Abrir molde 2D de confección y corte a escala real 1:1 (MOLDE CAMISA.svg)"
+                title="Previsualizar plantilla técnica de confección y corte a escala real 1:1"
               >
                 <Scissors className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black tracking-tight text-blue-700 leading-none">Molde 2D</span>
+                <span className="text-[10px] font-black tracking-tight text-blue-700 leading-none">Plantilla</span>
               </button>
 
               <button
@@ -4007,12 +4007,13 @@ export default function HybridStudioWorkspace({
         </div>
       </LightDismissModal>
 
-      {/* ==================== MODAL 6: MOLDES 2D DE CONFECCIÓN Y CORTE A ESCALA REAL 1:1 ==================== */}
+      {/* ==================== MODAL 6: PLANTILLA 2D DE CONFECCIÓN Y CORTE A ESCALA REAL 1:1 ==================== */}
       <ProductionMoldModal
         isOpen={isProductionMoldModalOpen}
         onClose={() => setIsProductionMoldModalOpen(false)}
         design={design}
         roster={roster}
+        artworkRegistry={artworkRegistry}
       />
     </div>
   );

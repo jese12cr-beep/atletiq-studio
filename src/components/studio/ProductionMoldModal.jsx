@@ -7,15 +7,16 @@ import {
 
 /**
  * ATLETIQ — ProductionMoldModal
- * Modal interactivo de visualización y exportación de moldes 2D de confección y sublimación textil.
- * Mapea en tiempo real el diseño 3D personalizado a los 5 moldes físicos de corte (Frente, Espalda,
- * Mangas y Cuello) a escala real 1:1 (1250 x 1200 mm).
+ * Modal de visualización y exportación de la Plantilla de Confección Textil (Escala 1:1).
+ * Muestra el pliego completo de corte físico (Frente, Espalda, Tira de Cuello y Mangas)
+ * con los logotipos subidos por el usuario, dorsales y diseño 3D proyectados con precisión industrial.
  */
 export default function ProductionMoldModal({
   isOpen,
   onClose,
   design,
   roster = [],
+  artworkRegistry = {},
 }) {
   const [selectedPlayerIdx, setSelectedPlayerIdx] = useState(0);
   const [showCutLines, setShowCutLines] = useState(true);
@@ -37,21 +38,27 @@ export default function ProductionMoldModal({
     };
   }, [roster, selectedPlayerIdx, design]);
 
-  // Generar marcado SVG reactivo
+  // Generar marcado SVG reactivo con decals y logos embebidos en base64
   const svgMarkup = useMemo(() => {
     if (!isOpen || !design) return '';
     return generateProductionMoldSvgString(design, activePlayer, {
       showCutLines,
       showRegistrationMarks,
       showProductionLabels,
+      artworkRegistry,
     });
-  }, [isOpen, design, activePlayer, showCutLines, showRegistrationMarks, showProductionLabels]);
+  }, [isOpen, design, activePlayer, showCutLines, showRegistrationMarks, showProductionLabels, artworkRegistry]);
 
   if (!isOpen) return null;
 
-  // Descarga directa SVG
+  // Descarga directa SVG 1:1
   const handleDownloadSvg = () => {
-    downloadProductionMoldSvg(design, activePlayer);
+    downloadProductionMoldSvg(design, activePlayer, null, {
+      showCutLines,
+      showRegistrationMarks,
+      showProductionLabels,
+      artworkRegistry,
+    });
   };
 
   // Descarga como imagen PNG de alta resolución mediante Canvas
@@ -64,7 +71,6 @@ export default function ProductionMoldModal({
 
       const image = new Image();
       image.onload = () => {
-        // Generamos a resolución de producción (ej. 3543 x 3401 píxeles)
         const canvas = document.createElement('canvas');
         canvas.width = 3543;
         canvas.height = 3401;
@@ -74,9 +80,9 @@ export default function ProductionMoldModal({
         ctx.drawImage(image, 0, 0);
 
         const a = document.createElement('a');
-        const safeName = (design?.clubAlias || 'atletiq').toLowerCase().replace(/\s+/g, '_');
+        const safeName = (design?.clubAlias || design?.mexicoKitId || 'PLANTILLA').toLowerCase().replace(/\s+/g, '_');
         const playerName = (activePlayer?.name || 'custom').toLowerCase().replace(/\s+/g, '_');
-        a.download = `MOLDE_CONFECCION_300DPI_${safeName}_${playerName}.png`;
+        a.download = `PLANTILLA_CONFECCION_300DPI_${safeName}_${playerName}.png`;
         a.href = canvas.toDataURL('image/png');
         document.body.appendChild(a);
         a.click();
@@ -105,17 +111,17 @@ export default function ProductionMoldModal({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-black tracking-tight text-white">
-                  Motor de Aplanado 3D a 2D — Moldes de Confección Textil
+                  Plantilla de Confección Textil
                 </h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                  Escala 1:1 • Talla M
+                  Previsualización • Escala 1:1
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-slate-300 font-semibold">
-                  1250 mm × 1200 mm
+                  Talla M (1250 mm × 1200 mm)
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Proyección exacta 1:1 de los 4 moldes físicos de confección (Frente, Espalda, Manga Izq., Manga Der.) extraídos de MOLDE CAMISA.svg.
+                Previsualización técnica de los moldes físicos de corte y confección textil (Frente, Espalda, Tira de Cuello y Mangas).
               </p>
             </div>
           </div>
@@ -125,7 +131,7 @@ export default function ProductionMoldModal({
               type="button"
               onClick={onClose}
               className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-lg font-bold"
-              title="Cerrar modal"
+              title="Cerrar ventana"
             >
               ✕
             </button>
@@ -193,7 +199,7 @@ export default function ProductionMoldModal({
           <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-2xs">
             <button
               type="button"
-              onClick={() => setZoomLevel((z) => Math.max(0.4, z - 0.2))}
+              onClick={() => setZoomLevel((z) => Math.max(0.4, +(z - 0.15).toFixed(2)))}
               className="px-2.5 py-1 text-slate-700 hover:bg-slate-100 rounded-lg font-bold"
               title="Alejar"
             >
@@ -204,7 +210,7 @@ export default function ProductionMoldModal({
             </span>
             <button
               type="button"
-              onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.2))}
+              onClick={() => setZoomLevel((z) => Math.min(2.5, +(z + 0.15).toFixed(2)))}
               className="px-2.5 py-1 text-slate-700 hover:bg-slate-100 rounded-lg font-bold"
               title="Acercar"
             >
@@ -216,22 +222,22 @@ export default function ProductionMoldModal({
               className="px-2 py-1 text-slate-500 hover:text-slate-900 rounded-lg text-[10px] font-bold"
               title="Restablecer"
             >
-              100%
+              Ajustar
             </button>
           </div>
         </div>
 
-        {/* ==================== VIEWPORT DEL MOLDE PLANO 2D ==================== */}
+        {/* ==================== VIEWPORT DE LA PLANTILLA 2D ==================== */}
         <div
           ref={containerRef}
-          className="flex-1 bg-slate-200/80 overflow-auto p-4 flex items-center justify-center relative cursor-grab active:cursor-grabbing"
+          className="flex-1 bg-slate-200/80 overflow-auto p-4 flex items-center justify-center relative select-none"
         >
           <div
-            className="transition-transform duration-150 origin-center bg-white shadow-2xl rounded-xl border border-slate-300 p-2"
+            className="transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-4 w-full max-w-[960px] max-h-[76vh] aspect-[3543/3401] flex items-center justify-center"
             style={{ transform: `scale(${zoomLevel})` }}
           >
             <div
-              className="w-[1000px] h-[950px] overflow-hidden flex items-center justify-center"
+              className="w-full h-full flex items-center justify-center select-none"
               dangerouslySetInnerHTML={{ __html: svgMarkup }}
             />
           </div>
@@ -266,7 +272,7 @@ export default function ProductionMoldModal({
               className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all cursor-pointer shadow-md hover:scale-102 flex items-center justify-center gap-2"
             >
               <span>⬇</span>
-              <span>Descargar Molde SVG 1:1 (Plotter / Illustrator)</span>
+              <span>Descargar Plantilla SVG 1:1 (Plotter / Illustrator)</span>
             </button>
           </div>
         </div>
