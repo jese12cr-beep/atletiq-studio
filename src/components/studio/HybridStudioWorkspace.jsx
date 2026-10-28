@@ -603,6 +603,8 @@ export default function HybridStudioWorkspace({
       zIndex: maxZ + 5,
       isVector: processed.isVector,
       widthPx: processed.widthPx,
+      dataUrl: processed.dataUrl || '',
+      previewUrl: processed.previewUrl || '',
     };
   };
 

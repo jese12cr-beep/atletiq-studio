@@ -64,7 +64,7 @@ console.log('Has PIECE_TRASERO:', svg.includes('id="PIECE_TRASERO"'));
 console.log('Has PIECE_CUELLO:', svg.includes('id="PIECE_CUELLO"'));
 console.log('Has PIECE_MANGA_IZQUIERDA:', svg.includes('id="PIECE_MANGA_IZQUIERDA"'));
 console.log('Has PIECE_MANGA_DERECHA:', svg.includes('id="PIECE_MANGA_DERECHA"'));
-console.log('Has uploaded image tag:', svg.includes('<image href="data:image/png;base64,'));
+console.log('Has uploaded image tag (xlink + href):', svg.includes('<image xlink:href=') && svg.includes('href='));
 console.log('Has player JORDAN:', svg.includes('JORDAN'));
 console.log('Has number 23:', svg.includes('23'));
 console.log('Has responsive 100% width:', svg.includes('width="100%" height="100%"'));

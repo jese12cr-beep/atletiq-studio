@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%" height="100%" viewBox="0 0 3543.31 3401.57" preserveAspectRatio="xMidYMid meet">
   <!-- Generator: ATLETIQ Industrial Sublimation Engine (Adobe Illustrator 1:1) -->
   <defs>
-    <style><![CDATA[
+    <style>
       
       .st0 {
         fill: #333;
@@ -58,7 +58,7 @@
     
       .cut-line { stroke: #010101; stroke-width: 2.2; fill: none; stroke-miterlimit: 10; }
       .piece-tag { font-family: 'Arial Black', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 2px; fill: #475569; }
-    ]]></style>
+    </style>
     <clipPath id="clip-frente">
       <path d="M1696.25,1839.99c-115.97-72.21-137.49-188.38-145.49-315.14-6.82-121.39,16.51-249.79,59.6-363.19l-412.37-122.53c-3.95,79.49-28.89,164.03-73.84,230.11-25.15,36.14-56.09,67-92.41,89.5-50.93,31.55-115.47,31.55-166.39,0-36.32-22.5-67.26-53.36-92.42-89.5-44.94-66.08-69.89-150.62-73.84-230.11l-412.37,122.53c43.09,113.4,66.42,241.8,59.6,363.19-8,126.76-29.51,242.93-145.49,315.14l-1.13,1358.15c237.54,7.64,511.01,6.93,748.84,6.91,237.83.02,511.3.73,748.84-6.91L1696.25,1839.99Z" />
     </clipPath>
@@ -211,7 +211,17 @@
       <rect x="170" y="1720" width="1560" height="230" fill="#003DA5" />
       <rect x="170" y="1710" width="1560" height="12" fill="#FFFFFF" />
       <rect x="170" y="1950" width="1560" height="12" fill="#FFFFFF" />
-      <text x="948.54" y="1845" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="115" letter-spacing="18" fill="#FDB913">TIGRES</text>
+      <text x="948.54" y="1845" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="115" letter-spacing="18" fill="#FFC72C">TIGRES</text>
+      
+      <line x1="588.54" y1="1770" x2="558.54" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="623.54" y1="1770" x2="593.54" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="658.54" y1="1770" x2="628.54" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+    
+      
+      <line x1="1238.54" y1="1770" x2="1268.54" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="1273.54" y1="1770" x2="1303.54" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="1308.54" y1="1770" x2="1338.54" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+    
     
         <!-- Logotipos y Escudos Proyectados -->
         
@@ -228,7 +238,7 @@
     
 
         <g id="decal_decal_user_uploaded_tigres_logo" transform="translate(1163.0608473760233, 1556.2766644296169) rotate(0) scale(1, 1)" opacity="1">
-          <image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" x="-93.74020221473279" y="-104.82702657357098" width="187.48040442946558" height="209.65405314714195" preserveAspectRatio="xMidYMid meet" />
+          <image xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" x="-93.74020221473279" y="-104.82702657357098" width="187.48040442946558" height="209.65405314714195" preserveAspectRatio="xMidYMid meet" />
         </g>
       
         <!-- Dorsal Pecho (solo si está activo en 3D) -->

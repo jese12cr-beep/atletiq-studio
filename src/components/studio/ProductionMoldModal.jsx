@@ -49,6 +49,12 @@ export default function ProductionMoldModal({
     });
   }, [isOpen, design, activePlayer, showCutLines, showRegistrationMarks, showProductionLabels, artworkRegistry]);
 
+  // Marcado limpio para el DOM de React (sin declaración XML para evitar advertencias del parser HTML5)
+  const cleanDomSvgMarkup = useMemo(() => {
+    if (!svgMarkup) return '';
+    return svgMarkup.replace(/^<\?xml[^>]*\?>\s*/i, '');
+  }, [svgMarkup]);
+
   if (!isOpen) return null;
 
   // Descarga directa SVG 1:1
@@ -230,15 +236,15 @@ export default function ProductionMoldModal({
         {/* ==================== VIEWPORT DE LA PLANTILLA 2D ==================== */}
         <div
           ref={containerRef}
-          className="flex-1 bg-slate-200/80 overflow-auto p-4 flex items-center justify-center relative select-none"
+          className="flex-1 bg-slate-200/80 overflow-auto p-3 sm:p-5 flex relative select-none"
         >
           <div
-            className="transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-4 w-full max-w-[960px] max-h-[76vh] aspect-[3543/3401] flex items-center justify-center"
+            className="m-auto transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-4 flex items-center justify-center h-full max-h-full max-w-full aspect-[3543.31/3401.57]"
             style={{ transform: `scale(${zoomLevel})` }}
           >
             <div
-              className="w-full h-full flex items-center justify-center select-none"
-              dangerouslySetInnerHTML={{ __html: svgMarkup }}
+              className="w-full h-full flex items-center justify-center select-none [&>svg]:w-full [&>svg]:h-full [&>svg]:max-h-full [&>svg]:object-contain"
+              dangerouslySetInnerHTML={{ __html: cleanDomSvgMarkup }}
             />
           </div>
         </div>

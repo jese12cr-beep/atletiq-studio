@@ -272,7 +272,7 @@ export function renderDecalToSvg(decal, panelBounds, artworkRegistry, design) {
     if (imageSrc) {
       return `
         <g id="decal_${decal.id || 'custom'}" transform="translate(${cx}, ${cy}) rotate(${rot}) scale(${sx}, ${sy})" opacity="${opacity}">
-          <image href="${imageSrc}" x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet" />
+          <image xlink:href="${imageSrc}" href="${imageSrc}" x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet" />
         </g>
       `;
     }
@@ -368,29 +368,31 @@ function generateFrontAndBackGraphics(design, frenteCenterX, traseroCenterX, isA
       const lx1 = vLeftWingX + t1 * (vApexX - vLeftWingX);
       const ly1 = vLeftWingY + t1 * (vApexY - vLeftWingY);
       const lmidX = (lx0 + lx1) / 2;
+      const lmidY = (ly0 + ly1) / 2;
 
       const rx0 = vApexX + t0 * (vRightWingX - vApexX);
       const ry0 = vApexY - t0 * (vApexY - vRightWingY);
       const rx1 = vApexX + t1 * (vRightWingX - vApexX);
       const ry1 = vApexY - t1 * (vApexY - vRightWingY);
       const rmidX = (rx0 + rx1) / 2;
+      const rmidY = (ry0 + ry1) / 2;
 
-      const r1H = 55;
-      tRow1 += `<polygon points="${lx0.toFixed(1)},${ly0.toFixed(1)} ${lx1.toFixed(1)},${ly1.toFixed(1)} ${lmidX.toFixed(1)},${(ly0 + r1H).toFixed(1)}" fill="${redColor}" />`;
-      tRow1 += `<polygon points="${rx0.toFixed(1)},${ry0.toFixed(1)} ${rx1.toFixed(1)},${ry1.toFixed(1)} ${rmidX.toFixed(1)},${(ry0 + r1H).toFixed(1)}" fill="${redColor}" />`;
+      const r1H = 65;
+      tRow1 += `<polygon points="${lx0.toFixed(1)},${ly0.toFixed(1)} ${lx1.toFixed(1)},${ly1.toFixed(1)} ${lmidX.toFixed(1)},${(lmidY + r1H).toFixed(1)}" fill="${redColor}" />`;
+      tRow1 += `<polygon points="${rx0.toFixed(1)},${ry0.toFixed(1)} ${rx1.toFixed(1)},${ry1.toFixed(1)} ${rmidX.toFixed(1)},${(rmidY + r1H).toFixed(1)}" fill="${redColor}" />`;
 
-      const r2H = 110;
-      tRow2 += `<polygon points="${lx0.toFixed(1)},${(ly0 + 40).toFixed(1)} ${lx1.toFixed(1)},${(ly1 + 40).toFixed(1)} ${lmidX.toFixed(1)},${(ly0 + r2H).toFixed(1)}" fill="${blueColor}" />`;
-      tRow2 += `<polygon points="${rx0.toFixed(1)},${(ry0 + 40).toFixed(1)} ${rx1.toFixed(1)},${(ry1 + 40).toFixed(1)} ${rmidX.toFixed(1)},${(ry0 + r2H).toFixed(1)}" fill="${blueColor}" />`;
+      const r2H = 115;
+      tRow2 += `<polygon points="${lx0.toFixed(1)},${(ly0 + 40).toFixed(1)} ${lx1.toFixed(1)},${(ly1 + 40).toFixed(1)} ${lmidX.toFixed(1)},${(lmidY + r2H).toFixed(1)}" fill="${blueColor}" />`;
+      tRow2 += `<polygon points="${rx0.toFixed(1)},${(ry0 + 40).toFixed(1)} ${rx1.toFixed(1)},${(ry1 + 40).toFixed(1)} ${rmidX.toFixed(1)},${(rmidY + r2H).toFixed(1)}" fill="${blueColor}" />`;
 
       const r3H = 160;
-      tRow3 += `<polygon points="${lx0.toFixed(1)},${(ly0 + 85).toFixed(1)} ${lx1.toFixed(1)},${(ly1 + 85).toFixed(1)} ${lmidX.toFixed(1)},${(ly0 + r3H).toFixed(1)}" fill="${yellowColor}" />`;
-      tRow3 += `<polygon points="${rx0.toFixed(1)},${(ry0 + 85).toFixed(1)} ${rx1.toFixed(1)},${(ry1 + 85).toFixed(1)} ${rmidX.toFixed(1)},${(ry0 + r3H).toFixed(1)}" fill="${yellowColor}" />`;
+      tRow3 += `<polygon points="${lx0.toFixed(1)},${(ly0 + 80).toFixed(1)} ${lx1.toFixed(1)},${(ly1 + 80).toFixed(1)} ${lmidX.toFixed(1)},${(lmidY + r3H).toFixed(1)}" fill="${yellowColor}" />`;
+      tRow3 += `<polygon points="${rx0.toFixed(1)},${(ry0 + 80).toFixed(1)} ${rx1.toFixed(1)},${(ry1 + 80).toFixed(1)} ${rmidX.toFixed(1)},${(rmidY + r3H).toFixed(1)}" fill="${yellowColor}" />`;
     }
 
     const apexDiamond = `
-      <polygon points="${vApexX},${vApexY + 80} ${vApexX + 45},${vApexY + 150} ${vApexX},${vApexY + 220} ${vApexX - 45},${vApexY + 150}" fill="${redColor}" />
-      <polygon points="${vApexX},${vApexY + 95} ${vApexX + 32},${vApexY + 150} ${vApexX},${vApexY + 205} ${vApexX - 32},${vApexY + 150}" fill="${blueColor}" />
+      <polygon points="${vApexX},${vApexY + 45} ${vApexX + 50},${vApexY + 125} ${vApexX},${vApexY + 205} ${vApexX - 50},${vApexY + 125}" fill="${redColor}" />
+      <polygon points="${vApexX},${vApexY + 65} ${vApexX + 35},${vApexY + 125} ${vApexX},${vApexY + 185} ${vApexX - 35},${vApexY + 125}" fill="${blueColor}" />
     `;
 
     frontGraphicSvg = `
@@ -443,12 +445,24 @@ function generateFrontAndBackGraphics(design, frenteCenterX, traseroCenterX, isA
       </g>
     `;
   } else if (graphicId === 'mx_tigres_chest_bar') {
-    // Barra de pecho universitaria UANL
+    // Barra de pecho universitaria UANL con franjas diagonales icónicas
+    const slashesLeft = `
+      <line x1="${frenteCenterX - 360}" y1="1770" x2="${frenteCenterX - 390}" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="${frenteCenterX - 325}" y1="1770" x2="${frenteCenterX - 355}" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="${frenteCenterX - 290}" y1="1770" x2="${frenteCenterX - 320}" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+    `;
+    const slashesRight = `
+      <line x1="${frenteCenterX + 290}" y1="1770" x2="${frenteCenterX + 320}" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="${frenteCenterX + 325}" y1="1770" x2="${frenteCenterX + 355}" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+      <line x1="${frenteCenterX + 360}" y1="1770" x2="${frenteCenterX + 390}" y2="1910" stroke="#FFC72C" stroke-width="12" stroke-linecap="round" />
+    `;
     frontGraphicSvg = `
       <rect x="170" y="1720" width="1560" height="230" fill="#003DA5" />
       <rect x="170" y="1710" width="1560" height="12" fill="#FFFFFF" />
       <rect x="170" y="1950" width="1560" height="12" fill="#FFFFFF" />
-      <text x="${frenteCenterX}" y="1845" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="115" letter-spacing="18" fill="#FDB913">TIGRES</text>
+      <text x="${frenteCenterX}" y="1845" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="115" letter-spacing="18" fill="#FFC72C">TIGRES</text>
+      ${slashesLeft}
+      ${slashesRight}
     `;
   } else if (graphicId === 'mx_atlas_50_50') {
     frontGraphicSvg = `<rect x="${frenteCenterX}" y="1010" width="800" height="2225" fill="#000000" />`;
@@ -590,11 +604,11 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%" height="100%" viewBox="${MOLD_CONSTANTS.VIEWBOX}" preserveAspectRatio="xMidYMid meet">
   <!-- Generator: ATLETIQ Industrial Sublimation Engine (Adobe Illustrator 1:1) -->
   <defs>
-    <style><![CDATA[
+    <style>
       ${MOLDE_CAMISA_STYLE}
       .cut-line { stroke: #010101; stroke-width: 2.2; fill: none; stroke-miterlimit: 10; }
       .piece-tag { font-family: 'Arial Black', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 2px; fill: #475569; }
-    ]]></style>
+    </style>
     <clipPath id="clip-frente">
       <path d="${MOLDE_PATHS.FRENTE}" />
     </clipPath>
