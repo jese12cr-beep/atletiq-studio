@@ -236,10 +236,10 @@ export default function ProductionMoldModal({
         {/* ==================== VIEWPORT DE LA PLANTILLA 2D ==================== */}
         <div
           ref={containerRef}
-          className="flex-1 bg-slate-200/80 overflow-auto p-3 sm:p-5 flex relative select-none"
+          className="flex-1 min-h-0 bg-slate-200/80 overflow-auto p-3 sm:p-5 flex relative select-none"
         >
           <div
-            className="m-auto transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-4 flex items-center justify-center h-full max-h-full max-w-full aspect-[3543.31/3401.57]"
+            className="m-auto transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-4 flex items-center justify-center max-h-full max-w-full aspect-[3543.31/3401.57]"
             style={{ transform: `scale(${zoomLevel})` }}
           >
             <div
