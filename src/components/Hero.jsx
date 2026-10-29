@@ -26,7 +26,7 @@ const FEATURED_HERO_GARMENTS = [
     price: '$34.00 USD',
     colors: ['#00875a', '#ffffff', '#101820', '#facc15'],
     samplePlayer: '#10 VALVERDE (L)',
-    image: '/assets/stitch/ghost_mannequin.png',
+    image: './assets/stitch/ghost_mannequin.png',
   },
   {
     id: 'basketball_b6_hero',
@@ -40,7 +40,7 @@ const FEATURED_HERO_GARMENTS = [
     price: '$32.50 USD',
     colors: ['#c8102e', '#101820', '#ffd700', '#ffffff'],
     samplePlayer: '#10 RODRÍGUEZ (L)',
-    image: '/assets/stitch/basketball_arena.png',
+    image: './assets/stitch/basketball_arena.png',
   },
   {
     id: 'jacket_softshell_601m_men',
@@ -54,7 +54,7 @@ const FEATURED_HERO_GARMENTS = [
     price: '$58.00 USD',
     colors: ['#0f172a', '#0284c7', '#ffffff', '#e11d48'],
     samplePlayer: 'CLUB STAFF (XL)',
-    image: '/assets/stitch/football_celebration.png',
+    image: './assets/stitch/football_celebration.png',
   },
 ];
 
