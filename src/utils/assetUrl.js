@@ -20,11 +20,11 @@ export function resolveAssetUrl(url) {
   // Determine base path
   let base = import.meta.env?.BASE_URL || '/';
 
-  // Subpath detection fallback (e.g. GitHub Pages https://<user>.github.io/ATLETIQ-STUDIO/)
+  // Subpath detection fallback (e.g. GitHub Pages https://<user>.github.io/atletiq-studio/)
   if (typeof window !== 'undefined') {
-    const pathname = window.location.pathname;
-    if (pathname.includes('/ATLETIQ-STUDIO')) {
-      base = '/ATLETIQ-STUDIO/';
+    const pathname = window.location.pathname.toLowerCase();
+    if (pathname.includes('/atletiq-studio')) {
+      base = '/atletiq-studio/';
     }
   }
 
