@@ -242,17 +242,24 @@ const filteredVariantCache = new Map();
  *  - `invertImage`: invierte luminancia (modo marca de agua invertida `wasserzeichenInvertImage` de Owayo).
  */
 export function getFilteredArtworkDrawable(asset, { removeWhiteBg = false, whiteThreshold = 238, tintHex = '', invertImage = false } = {}) {
-  if (!asset?.imageElement) return null;
+  let src = asset?.imageElement;
+  if (!src && (asset?.dataUrl || asset?.previewUrl)) {
+    if (!asset._cachedImg && typeof Image !== 'undefined') {
+      asset._cachedImg = new Image();
+      asset._cachedImg.src = asset.dataUrl || asset.previewUrl;
+    }
+    src = asset._cachedImg;
+  }
+  if (!src || (src instanceof Image && (!src.complete || src.naturalWidth === 0))) return null;
   if (!removeWhiteBg && !tintHex && !invertImage) {
-    return asset.imageElement;
+    return src;
   }
 
-  const key = `${asset.artworkId}|bg:${removeWhiteBg ? whiteThreshold : 0}|tint:${tintHex || 'none'}|inv:${invertImage ? 1 : 0}`;
+  const key = `${asset.artworkId || 'art'}|bg:${removeWhiteBg ? whiteThreshold : 0}|tint:${tintHex || 'none'}|inv:${invertImage ? 1 : 0}`;
   if (filteredVariantCache.has(key)) {
     return filteredVariantCache.get(key);
   }
 
-  const src = asset.imageElement;
   const w = Math.min(1600, Math.max(64, src.naturalWidth || src.width || 512));
   const h = Math.min(1600, Math.max(64, src.naturalHeight || src.height || 512));
   const canvas = document.createElement('canvas');

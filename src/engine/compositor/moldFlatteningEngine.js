@@ -9,6 +9,13 @@
  * extraído del archivo maestro MOLDE CAMISA.svg (3543.31 x 3401.57 px = 1250 x 1200 mm a 72 DPI).
  */
 
+import {
+  composeGarmentPartCanvas,
+  loadFishDesignMasks,
+  resolveActiveFishDesignMeta,
+  resolvedFishMasksCache,
+} from './fishPartCompositor';
+
 // ============================================================================
 // CONSTANTES Y TRAZOS MAESTROS DE "MOLDE CAMISA.SVG"
 // ============================================================================
@@ -216,19 +223,20 @@ export function getDecalImageDataUrl(decal, artworkRegistry = {}) {
   }
 
   // 5. Extracción desde imagen viva en el DOM (canvas toDataURL)
-  if (typeof document !== 'undefined' && art?.imageElement) {
+  const liveImg = art?.imageElement || decal?.imageElement;
+  if (typeof document !== 'undefined' && liveImg) {
     try {
-      const img = art.imageElement;
-      const w = img.naturalWidth || img.width || 800;
-      const h = img.naturalHeight || img.height || 800;
+      const w = liveImg.naturalWidth || liveImg.width || 800;
+      const h = liveImg.naturalHeight || liveImg.height || 800;
       if (w > 0 && h > 0) {
         const c = document.createElement('canvas');
         c.width = w;
         c.height = h;
         const ctx = c.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(liveImg, 0, 0);
         const dUrl = c.toDataURL('image/png');
-        art.dataUrl = dUrl;
+        if (art) art.dataUrl = dUrl;
+        decal.dataUrl = dUrl;
         return dUrl;
       }
     } catch {
@@ -1041,6 +1049,122 @@ function generateFrontAndBackGraphics(design, frenteCenterX, traseroCenterX, isA
 }
 
 /**
+ * Precarga y decodifica todos los logotipos subidos (PNG/SVG/WebP) en el DOM
+ * para asegurar que estén 100% disponibles en memoria antes de la composición y exportación.
+ */
+export async function preloadDesignArtworkImages(design, artworkRegistry = {}) {
+  if (typeof document === 'undefined') return;
+  const decals = design?.decals || [];
+  const promises = [];
+
+  for (const decal of decals) {
+    if (
+      decal.type === 'UPLOADED_RASTER' ||
+      decal.type === 'UPLOADED_VECTOR' ||
+      decal.artworkId ||
+      decal.dataUrl ||
+      decal.previewUrl
+    ) {
+      const art = artworkRegistry?.[decal.artworkId] || decal;
+      const src = art.dataUrl || decal.dataUrl || art.previewUrl || decal.previewUrl;
+      if (!src) continue;
+
+      if (!art.imageElement || !art.imageElement.complete || art.imageElement.naturalWidth === 0) {
+        const p = new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            art.imageElement = img;
+            decal.imageElement = img;
+            resolve(img);
+          };
+          img.onerror = () => resolve(null);
+          img.src = src;
+        });
+        promises.push(p);
+      }
+    }
+  }
+
+  if (promises.length > 0) {
+    await Promise.all(promises);
+  }
+}
+
+/**
+ * Compone las texturas 3D en alta resolución (1536x1536) para cada pieza del patrón textil
+ * utilizando directamente el motor de renderizado 3D (composeGarmentPartCanvas).
+ * Esto transfiere el 100% de los gráficos, escudos oficiales, dorsales, nombres y logos subidos por el usuario.
+ */
+export function composeDirect3DTextures(design, activePlayer = {}, artworkRegistry = {}, masksMap = null) {
+  if (typeof document === 'undefined') return null;
+
+  const activeFish = resolveActiveFishDesignMeta(design);
+  const activeMasksMap = masksMap || (activeFish?.fileUrl ? resolvedFishMasksCache.get(activeFish.fileUrl) : null);
+
+  // Sincronizar y montar cualquier imagen de decal no inicializada
+  const decals = design?.decals || [];
+  for (const decal of decals) {
+    if (decal.artworkId || decal.dataUrl || decal.previewUrl) {
+      const art = artworkRegistry?.[decal.artworkId] || decal;
+      if (!art.imageElement && (art.dataUrl || decal.dataUrl || art.previewUrl || decal.previewUrl)) {
+        const img = new Image();
+        img.src = art.dataUrl || decal.dataUrl || art.previewUrl || decal.previewUrl;
+        art.imageElement = img;
+        decal.imageElement = img;
+      }
+    }
+  }
+
+  const isSleeveless = design.productModelId === 'basketball_jersey_hero' || design.productModelId === 'basketball_b6_hero';
+
+  const parts = isSleeveless
+    ? {
+        front: 'Front',
+        back: 'Back',
+      }
+    : {
+        front: 'Front',
+        back: 'Back',
+        left_sleeve: 'LeftArm',
+        right_sleeve: 'RightArm',
+      };
+
+  const result = {};
+  let successCount = 0;
+  for (const [key, partName] of Object.entries(parts)) {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1536;
+      canvas.height = 1536;
+      composeGarmentPartCanvas(canvas, partName, design, activePlayer, artworkRegistry, activeMasksMap, null);
+      result[key] = canvas.toDataURL('image/png');
+      successCount++;
+    } catch (e) {
+      console.warn(`[moldFlatteningEngine] Direct texture composition for ${partName} fallback:`, e);
+    }
+  }
+  return successCount > 0 ? result : null;
+}
+
+/**
+ * Carga de forma asíncrona los mapas .fish (patrones y franjas) y precarga imágenes de decals
+ * para generar las texturas directas completas con 100% fidelidad visual.
+ */
+export async function composeDirect3DTexturesAsync(design, activePlayer = {}, artworkRegistry = {}) {
+  await preloadDesignArtworkImages(design, artworkRegistry);
+  let masksMap = null;
+  const activeFish = resolveActiveFishDesignMeta(design);
+  if (activeFish?.fileUrl) {
+    try {
+      masksMap = await loadFishDesignMasks(activeFish.fileUrl);
+    } catch (e) {
+      console.warn('[moldFlatteningEngine] Error loading fish masks:', e);
+    }
+  }
+  return composeDirect3DTextures(design, activePlayer, artworkRegistry, masksMap);
+}
+
+/**
  * Genera la cadena completa SVG de la Plantilla de Producción Textil 1:1.
  */
 export function generateProductionMoldSvgString(design, activePlayer = {}, options = {}) {
@@ -1049,6 +1173,10 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     showLabels = true,
     artworkRegistry = {},
   } = options;
+
+  const directTextures =
+    options.directTextures ||
+    (typeof document !== 'undefined' ? composeDirect3DTextures(design, activePlayer, artworkRegistry) : null);
 
   const isAway =
     design?.mexicoKitId?.includes('away') ||
@@ -1115,13 +1243,13 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     .map((d) => renderDecalToSvg(d, traseroBounds, artworkRegistry, design))
     .join('\n');
 
-  // Sleeve Decals
-  const leftSleeveDecals = allDecals.filter((d) => d.panel === 'left_sleeve');
+  // Sleeve Decals (soporta aliases left_sleeve/left_arm y right_sleeve/right_arm)
+  const leftSleeveDecals = allDecals.filter((d) => d.panel === 'left_sleeve' || d.panel === 'left_arm');
   const leftSleeveDecalsSvg = leftSleeveDecals
     .map((d) => renderDecalToSvg(d, leftSleeveBounds, artworkRegistry, design))
     .join('\n');
 
-  const rightSleeveDecals = allDecals.filter((d) => d.panel === 'right_sleeve');
+  const rightSleeveDecals = allDecals.filter((d) => d.panel === 'right_sleeve' || d.panel === 'right_arm');
   const rightSleeveDecalsSvg = rightSleeveDecals
     .map((d) => renderDecalToSvg(d, rightSleeveBounds, artworkRegistry, design))
     .join('\n');
@@ -1184,19 +1312,23 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     ${MOLDE_CAMISA_BACKGROUND_INNER}
   </g>
 
-  <!-- 2. CAPA DE PRODUCCIÓN TEXTIL 1:1 (DISEÑO Y PIEZAS APLANADAS) -->
+  <!-- 2. CAPA DE PRODUCCIÓN TEXTIL 1:1 (DISEÑO Y PIEZAS APLANADAS DIRECTO DE 3D) -->
   <g id="DESIGN">
     <!-- ==================== PIEZA 1: DELANTERO / FRENTE ==================== -->
     <g id="PIECE_FRENTE">
       <g clip-path="url(#clip-frente)">
-        <!-- Fondo Base con Sangrado 10mm -->
+        ${
+          directTextures?.front
+            ? `<image href="${directTextures.front}" xlink:href="${directTextures.front}" x="${frenteBounds.x}" y="${frenteBounds.y}" width="${frenteBounds.width}" height="${frenteBounds.height}" preserveAspectRatio="none" />`
+            : `<!-- Fondo Base con Sangrado 10mm -->
         <rect x="170" y="1010" width="1560" height="2225" fill="${primaryColor}" />
         <!-- Patrón Gráfico Oficial -->
         ${frontGraphicSvg}
         <!-- Logotipos y Escudos Proyectados -->
         ${frontDecalsSvg}
         <!-- Dorsal Pecho (solo si está activo en 3D) -->
-        ${frontNumSvg}
+        ${frontNumSvg}`
+        }
       </g>
 
       <!-- Trazo de Corte Físico (Línea de confección) -->
@@ -1209,7 +1341,10 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     <!-- ==================== PIEZA 2: TRASERO / ESPALDA ==================== -->
     <g id="PIECE_TRASERO">
       <g clip-path="url(#clip-trasero)">
-        <!-- Fondo Base con Sangrado 10mm -->
+        ${
+          directTextures?.back
+            ? `<image href="${directTextures.back}" xlink:href="${directTextures.back}" x="${traseroBounds.x}" y="${traseroBounds.y}" width="${traseroBounds.width}" height="${traseroBounds.height}" preserveAspectRatio="none" />`
+            : `<!-- Fondo Base con Sangrado 10mm -->
         <rect x="1815" y="985" width="1560" height="2250" fill="${primaryColor}" />
         <!-- Yugo Posterior Superior -->
         ${backGraphicSvg}
@@ -1218,7 +1353,8 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
         <!-- Nombre de Jugador -->
         ${backNameSvg}
         <!-- Dorsal de Jugador Atlético (250 mm) -->
-        ${backNumberSvg}
+        ${backNumberSvg}`
+        }
       </g>
 
       <!-- Trazo de Corte Físico -->
@@ -1228,21 +1364,19 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
       ${showLabels ? `<text x="${traseroCenterX}" y="3255" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.BACK.tag}</text>` : ''}
     </g>
 
-    <!-- ==================== PIEZA 3: TIRA DE CUELLO (ORIGINAL MOLDE CAMISA.SVG) ==================== -->
-    <g id="PIECE_CUELLO">
-      <rect class="cut-line" x="1072.82" y="822.98" width="1397.62" height="144.35" transform="translate(2666.7948 -876.4772) rotate(90)" fill="${collarColor}" stroke="#010101" stroke-width="2.2" />
-      ${showLabels ? `<text x="1771" y="900" transform="rotate(-90 1771 900)" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.COLLAR.tag}</text>` : ''}
-    </g>
-
-    <!-- ==================== PIEZA 4: MANGA IZQUIERDA ==================== -->
+    <!-- ==================== PIEZA 3: MANGA IZQUIERDA ==================== -->
     <g id="PIECE_MANGA_IZQUIERDA">
       <g clip-path="url(#clip-manga-izq)">
-        <!-- Fondo Manga con Sangrado -->
+        ${
+          directTextures?.left_sleeve
+            ? `<image href="${directTextures.left_sleeve}" xlink:href="${directTextures.left_sleeve}" x="${leftSleeveBounds.x}" y="${leftSleeveBounds.y}" width="${leftSleeveBounds.width}" height="${leftSleeveBounds.height}" preserveAspectRatio="none" />`
+            : `<!-- Fondo Manga con Sangrado -->
         <rect x="280" y="165" width="1335" height="745" fill="${sleevesColor}" />
         <!-- Ribete de Puño -->
         <rect x="280" y="${882.7 - sleeveTrimHeight}" width="1335" height="${sleeveTrimHeight + 20}" fill="${secondaryColor}" />
         <!-- Decals Manga Izquierda -->
-        ${leftSleeveDecalsSvg}
+        ${leftSleeveDecalsSvg}`
+        }
       </g>
 
       <!-- Trazo de Corte Físico -->
@@ -1252,15 +1386,19 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
       ${showLabels ? `<text x="${frenteCenterX}" y="920" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.LEFT_SLEEVE.tag}</text>` : ''}
     </g>
 
-    <!-- ==================== PIEZA 5: MANGA DERECHA ==================== -->
+    <!-- ==================== PIEZA 4: MANGA DERECHA ==================== -->
     <g id="PIECE_MANGA_DERECHA">
       <g clip-path="url(#clip-manga-der)">
-        <!-- Fondo Manga con Sangrado -->
+        ${
+          directTextures?.right_sleeve
+            ? `<image href="${directTextures.right_sleeve}" xlink:href="${directTextures.right_sleeve}" x="${rightSleeveBounds.x}" y="${rightSleeveBounds.y}" width="${rightSleeveBounds.width}" height="${rightSleeveBounds.height}" preserveAspectRatio="none" />`
+            : `<!-- Fondo Manga con Sangrado -->
         <rect x="1925" y="165" width="1335" height="745" fill="${sleevesColor}" />
         <!-- Ribete de Puño -->
         <rect x="1925" y="${882.7 - sleeveTrimHeight}" width="1335" height="${sleeveTrimHeight + 20}" fill="${secondaryColor}" />
         <!-- Decals Manga Derecha -->
-        ${rightSleeveDecalsSvg}
+        ${rightSleeveDecalsSvg}`
+        }
       </g>
 
       <!-- Trazo de Corte Físico -->

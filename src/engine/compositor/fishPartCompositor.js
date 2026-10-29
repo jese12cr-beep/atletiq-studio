@@ -16,7 +16,8 @@ import { getFilteredArtworkDrawable } from '../core/dpiValidator';
 import { drawLigaMxGraphicMm, drawLigaMxCrestMm } from './ligaMxKitsEngine';
 
 // Caché de máscaras decodificadas `.fish`: key = `${fishUrl}` -> Promise<Map<partName, { width, height, zones: Uint8Array }>>
-const decodedFishCache = new Map();
+export const decodedFishCache = new Map();
+export const resolvedFishMasksCache = new Map();
 
 // Caché de capas base recoloreadas por pieza: key = `${mirlKey}|${partName}` -> { keySignature, canvas }
 const baseLayerCanvasCache = new Map();
@@ -207,6 +208,7 @@ export async function loadFishDesignMasks(fishUrl) {
       partMap.set(partName, { width: targetW, height: targetH, zones });
     }
 
+    resolvedFishMasksCache.set(fishUrl, partMap);
     return partMap;
   })();
 
@@ -650,7 +652,9 @@ export function composeGarmentPartCanvas(
   overlayOptions = null
 ) {
   const mirlKey = resolveMirlKeyForProduct(design.productModelId);
-  const maskEntry = fishMasksMap?.get(partName) || null;
+  const activeFishMeta = resolveActiveFishDesignMeta(design);
+  const cachedMasks = activeFishMeta?.fileUrl ? resolvedFishMasksCache.get(activeFishMeta.fileUrl) : null;
+  const maskEntry = fishMasksMap?.get(partName) || cachedMasks?.get(partName) || null;
   const baseCanvas = getOrRenderBasePartCanvas(mirlKey, partName, maskEntry, design);
 
   if (targetCanvas.width !== baseCanvas.width || targetCanvas.height !== baseCanvas.height) {
@@ -689,13 +693,15 @@ export function composeGarmentPartCanvas(
   const spec = getPartSpec(design.productModelId, panel);
   const pxPerMmX = W / spec.widthMm;
   const pxPerMmY = H / spec.heightMm;
-  const activeFishMeta = resolveActiveFishDesignMeta(design);
 
   // 1. Ordenar y pintar todos los Decals (PNGs, SVGs, Escudos y Textos Libres) asignados a esta pieza por zIndex
   const partDecals = (design.decals || [])
     .filter((d) => {
       const dp = d.panel || 'front';
       if (dp === panel) return true;
+      // Normalización de alias para mangas (left_sleeve / left_arm y right_sleeve / right_arm)
+      if ((dp === 'left_arm' || dp === 'left_sleeve') && (panel === 'left_arm' || panel === 'left_sleeve')) return true;
+      if ((dp === 'right_arm' || dp === 'right_sleeve') && (panel === 'right_arm' || panel === 'right_sleeve')) return true;
       // Compatibilidad si un decal tiene panel 'front' en una chaqueta con 'front_left' o 'front_right'
       if (dp === 'front' && (panel === 'front_left' || panel === 'front_right')) {
         return panel === 'front_left';
@@ -752,14 +758,22 @@ export function composeGarmentPartCanvas(
         archDeg: decal.archDeg || 0,
         letterSpacingMm: decal.letterSpacingMm || 0,
       });
-    } else if (decal.artworkId && artworkRegistry[decal.artworkId]) {
-      const asset = artworkRegistry[decal.artworkId];
-      const drawable = getFilteredArtworkDrawable(asset, {
+    } else if (decal.artworkId || decal.dataUrl || decal.previewUrl) {
+      const asset = artworkRegistry?.[decal.artworkId] || {
+        artworkId: decal.artworkId || decal.id,
+        dataUrl: decal.dataUrl || '',
+        previewUrl: decal.previewUrl || decal.url || '',
+        imageElement: decal.imageElement,
+      };
+      let drawable = getFilteredArtworkDrawable(asset, {
         removeWhiteBg: Boolean(decal.removeWhiteBg),
         whiteThreshold: decal.whiteThreshold ?? 238,
         tintHex: decal.tintHex || '',
         invertImage: Boolean(decal.invertImage),
       });
+      if (!drawable && asset.imageElement && asset.imageElement.complete && asset.imageElement.naturalWidth > 0) {
+        drawable = asset.imageElement;
+      }
       if (drawable) {
         drawCtx.drawImage(drawable, -wMm / 2, -hMm / 2, wMm, hMm);
       }

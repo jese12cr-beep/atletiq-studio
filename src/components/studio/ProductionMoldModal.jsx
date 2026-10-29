@@ -1,14 +1,17 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   generateProductionMoldSvgString,
   downloadProductionMoldSvg,
+  composeDirect3DTextures,
+  composeDirect3DTexturesAsync,
+  preloadDesignArtworkImages,
   MOLD_CONSTANTS,
 } from '../../engine/compositor/moldFlatteningEngine';
 
 /**
  * ATLETIQ — ProductionMoldModal
  * Modal de visualización y exportación de la Plantilla de Confección Textil (Escala 1:1).
- * Muestra el pliego completo de corte físico (Frente, Espalda, Tira de Cuello y Mangas)
+ * Muestra el pliego completo de corte físico (Frente, Espalda y Mangas)
  * con los logotipos subidos por el usuario, dorsales y diseño 3D proyectados con precisión industrial.
  */
 export default function ProductionMoldModal({
@@ -19,13 +22,6 @@ export default function ProductionMoldModal({
   artworkRegistry = {},
 }) {
   const [selectedPlayerIdx, setSelectedPlayerIdx] = useState(0);
-  const [showCutLines, setShowCutLines] = useState(true);
-  const [showRegistrationMarks, setShowRegistrationMarks] = useState(true);
-  const [showProductionLabels, setShowProductionLabels] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [isExporting, setIsExporting] = useState(false);
-
-  const containerRef = useRef(null);
 
   const activePlayer = useMemo(() => {
     if (roster && roster.length > 0 && roster[selectedPlayerIdx]) {
@@ -38,6 +34,49 @@ export default function ProductionMoldModal({
     };
   }, [roster, selectedPlayerIdx, design]);
 
+  const [showCutLines, setShowCutLines] = useState(true);
+  const [showRegistrationMarks, setShowRegistrationMarks] = useState(true);
+  const [showProductionLabels, setShowProductionLabels] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isExporting, setIsExporting] = useState(false);
+  const [directTextures, setDirectTextures] = useState(null);
+
+  const containerRef = useRef(null);
+
+  // Asegurar que al abrir la plantilla inicie siempre centrada y arriba (todas las piezas visibles)
+  useEffect(() => {
+    if (isOpen) {
+      setZoomLevel(1);
+      if (containerRef.current) {
+        containerRef.current.scrollTop = 0;
+        containerRef.current.scrollLeft = 0;
+      }
+      // Inicializar de inmediato con texturas sincrónicas desde caché
+      const initTex = composeDirect3DTextures(design, activePlayer, artworkRegistry);
+      if (initTex) setDirectTextures(initTex);
+    } else {
+      setDirectTextures(null);
+    }
+  }, [isOpen, design, activePlayer, artworkRegistry]);
+
+  // Precargar de inmediato todas las imágenes, logos PNG y máscaras de diseño en memoria viva
+  useEffect(() => {
+    if (!isOpen || !design) return;
+    let cancelled = false;
+
+    async function loadTexturesWithLogos() {
+      const textures = await composeDirect3DTexturesAsync(design, activePlayer, artworkRegistry);
+      if (!cancelled && textures) {
+        setDirectTextures(textures);
+      }
+    }
+
+    loadTexturesWithLogos();
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, design, activePlayer, artworkRegistry]);
+
   // Generar marcado SVG reactivo con decals y logos embebidos en base64
   const svgMarkup = useMemo(() => {
     if (!isOpen || !design) return '';
@@ -46,8 +85,9 @@ export default function ProductionMoldModal({
       showRegistrationMarks,
       showProductionLabels,
       artworkRegistry,
+      directTextures,
     });
-  }, [isOpen, design, activePlayer, showCutLines, showRegistrationMarks, showProductionLabels, artworkRegistry]);
+  }, [isOpen, design, activePlayer, showCutLines, showRegistrationMarks, showProductionLabels, artworkRegistry, directTextures]);
 
   // Marcado limpio para el DOM de React (sin declaración XML para evitar advertencias del parser HTML5)
   const cleanDomSvgMarkup = useMemo(() => {
@@ -57,13 +97,15 @@ export default function ProductionMoldModal({
 
   if (!isOpen) return null;
 
-  // Descarga directa SVG 1:1
-  const handleDownloadSvg = () => {
+  // Descarga directa SVG 1:1 con logotipos PNG embebidos en base64
+  const handleDownloadSvg = async () => {
+    const textures = directTextures || (await composeDirect3DTexturesAsync(design, activePlayer, artworkRegistry));
     downloadProductionMoldSvg(design, activePlayer, null, {
       showCutLines,
       showRegistrationMarks,
       showProductionLabels,
       artworkRegistry,
+      directTextures: textures,
     });
   };
 
@@ -71,7 +113,16 @@ export default function ProductionMoldModal({
   const handleDownloadPng = async () => {
     setIsExporting(true);
     try {
-      const svgBlob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+      const textures = directTextures || (await composeDirect3DTexturesAsync(design, activePlayer, artworkRegistry));
+      const currentSvg = generateProductionMoldSvgString(design, activePlayer, {
+        showCutLines,
+        showRegistrationMarks,
+        showProductionLabels,
+        artworkRegistry,
+        directTextures: textures,
+      });
+
+      const svgBlob = new Blob([currentSvg], { type: 'image/svg+xml;charset=utf-8' });
       const URLObj = window.URL || window.webkitURL || window;
       const blobURL = URLObj.createObjectURL(svgBlob);
 
@@ -134,6 +185,7 @@ export default function ProductionMoldModal({
 
           <div className="flex items-center gap-2">
             <button
+              id="btn-close-production-mold"
               type="button"
               onClick={onClose}
               className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-lg font-bold"
@@ -236,11 +288,19 @@ export default function ProductionMoldModal({
         {/* ==================== VIEWPORT DE LA PLANTILLA 2D ==================== */}
         <div
           ref={containerRef}
-          className="flex-1 min-h-0 bg-slate-200/80 overflow-auto p-3 sm:p-5 flex relative select-none"
+          className="flex-1 min-h-0 bg-slate-200/80 overflow-auto p-2 sm:p-4 flex items-center justify-center relative select-none"
         >
           <div
-            className="m-auto transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-4 flex items-center justify-center max-h-full max-w-full aspect-[3543.31/3401.57]"
-            style={{ transform: `scale(${zoomLevel})` }}
+            className="m-auto transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-3 flex items-center justify-center"
+            style={{
+              width: zoomLevel === 1 ? 'auto' : `${Math.round(zoomLevel * 100)}%`,
+              height: zoomLevel === 1 ? '100%' : 'auto',
+              maxWidth: zoomLevel === 1 ? '100%' : 'none',
+              maxHeight: zoomLevel === 1 ? '100%' : 'none',
+              aspectRatio: '3543.31 / 3401.57',
+              transform: zoomLevel !== 1 ? `scale(${zoomLevel})` : undefined,
+              transformOrigin: 'top center',
+            }}
           >
             <div
               className="w-full h-full flex items-center justify-center select-none [&>svg]:w-full [&>svg]:h-full [&>svg]:max-h-full [&>svg]:object-contain"

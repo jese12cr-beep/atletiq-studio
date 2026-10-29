@@ -195,6 +195,7 @@ function LightDismissModal({ isOpen, onClose, titleId, title, subtitle, maxWidth
             </h2>
           </div>
           <button
+            id="btn-close-garment-modal"
             type="button"
             onClick={() => dialogRef.current?.close()}
             aria-label="Cerrar ventana"
@@ -251,7 +252,7 @@ export default function HybridStudioWorkspace({
   const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
   const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [isGarmentMenuOpen, setIsGarmentMenuOpen] = useState(false);
+  const [isGarmentMenuOpen, setIsGarmentMenuOpen] = useState(true);
   const [isMexicoKitsModalOpen, setIsMexicoKitsModalOpen] = useState(false);
   const [isProductionMoldModalOpen, setIsProductionMoldModalOpen] = useState(false);
   const [garmentMenuMenSection, setGarmentMenuMenSection] = useState('custom'); // 'custom' | 'ligamx'
@@ -604,7 +605,8 @@ export default function HybridStudioWorkspace({
       isVector: processed.isVector,
       widthPx: processed.widthPx,
       dataUrl: processed.dataUrl || '',
-      previewUrl: processed.previewUrl || '',
+      previewUrl: processed.dataUrl || processed.previewUrl || '',
+      imageElement: processed.imageElement,
     };
   };
 
@@ -1222,19 +1224,20 @@ export default function HybridStudioWorkspace({
               </div>
             </div>
 
-            {/* Pestañas de píldora Owayo: [ Diseño ] [ Colores ] [ Text ] [ Logo ] */}
+            {/* Pestañas de píldora: [ Diseño ] [ Colores ] [ Text ] [ Logo ] */}
             <div className="flex items-center gap-2 mt-3.5">
               {OWAYO_TABS.map((t) => {
                 const isActive = activeTab === t.id;
                 return (
                   <button
                     key={t.id}
+                    id={`tab-pill-${t.id}`}
                     type="button"
                     onClick={() => setActiveTab(t.id)}
-                    className={`flex-1 py-1.5 px-2.5 rounded-full text-xs font-bold transition-all text-center cursor-pointer ${
+                    className={`flex-1 py-1.5 px-2.5 rounded-full text-xs transition-all text-center cursor-pointer ${
                       isActive
-                        ? 'bg-[#222222] text-white shadow-xs'
-                        : 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400 hover:bg-slate-50'
+                        ? 'bg-white text-slate-900 border-2 border-slate-900 shadow-sm font-black'
+                        : 'bg-slate-100/90 text-slate-600 hover:bg-slate-200/80 hover:text-slate-900 border border-slate-200/60 font-semibold'
                     }`}
                   >
                     {t.label}
@@ -1253,19 +1256,19 @@ export default function HybridStudioWorkspace({
                   /* Modo Liga MX: Exclusivamente Versión Local y Visitante (2 Versiones) */
                   <div className="space-y-3.5">
                     {/* Cabecera del Club Activo */}
-                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 text-white shadow-sm border border-slate-700/60">
+                    <div className="p-3.5 rounded-2xl bg-white text-slate-900 shadow-xs border border-slate-200">
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="text-sm">🇲🇽</span>
-                            <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                            <span className="text-xs font-black uppercase tracking-wider text-emerald-700">
                               {activeMexicoClubKits.clubAlias}
                             </span>
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-slate-300">
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">
                               {activeMexicoClubKits.location}
                             </span>
                           </div>
-                          <p className="text-[10px] text-slate-300 truncate mt-1">
+                          <p className="text-[10px] text-slate-500 truncate mt-1 font-medium">
                             Inspiración Liga MX 2025/2026 • 100% Libre de marcas
                           </p>
                         </div>
@@ -1273,7 +1276,7 @@ export default function HybridStudioWorkspace({
                           type="button"
                           id="btn-change-club-in-design"
                           onClick={() => setIsMexicoKitsModalOpen(true)}
-                          className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold shrink-0 transition-all cursor-pointer border border-white/10 flex items-center gap-1"
+                          className="px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-bold shrink-0 transition-all cursor-pointer border border-slate-300 flex items-center gap-1 shadow-2xs"
                         >
                           <span>Cambiar Club</span>
                           <span>↺</span>
@@ -1777,13 +1780,13 @@ export default function HybridStudioWorkspace({
                     </button>
 
                     {selectedTextDecal ? (
-                      <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
+                      <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-white">Editar Texto Fijo (Idéntico en todo el lote)</span>
+                          <span className="text-xs font-black text-slate-900">Editar Texto Fijo (Idéntico en todo el lote)</span>
                           <button
                             type="button"
                             onClick={() => deleteDecal(selectedTextDecal.id)}
-                            className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-300"
+                            className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200"
                             title="Eliminar texto"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1804,13 +1807,13 @@ export default function HybridStudioWorkspace({
                             )
                           }
                           placeholder="Escribe lema, club o patrocinador..."
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm font-bold text-white focus:outline-none focus:border-amber-400"
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-sm font-bold text-slate-900 focus:outline-none focus:border-sky-500 shadow-2xs"
                         />
 
                         {/* Pieza destino + Mostrar solo en zona (`clampToZone`) */}
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="text-[10px] text-slate-400 block mb-1">Pieza de la prenda</label>
+                            <label className="text-[10px] text-slate-500 font-bold block mb-1">Pieza de la prenda</label>
                             <select
                               value={selectedTextDecal.panel || droppablePanels[0]?.panelId}
                               onChange={(e) => {
@@ -1830,7 +1833,7 @@ export default function HybridStudioWorkspace({
                                 setPanel2D(nextP);
                                 if (PANEL_TO_CAMERA[nextP]) setCameraPreset(PANEL_TO_CAMERA[nextP]);
                               }}
-                              className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white"
+                              className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-800 font-medium focus:border-sky-500 shadow-2xs"
                             >
                               {droppablePanels.map((p) => (
                                 <option key={p.panelId} value={p.panelId}>
@@ -1841,13 +1844,13 @@ export default function HybridStudioWorkspace({
                           </div>
 
                           <div>
-                            <label className="text-[10px] text-slate-400 block mb-1">Mostrar solo en zona</label>
+                            <label className="text-[10px] text-slate-500 font-bold block mb-1">Mostrar solo en zona</label>
                             <select
                               value={selectedTextDecal.clampToZone || 'ALL'}
                               onChange={(e) =>
                                 updateDecal(selectedTextDecal.id, { clampToZone: e.target.value }, true)
                               }
-                              className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white"
+                              className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-800 font-medium focus:border-sky-500 shadow-2xs"
                             >
                               <option value="ALL">Toda la pieza</option>
                               <option value="A">Solo Zona A</option>
@@ -1860,7 +1863,7 @@ export default function HybridStudioWorkspace({
 
                         {/* Tipografías Deportivas */}
                         <div>
-                          <span className="text-[10px] text-slate-400 block mb-1">Fuente Atlética</span>
+                          <span className="text-[10px] text-slate-500 font-bold block mb-1">Fuente Atlética</span>
                           <div className="grid grid-cols-2 gap-1.5">
                             {SPORT_FONTS.map((f) => (
                               <button
@@ -1868,10 +1871,10 @@ export default function HybridStudioWorkspace({
                                 type="button"
                                 style={{ fontFamily: f.family }}
                                 onClick={() => updateDecal(selectedTextDecal.id, { fontFamily: f.family }, true)}
-                                className={`px-2.5 py-1.5 rounded-xl border text-sm tracking-wide ${
+                                className={`px-2.5 py-1.5 rounded-xl border text-sm tracking-wide transition-all ${
                                   selectedTextDecal.fontFamily === f.family
-                                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold'
-                                    : 'bg-slate-900 text-white border-slate-800'
+                                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-xs'
+                                    : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                                 }`}
                               >
                                 {f.name}
@@ -1883,7 +1886,7 @@ export default function HybridStudioWorkspace({
                         {/* Escala, Rotación y Arco Circular con Steppers Owayo (- / +) */}
                         <div className="space-y-2">
                           <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-slate-300">Tamaño ({Math.round((selectedTextDecal.scale ?? 1) * 100)}%)</span>
+                            <span className="text-slate-700 font-medium">Tamaño ({Math.round((selectedTextDecal.scale ?? 1) * 100)}%)</span>
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
@@ -1894,7 +1897,7 @@ export default function HybridStudioWorkspace({
                                     true
                                   )
                                 }
-                                className="px-2 py-0.5 rounded bg-slate-800 text-xs font-bold"
+                                className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold"
                               >
                                 -
                               </button>
@@ -1907,7 +1910,7 @@ export default function HybridStudioWorkspace({
                                     true
                                   )
                                 }
-                                className="px-2 py-0.5 rounded bg-slate-800 text-xs font-bold"
+                                className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold"
                               >
                                 +
                               </button>
@@ -1926,11 +1929,11 @@ export default function HybridStudioWorkspace({
                           />
 
                           <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-slate-300">Rotación ({selectedTextDecal.rotationDeg || 0}°)</span>
+                            <span className="text-slate-700 font-medium">Rotación ({selectedTextDecal.rotationDeg || 0}°)</span>
                             <button
                               type="button"
                               onClick={() => updateDecal(selectedTextDecal.id, { rotationDeg: 0 }, true)}
-                              className="text-[10px] text-amber-300 font-mono"
+                              className="text-[10px] text-sky-600 font-mono font-bold"
                             >
                               Reset 0°
                             </button>
@@ -1952,11 +1955,11 @@ export default function HybridStudioWorkspace({
                           />
 
                           <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-slate-300">Curvatura Circular ({selectedTextDecal.archDeg || 0}°)</span>
+                            <span className="text-slate-700 font-medium">Curvatura Circular ({selectedTextDecal.archDeg || 0}°)</span>
                             <button
                               type="button"
                               onClick={() => updateDecal(selectedTextDecal.id, { archDeg: 0 }, true)}
-                              className="text-[10px] text-amber-300 font-mono"
+                              className="text-[10px] text-sky-600 font-mono font-bold"
                             >
                               Recto
                             </button>
@@ -1976,7 +1979,7 @@ export default function HybridStudioWorkspace({
 
                         {/* Color de Relleno y Contorno */}
                         <div className="grid grid-cols-2 gap-2 pt-1">
-                          <label className="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                          <label className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs text-slate-800 font-medium">
                             <span>Relleno</span>
                             <input
                               type="color"
@@ -1987,7 +1990,7 @@ export default function HybridStudioWorkspace({
                               className="w-7 h-6 rounded cursor-pointer"
                             />
                           </label>
-                          <label className="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                          <label className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs text-slate-800 font-medium">
                             <span>Contorno</span>
                             <input
                               type="color"
@@ -2000,7 +2003,7 @@ export default function HybridStudioWorkspace({
                           </label>
                         </div>
 
-                        <label className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800 text-xs text-slate-200 cursor-pointer">
+                        <label className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200 text-xs text-slate-700 cursor-pointer">
                           <span>Fijar texto en el tejido (evitar arrastre accidental)</span>
                           <input
                             type="checkbox"
@@ -2020,13 +2023,13 @@ export default function HybridStudioWorkspace({
                         const sizeField = isName ? 'capHeightMm' : 'heightMm';
                         const curSizeMm = slot[sizeField] || (isName ? 52 : 68);
                         return (
-                          <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
+                          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
                             <div className="flex items-center justify-between">
                               <div>
-                                <span className="text-xs font-black text-white block">
+                                <span className="text-xs font-black text-slate-900 block">
                                   {SLOT_LABELS[selectedSlotKey] || selectedSlotKey}
                                 </span>
-                                <span className="text-[10px] text-emerald-400">
+                                <span className="text-[10px] text-emerald-600 font-bold">
                                   Vinculado automáticamente a los {totalUnits} jugadores de «Ejemplares»
                                 </span>
                               </div>
@@ -2047,7 +2050,7 @@ export default function HybridStudioWorkspace({
                             {/* Selector de pierna cuando es número de Short */}
                             {selectedSlotKey === 'playerNumberShorts' && (
                               <div>
-                                <label className="text-[10px] text-slate-400 block mb-1">Pierna del Short</label>
+                                <label className="text-[10px] text-slate-500 font-bold block mb-1">Pierna del Short</label>
                                 <div className="grid grid-cols-2 gap-1.5">
                                   {[
                                     { id: 'right_leg', label: 'Pierna Derecha' },
@@ -2073,10 +2076,10 @@ export default function HybridStudioWorkspace({
                                         setPanel2D(leg.id);
                                         setCameraPreset(leg.id);
                                       }}
-                                      className={`py-1.5 rounded-xl text-xs font-bold border ${
+                                      className={`py-1.5 rounded-xl text-xs font-bold border transition-all ${
                                         slot.panel === leg.id
                                           ? 'bg-amber-400 text-slate-950 border-amber-300'
-                                          : 'bg-slate-900 text-slate-300 border-slate-800'
+                                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                                       }`}
                                     >
                                       {leg.label}
@@ -2096,10 +2099,10 @@ export default function HybridStudioWorkspace({
                                   onClick={() =>
                                     updateVariableSlot(selectedSlotKey, { ...slot, fontFamily: f.family }, true)
                                   }
-                                  className={`px-2.5 py-1.5 rounded-xl border text-sm ${
+                                  className={`px-2.5 py-1.5 rounded-xl border text-sm transition-all ${
                                     slot.fontFamily === f.family
-                                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold'
-                                      : 'bg-slate-900 text-white border-slate-800'
+                                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-xs'
+                                      : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                                   }`}
                                 >
                                   {f.name}
@@ -2110,7 +2113,7 @@ export default function HybridStudioWorkspace({
                             {/* Altura física real en milímetros / centímetros */}
                             <div>
                               <div className="flex items-center justify-between text-[11px] mb-1">
-                                <span className="text-slate-300">Altura oficial: {(curSizeMm / 10).toFixed(1)} cm</span>
+                                <span className="text-slate-700 font-medium">Altura oficial: {(curSizeMm / 10).toFixed(1)} cm</span>
                                 <div className="flex gap-1">
                                   <button
                                     type="button"
@@ -2121,7 +2124,7 @@ export default function HybridStudioWorkspace({
                                         true
                                       )
                                     }
-                                    className="px-2 py-0.5 rounded bg-slate-800 text-xs font-bold"
+                                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold"
                                   >
                                     -
                                   </button>
@@ -2134,7 +2137,7 @@ export default function HybridStudioWorkspace({
                                         true
                                       )
                                     }
-                                    className="px-2 py-0.5 rounded bg-slate-800 text-xs font-bold"
+                                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold"
                                   >
                                     +
                                   </button>
@@ -2160,13 +2163,13 @@ export default function HybridStudioWorkspace({
                             {isName && (
                               <div>
                                 <div className="flex items-center justify-between text-[11px]">
-                                  <span className="text-slate-300">Arco NBA / Europeo ({slot.archDeg || 0}°)</span>
+                                  <span className="text-slate-700 font-medium">Arco NBA / Europeo ({slot.archDeg || 0}°)</span>
                                   <button
                                     type="button"
                                     onClick={() =>
                                       updateVariableSlot(selectedSlotKey, { ...slot, archDeg: 0 }, true)
                                     }
-                                    className="text-[10px] font-mono text-amber-300"
+                                    className="text-[10px] font-mono text-sky-600 font-bold"
                                   >
                                     Recto
                                   </button>
@@ -2190,7 +2193,7 @@ export default function HybridStudioWorkspace({
                             )}
 
                             <div className="grid grid-cols-2 gap-2">
-                              <label className="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                              <label className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs text-slate-800 font-medium">
                                 <span>Color Número</span>
                                 <input
                                   type="color"
@@ -2205,7 +2208,7 @@ export default function HybridStudioWorkspace({
                                   className="w-7 h-6 rounded cursor-pointer"
                                 />
                               </label>
-                              <label className="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                              <label className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs text-slate-800 font-medium">
                                 <span>Filete Exterior</span>
                                 <input
                                   type="color"
@@ -2222,7 +2225,7 @@ export default function HybridStudioWorkspace({
                               </label>
                             </div>
 
-                            <label className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800 text-xs text-slate-200 cursor-pointer">
+                            <label className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200 text-xs text-slate-700 cursor-pointer">
                               <span>Fijar posición (Pin)</span>
                               <input
                                 type="checkbox"
@@ -2374,13 +2377,13 @@ export default function HybridStudioWorkspace({
                     </button>
 
                     {/* Bloque 1: Nombres y Números individuales por jugador (`Ejemplares`) */}
-                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-white">Nombres y Números de Jugador</span>
+                        <span className="text-xs font-black text-slate-900">Nombres y Números de Jugador</span>
                         <button
                           type="button"
                           onClick={() => setIsRosterModalOpen(true)}
-                          className="text-[11px] font-bold text-amber-400 hover:underline"
+                          className="text-[11px] font-bold text-sky-600 hover:underline"
                         >
                           Editar lista ({totalUnits}) →
                         </button>
@@ -2392,7 +2395,7 @@ export default function HybridStudioWorkspace({
                         return (
                           <div
                             key={sKey}
-                            className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2"
+                            className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 flex items-center justify-between gap-2 transition-colors"
                           >
                             <button
                               type="button"
@@ -2411,10 +2414,10 @@ export default function HybridStudioWorkspace({
                               }}
                               className="text-left flex-1 min-w-0"
                             >
-                              <div className="text-xs font-bold text-slate-100 truncate">
+                              <div className="text-xs font-bold text-slate-900 truncate">
                                 {SLOT_LABELS[sKey] || sKey}
                               </div>
-                              <div className="text-[10px] text-slate-400">
+                              <div className="text-[10px] text-slate-500 font-medium">
                                 Clic para cambiar fuente, color, arco o altura
                               </div>
                             </button>
@@ -2433,19 +2436,19 @@ export default function HybridStudioWorkspace({
                     </div>
 
                     {/* Bloque 2: Textos Idénticos en todas las prendas */}
-                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                      <span className="text-xs font-black text-white block">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                      <span className="text-xs font-black text-slate-900 block">
                         Textos Fijos en la Prenda ({textDecals.length})
                       </span>
                       {textDecals.length === 0 ? (
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-slate-500 font-medium">
                           Aún no hay textos fijos. Pulsa «Añadir nuevo texto» arriba.
                         </p>
                       ) : (
                         textDecals.map((td) => (
                           <div
                             key={td.id}
-                            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2"
+                            className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 flex items-center justify-between gap-2 transition-colors"
                           >
                             <button
                               type="button"
@@ -2460,15 +2463,15 @@ export default function HybridStudioWorkspace({
                               }}
                               className="text-left flex-1 min-w-0"
                             >
-                              <div className="text-xs font-bold text-amber-300 truncate">{td.text}</div>
-                              <div className="text-[10px] text-slate-400">
+                              <div className="text-xs font-bold text-amber-600 truncate">{td.text}</div>
+                              <div className="text-[10px] text-slate-500 font-medium">
                                 Pieza: {getPartSpec(design.productModelId, td.panel).shortLabel}
                               </div>
                             </button>
                             <button
                               type="button"
                               onClick={() => deleteDecal(td.id)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -2496,10 +2499,10 @@ export default function HybridStudioWorkspace({
                       Volver a galería y carga de logos
                     </button>
 
-                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
+                    <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
                       {/* Cabecera con miniatura cuadriculada + Auditoría DPI */}
                       <div className="flex items-center gap-3">
-                        <div className="w-16 h-16 rounded-xl checkered-preview border border-slate-700 p-1.5 flex items-center justify-center shrink-0 overflow-hidden">
+                        <div className="w-16 h-16 rounded-xl checkered-preview border border-slate-200 p-1.5 flex items-center justify-center shrink-0 overflow-hidden bg-slate-50">
                           {selectedLogoDecal.artworkId &&
                           artworkRegistry[selectedLogoDecal.artworkId]?.previewUrl ? (
                             <img
@@ -2508,11 +2511,11 @@ export default function HybridStudioWorkspace({
                               className="max-w-full max-h-full object-contain"
                             />
                           ) : (
-                            <Shield className="w-7 h-7 text-amber-400" />
+                            <Shield className="w-7 h-7 text-amber-500" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0 space-y-1">
-                          <div className="text-xs font-black text-white truncate">
+                          <div className="text-xs font-black text-slate-900 truncate">
                             {selectedLogoDecal.label}
                           </div>
                           {(() => {
@@ -2535,7 +2538,7 @@ export default function HybridStudioWorkspace({
                           type="button"
                           onClick={() => deleteDecal(selectedLogoDecal.id)}
                           title="Eliminar logotipo"
-                          className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300"
+                          className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -2544,7 +2547,7 @@ export default function HybridStudioWorkspace({
                       {/* Pieza + Mostrar solo en zona (`clampToZone` de Owayo) */}
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-[10px] text-slate-400 block mb-1">Pieza</label>
+                          <label className="text-[10px] text-slate-500 font-bold block mb-1">Pieza</label>
                           <select
                             value={selectedLogoDecal.panel || droppablePanels[0]?.panelId}
                             onChange={(e) => {
@@ -2564,7 +2567,7 @@ export default function HybridStudioWorkspace({
                               setPanel2D(nextP);
                               if (PANEL_TO_CAMERA[nextP]) setCameraPreset(PANEL_TO_CAMERA[nextP]);
                             }}
-                            className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white"
+                            className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-800 font-medium focus:border-sky-500 shadow-2xs"
                           >
                             {droppablePanels.map((p) => (
                               <option key={p.panelId} value={p.panelId}>
@@ -2575,13 +2578,13 @@ export default function HybridStudioWorkspace({
                         </div>
 
                         <div>
-                          <label className="text-[10px] text-slate-400 block mb-1">Mostrar solo en</label>
+                          <label className="text-[10px] text-slate-500 font-bold block mb-1">Mostrar solo en</label>
                           <select
                             value={selectedLogoDecal.clampToZone || 'ALL'}
                             onChange={(e) =>
                               updateDecal(selectedLogoDecal.id, { clampToZone: e.target.value }, true)
                             }
-                            className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white"
+                            className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-800 font-medium focus:border-sky-500 shadow-2xs"
                           >
                             <option value="ALL">Toda la pieza</option>
                             <option value="A">Solo Zona A</option>
@@ -2609,7 +2612,7 @@ export default function HybridStudioWorkspace({
                               true
                             );
                           }}
-                          className="py-1.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-bold text-sky-300 flex items-center justify-center gap-1"
+                          className="py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[11px] font-bold text-sky-700 flex items-center justify-center gap-1 shadow-2xs transition-colors"
                         >
                           <AlignCenterVertical className="w-3.5 h-3.5" />
                           Centrar en eje
@@ -2617,7 +2620,7 @@ export default function HybridStudioWorkspace({
                         <button
                           type="button"
                           onClick={() => mirrorDecalToSymmetricPiece(selectedLogoDecal)}
-                          className="py-1.5 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-bold text-emerald-300 flex items-center justify-center gap-1"
+                          className="py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[11px] font-bold text-emerald-700 flex items-center justify-center gap-1 shadow-2xs transition-colors"
                         >
                           <Copy className="w-3.5 h-3.5" />
                           Espejar simétrico
@@ -2627,7 +2630,7 @@ export default function HybridStudioWorkspace({
                       {/* Sliders con botones - / + de Escala, Rotación y Marca de Agua */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-slate-300">
+                          <span className="text-slate-700 font-medium">
                             Tamaño ({((selectedLogoDecal.sizeMm.width * (selectedLogoDecal.scale ?? 1)) / 10).toFixed(1)} cm)
                           </span>
                           <div className="flex gap-1">
@@ -2640,7 +2643,7 @@ export default function HybridStudioWorkspace({
                                   true
                                 )
                               }
-                              className="px-2 py-0.5 rounded bg-slate-800 text-xs font-bold"
+                              className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold"
                             >
                               -
                             </button>
@@ -2653,7 +2656,7 @@ export default function HybridStudioWorkspace({
                                   true
                                 )
                               }
-                              className="px-2 py-0.5 rounded bg-slate-800 text-xs font-bold"
+                              className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold"
                             >
                               +
                             </button>
@@ -2672,11 +2675,11 @@ export default function HybridStudioWorkspace({
                         />
 
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-slate-300">Rotación ({selectedLogoDecal.rotationDeg || 0}°)</span>
+                          <span className="text-slate-700 font-medium">Rotación ({selectedLogoDecal.rotationDeg || 0}°)</span>
                           <button
                             type="button"
                             onClick={() => updateDecal(selectedLogoDecal.id, { rotationDeg: 0 }, true)}
-                            className="text-[10px] font-mono text-amber-300"
+                            className="text-[10px] font-mono text-sky-600 font-bold"
                           >
                             0°
                           </button>
@@ -2698,7 +2701,7 @@ export default function HybridStudioWorkspace({
                         />
 
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-slate-300">
+                          <span className="text-slate-700 font-medium">
                             Opacidad / Marca de Agua ({Math.round((selectedLogoDecal.opacity ?? 1) * 100)}%)
                           </span>
                         </div>
@@ -2722,10 +2725,10 @@ export default function HybridStudioWorkspace({
                           onClick={() =>
                             updateDecal(selectedLogoDecal.id, { flipX: !selectedLogoDecal.flipX }, true)
                           }
-                          className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold border flex items-center justify-center gap-1 ${
+                          className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold border flex items-center justify-center gap-1 transition-colors ${
                             selectedLogoDecal.flipX
                               ? 'bg-amber-400 text-slate-950 border-amber-300'
-                              : 'bg-slate-900 text-slate-300 border-slate-800'
+                              : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                           }`}
                         >
                           <FlipHorizontal2 className="w-3.5 h-3.5" />
@@ -2736,10 +2739,10 @@ export default function HybridStudioWorkspace({
                           onClick={() =>
                             updateDecal(selectedLogoDecal.id, { flipY: !selectedLogoDecal.flipY }, true)
                           }
-                          className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold border flex items-center justify-center gap-1 ${
+                          className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold border flex items-center justify-center gap-1 transition-colors ${
                             selectedLogoDecal.flipY
                               ? 'bg-amber-400 text-slate-950 border-amber-300'
-                              : 'bg-slate-900 text-slate-300 border-slate-800'
+                              : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                           }`}
                         >
                           <FlipVertical2 className="w-3.5 h-3.5" />
@@ -2755,7 +2758,7 @@ export default function HybridStudioWorkspace({
                             )
                           }
                           title="Traer al frente"
-                          className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+                          className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-950 transition-colors"
                         >
                           <ArrowUp className="w-4 h-4" />
                         </button>
@@ -2769,7 +2772,7 @@ export default function HybridStudioWorkspace({
                             )
                           }
                           title="Enviar atrás"
-                          className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+                          className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-950 transition-colors"
                         >
                           <ArrowDown className="w-4 h-4" />
                         </button>
@@ -2777,8 +2780,8 @@ export default function HybridStudioWorkspace({
 
                       {/* Switches Nativos Owayo: Quita-fondo blanco, Recoloración Pantone y Fijar Logo */}
                       {selectedLogoDecal.artworkId && (
-                        <div className="space-y-2 pt-2 border-t border-slate-800">
-                          <label className="flex items-center justify-between gap-2 text-xs text-slate-200 cursor-pointer">
+                        <div className="space-y-2 pt-2 border-t border-slate-200">
+                          <label className="flex items-center justify-between gap-2 text-xs text-slate-700 font-medium cursor-pointer">
                             <span>Eliminar fondo blanco automáticamente</span>
                             <input
                               type="checkbox"
@@ -2791,13 +2794,13 @@ export default function HybridStudioWorkspace({
                           </label>
 
                           <div className="flex items-center justify-between gap-2 text-xs">
-                            <span className="text-slate-300">Recolorear silueta (Tinte Pantone)</span>
+                            <span className="text-slate-700 font-medium">Recolorear silueta (Tinte Pantone)</span>
                             <div className="flex items-center gap-1.5">
                               {selectedLogoDecal.tintHex && (
                                 <button
                                   type="button"
                                   onClick={() => updateDecal(selectedLogoDecal.id, { tintHex: '' }, true)}
-                                  className="text-[10px] text-amber-300 font-bold"
+                                  className="text-[10px] text-sky-600 font-bold"
                                 >
                                   Original
                                 </button>
@@ -2815,7 +2818,7 @@ export default function HybridStudioWorkspace({
                         </div>
                       )}
 
-                      <label className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800 text-xs text-slate-200 cursor-pointer">
+                      <label className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200 text-xs text-slate-700 cursor-pointer">
                         <span>Fijar logotipo (evitar mover por error)</span>
                         <input
                           type="checkbox"
@@ -2845,12 +2848,13 @@ export default function HybridStudioWorkspace({
                       }}
                       className={`p-4 rounded-2xl border-2 border-dashed text-center transition-colors ${
                         isDragOverUpload
-                          ? 'border-amber-400 bg-amber-400/10'
-                          : 'border-slate-700 bg-slate-950/80 hover:border-amber-400/60'
+                          ? 'border-sky-500 bg-sky-50/50'
+                          : 'border-slate-300 bg-slate-50/80 hover:border-sky-400 hover:bg-slate-50'
                       }`}
                     >
                       <input
                         ref={fileInputRef}
+                        id="logo-file-input"
                         type="file"
                         multiple
                         accept=".png,.svg,.webp,.jpg,.jpeg,image/*"
@@ -2860,36 +2864,36 @@ export default function HybridStudioWorkspace({
                         }}
                         className="hidden"
                       />
-                      <Upload className="w-6 h-6 text-amber-400 mx-auto mb-1.5" />
-                      <p className="text-xs font-black text-white">
+                      <Upload className="w-6 h-6 text-sky-600 mx-auto mb-1.5" />
+                      <p className="text-xs font-black text-slate-900">
                         Cargar archivos PNG, SVG, WebP o JPG
                       </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5 mb-2.5">
+                      <p className="text-[10px] text-slate-500 mt-0.5 mb-2.5">
                         Sanitizador SVG vectorial infinito + recorte automático de márgenes transparentes
                       </p>
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs"
+                        className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs cursor-pointer"
                       >
                         Seleccionar archivos
                       </button>
                     </div>
 
                     {/* Logos activos colocados actualmente en la prenda */}
-                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                      <span className="text-xs font-black text-white block">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                      <span className="text-xs font-black text-slate-900 block">
                         Logos colocados en esta prenda ({logoDecals.length})
                       </span>
                       {logoDecals.length === 0 ? (
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-slate-500">
                           Sube tu escudo o elige uno de la logoteca deportiva abajo.
                         </p>
                       ) : (
                         logoDecals.map((ld) => (
                           <div
                             key={ld.id}
-                            className="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2"
+                            className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 flex items-center justify-between gap-2 transition-colors"
                           >
                             <button
                               type="button"
@@ -2904,7 +2908,7 @@ export default function HybridStudioWorkspace({
                               }}
                               className="flex items-center gap-2.5 text-left flex-1 min-w-0"
                             >
-                              <span className="w-9 h-9 rounded-lg checkered-preview border border-slate-700 flex items-center justify-center shrink-0 overflow-hidden p-1">
+                              <span className="w-9 h-9 rounded-lg checkered-preview border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden p-1 bg-white">
                                 {ld.artworkId && artworkRegistry[ld.artworkId]?.previewUrl ? (
                                   <img
                                     src={artworkRegistry[ld.artworkId].previewUrl}
@@ -2912,12 +2916,12 @@ export default function HybridStudioWorkspace({
                                     className="max-w-full max-h-full object-contain"
                                   />
                                 ) : (
-                                  <Shield className="w-4 h-4 text-amber-400" />
+                                  <Shield className="w-4 h-4 text-amber-500" />
                                 )}
                               </span>
                               <div className="min-w-0">
-                                <div className="text-xs font-bold text-white truncate">{ld.label}</div>
-                                <div className="text-[10px] text-slate-400">
+                                <div className="text-xs font-bold text-slate-900 truncate">{ld.label}</div>
+                                <div className="text-[10px] text-slate-500">
                                   {getPartSpec(design.productModelId, ld.panel).shortLabel} • Clic para editar
                                 </div>
                               </div>
@@ -2925,7 +2929,7 @@ export default function HybridStudioWorkspace({
                             <button
                               type="button"
                               onClick={() => deleteDecal(ld.id)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -2936,8 +2940,8 @@ export default function HybridStudioWorkspace({
 
                     {/* Mis Archivos Subidos en esta sesión (Reutilizables entre Camiseta y Short) */}
                     {uploadedLibrary.length > 0 && (
-                      <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                        <span className="text-xs font-black text-amber-300 block">
+                      <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                        <span className="text-xs font-black text-amber-700 block">
                           Mis Logotipos Cargados (Clic para insertar en Camisa o Short)
                         </span>
                         <div className="grid grid-cols-3 gap-2">
@@ -2951,14 +2955,14 @@ export default function HybridStudioWorkspace({
                                 setSelectedDecalId(dec.id);
                                 setIsEditingLogoDetail(true);
                               }}
-                              className="p-2 rounded-xl checkered-preview border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1"
+                              className="p-2 rounded-xl checkered-preview border border-slate-200 hover:border-sky-500 bg-white flex flex-col items-center gap-1 transition-all cursor-pointer shadow-2xs"
                             >
                               <img
                                 src={art.previewUrl}
                                 alt={art.fileName}
                                 className="h-10 w-full object-contain"
                               />
-                              <span className="text-[9px] font-bold text-slate-200 truncate w-full text-center">
+                              <span className="text-[9px] font-bold text-slate-700 truncate w-full text-center">
                                 {art.fileName}
                               </span>
                             </button>
@@ -2968,8 +2972,8 @@ export default function HybridStudioWorkspace({
                     )}
 
                     {/* Logoteca Deportiva Vectorial Integrada */}
-                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                      <span className="text-xs font-black text-slate-200 block">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                      <span className="text-xs font-black text-slate-900 block">
                         Logoteca Deportiva Vectorial (300+ DPI)
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
@@ -2978,10 +2982,10 @@ export default function HybridStudioWorkspace({
                             key={preset.id}
                             type="button"
                             onClick={() => handleAddPresetCrest(preset)}
-                            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left flex items-center gap-2"
+                            className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2 transition-colors cursor-pointer"
                           >
-                            <Shield className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span className="text-[11px] font-bold text-slate-200 truncate">
+                            <Shield className="w-4 h-4 text-amber-500 shrink-0" />
+                            <span className="text-[11px] font-bold text-slate-800 truncate">
                               {preset.label}
                             </span>
                           </button>
@@ -3129,9 +3133,9 @@ export default function HybridStudioWorkspace({
             </button>
           </div>
 
-          <div className="roster-table-wrapper rounded-2xl border border-slate-800 bg-slate-950">
+          <div className="roster-table-wrapper rounded-2xl border border-slate-200 bg-white shadow-xs">
             <table className="roster-data-table text-xs text-left">
-              <thead className="bg-slate-900 text-slate-300 text-[11px] uppercase">
+              <thead className="bg-slate-50 text-slate-700 text-[11px] uppercase border-b border-slate-200">
                 <tr>
                   <th className="p-2.5">#</th>
                   <th className="p-2.5">Corte</th>
@@ -3142,15 +3146,15 @@ export default function HybridStudioWorkspace({
                   <th className="p-2.5 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-slate-100">
                 {roster.map((row, idx) => {
                   const isPreviewed = idx === activeRosterIndex;
                   return (
                     <tr
                       key={row.id || idx}
-                      className={isPreviewed ? 'bg-amber-400/10' : 'hover:bg-slate-900/50'}
+                      className={isPreviewed ? 'bg-amber-50/70' : 'hover:bg-slate-50/70 transition-colors'}
                     >
-                      <th scope="row" className="p-2.5 font-mono text-amber-300">
+                      <th scope="row" className="p-2.5 font-mono text-slate-700">
                         {String(idx + 1).padStart(2, '0')}
                       </th>
                       <td className="p-2">
@@ -3161,7 +3165,7 @@ export default function HybridStudioWorkspace({
                               roster.map((r, i) => (i === idx ? { ...r, cut: e.target.value } : r))
                             )
                           }
-                          className="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white"
+                          className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-800"
                         >
                           {CUT_OPTIONS.map((c) => (
                             <option key={c.value} value={c.value}>
@@ -3178,7 +3182,7 @@ export default function HybridStudioWorkspace({
                               roster.map((r, i) => (i === idx ? { ...r, size: e.target.value } : r))
                             )
                           }
-                          className="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white font-bold"
+                          className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-800 font-bold"
                         >
                           {SIZE_OPTIONS.map((s) => (
                             <option key={s} value={s}>
@@ -3200,7 +3204,7 @@ export default function HybridStudioWorkspace({
                               )
                             )
                           }
-                          className="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white font-mono"
+                          className="w-16 bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-800 font-mono"
                         />
                       </td>
                       <td className="p-2">
@@ -3214,7 +3218,7 @@ export default function HybridStudioWorkspace({
                               )
                             )
                           }
-                          className="w-full min-w-[140px] bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-white font-bold"
+                          className="w-full min-w-[140px] bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-slate-900 font-bold"
                         />
                       </td>
                       <td className="p-2">
@@ -3227,7 +3231,7 @@ export default function HybridStudioWorkspace({
                               roster.map((r, i) => (i === idx ? { ...r, number: e.target.value } : r))
                             )
                           }
-                          className="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-amber-300 font-black text-center"
+                          className="w-16 bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-900 font-black text-center"
                         />
                       </td>
                       <td className="p-2 text-right space-x-1">
@@ -3263,8 +3267,8 @@ export default function HybridStudioWorkspace({
           </div>
 
           {/* Pegado rápido desde Excel / CSV */}
-          <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-            <span className="text-xs font-bold text-slate-200 block">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <span className="text-xs font-bold text-slate-700 block">
               Pegado Rápido desde Excel / WhatsApp (`NOMBRE, NÚMERO, TALLA, CANTIDAD`)
             </span>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -3273,12 +3277,12 @@ export default function HybridStudioWorkspace({
                 value={csvQuickInput}
                 onChange={(e) => setCsvQuickInput(e.target.value)}
                 placeholder={'JORDAN, 23, XL, 1\nPIPPEN, 33, L, 1'}
-                className="flex-1 rounded-xl bg-slate-900 border border-slate-700 p-2 text-xs font-mono text-white"
+                className="flex-1 rounded-xl bg-white border border-slate-300 p-2 text-xs font-mono text-slate-800 focus:outline-none focus:border-sky-500 shadow-2xs"
               />
               <button
                 type="button"
                 onClick={handleImportCsvRoster}
-                className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs shrink-0"
+                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs shrink-0 cursor-pointer shadow-xs"
               >
                 Importar Filas
               </button>
@@ -3297,7 +3301,7 @@ export default function HybridStudioWorkspace({
         maxWidthClass="max-w-2xl"
       >
         {savedDrafts.length === 0 ? (
-          <p className="text-sm text-slate-400 py-6 text-center">
+          <p className="text-sm text-slate-500 py-6 text-center">
             Aún no has guardado bocetos. Pulsa el botón «Guardar» en la barra inferior para conservar versiones de tus uniformes.
           </p>
         ) : (
@@ -3305,19 +3309,19 @@ export default function HybridStudioWorkspace({
             {savedDrafts.map((dr) => (
               <div
                 key={dr.draftId}
-                className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3"
+                className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex rounded-lg overflow-hidden border border-white/15 shrink-0">
+                  <div className="flex rounded-lg overflow-hidden border border-slate-300 shrink-0">
                     {(dr.colors || []).map((hex, i) => (
                       <span key={i} style={{ background: hex || '#1e293b' }} className="w-3.5 h-8 block" />
                     ))}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-xs font-black text-white truncate">
+                    <div className="text-xs font-black text-slate-900 truncate">
                       {dr.productName} — Patrón «{dr.patternId}»
                     </div>
-                    <div className="text-[11px] font-mono text-slate-400">{dr.savedAt}</div>
+                    <div className="text-[11px] font-mono text-slate-500">{dr.savedAt}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -3331,7 +3335,7 @@ export default function HybridStudioWorkspace({
                   <button
                     type="button"
                     onClick={() => handleDeleteDraft(dr.draftId)}
-                    className="p-1.5 rounded-xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300"
+                    className="p-1.5 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

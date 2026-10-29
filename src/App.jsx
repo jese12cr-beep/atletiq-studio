@@ -32,7 +32,7 @@ function createInitialKitSnapshot() {
   const jktWomen = createDefaultDesignForProduct('jacket_softshell_601w_women', jktMen.colorZones);
 
   return {
-    activeProductId: 'basketball_b6_hero',
+    activeProductId: 'futbol_jersey_pro_vneck',
     designsByProduct: {
       futbol_jersey_pro_vneck: fbJersey,
       football_shorts_fp3: fbShorts,
@@ -80,7 +80,7 @@ export default function App() {
   }));
 
   const currentSnapshot = history[historyIdx] || history[0];
-  const activeProductId = currentSnapshot?.activeProductId || 'basketball_b6_hero';
+  const activeProductId = currentSnapshot?.activeProductId || 'futbol_jersey_pro_vneck';
   const design =
     currentSnapshot?.designsByProduct?.[activeProductId] ||
     (currentSnapshot?.designsByProduct
