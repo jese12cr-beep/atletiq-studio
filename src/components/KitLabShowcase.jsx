@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 export default function KitLabShowcase({ onLaunch3DStudio, onQuickOrder }) {
   const [selectedGarment, setSelectedGarment] = useState('futbol');
@@ -249,7 +250,7 @@ export default function KitLabShowcase({ onLaunch3DStudio, onQuickOrder }) {
             {/* Base Jersey Graphic */}
             <div className="relative w-[340px] sm:w-[420px] aspect-square flex items-center justify-center">
               <img
-                src="/assets/stitch/ghost_mannequin.png"
+                src={resolveAssetUrl('/assets/stitch/ghost_mannequin.png')}
                 alt="Jersey Deportivo Apex"
                 className="w-full h-full object-contain filter contrast-125 drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)]"
               />

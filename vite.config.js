@@ -4,14 +4,11 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
+  base: process.env.GITHUB_ACTIONS ? '/ATLETIQ-STUDIO/' : './',
   plugins: [
     react(),
     tailwindcss(),
   ],
-  optimizeDeps: {
-    exclude: ['input-switch-polyfill'],
-  },
   server: {
     host: true,
     watch: {

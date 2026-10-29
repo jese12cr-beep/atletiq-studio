@@ -1,28 +1,28 @@
 import React from 'react';
-import { Palette, Users, Truck, CheckCircle2, Sparkles, Shield, ArrowRight } from 'lucide-react';
+import { Palette, Users, Truck, CheckCircle2, Sparkles, PackageCheck, ArrowRight } from 'lucide-react';
 
-export default function HowItWorks({ onOpenStudio }) {
+export default function HowItWorks({ onOpenStudio, onOpenQuote }) {
   const steps = [
     {
       number: '01',
       icon: Palette,
-      title: 'Diseña en 3D en Tiempo Real',
-      desc: 'Selecciona tu deporte, corte anatómico (Caballero o Dama) y personaliza los colores por zonas con nuestra paleta oficial de 24 tonos deportivos.',
-      highlight: '94 patrones sublimados sin marcas de agua',
+      title: 'Elige y Diseña tu Prenda',
+      desc: 'Selecciona tu deporte, corte anatómico (Caballero o Dama) y personaliza libremente colores, patrones y franjas con visualización interactiva.',
+      highlight: 'Todos los patrones y combinaciones incluidos',
     },
     {
       number: '02',
       icon: Users,
-      title: 'Plantilla y Personalización Total',
-      desc: 'Añade los nombres, dorsales y escudos de cada jugador de tu club. Sin cargos ocultos por añadir patrocinadores o números.',
+      title: 'Plantilla y Logos Ilimitados',
+      desc: 'Sube los escudos de tu club, patrocinadores ilimitados y la lista de dorsales y nombres de los jugadores. Sin sobrecostes por logo.',
       highlight: 'Sublimación integral 100% todo incluido',
     },
     {
       number: '03',
       icon: Truck,
-      title: 'Fabricación y Entrega en 10 Días',
-      desc: 'Confeccionamos tus uniformes con tejidos técnicos DryFit y los enviamos directamente a tu sede o club con garantía de entrega antes de tu partido.',
-      highlight: 'Garantía Kickoff antes de tu primera jornada',
+      title: 'Confección y Entrega en 10-12 Días',
+      desc: 'Imprimimos y cosemos tus prendas con tejidos técnicos de alta resistencia. Enviamos directamente a la sede de tu club o domicilio.',
+      highlight: 'Garantía oficial y reposiciones desde 1 ud.',
     },
   ];
 
@@ -33,26 +33,26 @@ export default function HowItWorks({ onOpenStudio }) {
           Proceso Simple &amp; Transparente
         </span>
         <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          ¿Cómo Funciona el Configurador?
+          ¿Cómo Funciona el Pedido para Equipos?
         </h2>
         <p className="text-slate-600 text-sm mt-3">
-          Desde el primer boceto 3D hasta que tu equipo salta al terreno de juego. Sin intermediarios, sin sorpresas en el precio y con calidad profesional.
+          De tu idea inicial a la cancha en 3 pasos sencillos. Sin intermediarios, sin tarifas ocultas por logos y con calidad garantizada.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-        {steps.map((step, idx) => {
+        {steps.map((step) => {
           const Icon = step.icon;
           return (
             <div
               key={step.number}
-              className="relative p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all flex flex-col justify-between group"
+              className="relative p-8 rounded-3xl bg-white border border-slate-200 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between group"
             >
               <div className="flex items-center justify-between mb-6">
-                <span className="font-mono text-3xl font-black text-slate-300 group-hover:text-sky-600 transition-colors">
+                <span className="font-mono text-3xl font-black text-slate-300 group-hover:text-slate-900 transition-colors">
                   {step.number}
                 </span>
-                <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100 group-hover:bg-sky-600 group-hover:text-white transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-800 flex items-center justify-center border border-slate-200 group-hover:bg-slate-900 group-hover:text-white transition-all">
                   <Icon className="w-6 h-6" />
                 </div>
               </div>
@@ -66,8 +66,8 @@ export default function HowItWorks({ onOpenStudio }) {
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-sky-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-slate-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>{step.highlight}</span>
               </div>
             </div>
@@ -75,28 +75,31 @@ export default function HowItWorks({ onOpenStudio }) {
         })}
       </div>
 
-      {/* Ventajas Owayo Style Callout */}
-      <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+      {/* Ventajas Owayo Style Callout: Neutral, Elegante y Claro */}
+      <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-4 h-4" />
-            <span>Ventaja Exclusiva AtletiQ</span>
+          <div className="flex items-center justify-center md:justify-start gap-2 text-sky-700 text-xs font-bold uppercase tracking-wider">
+            <PackageCheck className="w-4 h-4" />
+            <span>Servicio Exclusivo para Clubes y Academias</span>
           </div>
-          <h4 className="text-xl sm:text-2xl font-black">
-            ¿Necesitas equipar a tu equipo para la próxima temporada?
+          <h4 className="text-xl sm:text-2xl font-black text-slate-900">
+            ¿Equipas a más de un equipo o a todo un club deportivo?
           </h4>
-          <p className="text-slate-300 text-xs sm:text-sm max-w-2xl">
-            Prueba nuestro configurador 3D libremente. Puedes guardar tus bocetos, compartirlos con la directiva del club y recibir una cotización formal en PDF en minutos.
+          <p className="text-slate-600 text-xs sm:text-sm max-w-2xl">
+            Aprovecha nuestros descuentos por volumen de hasta el 25%, solicita un muestrario de tallas sin coste para tu directiva y guarda los patrones para futuras temporadas.
           </p>
         </div>
 
-        <button
-          onClick={onOpenStudio}
-          className="px-6 py-3.5 rounded-2xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-sky-500/20 shrink-0 flex items-center gap-2 cursor-pointer"
-        >
-          <span>Abrir Configurador 3D</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={onOpenStudio}
+            className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+          >
+            <span>Configurar Prenda</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </section>
   );

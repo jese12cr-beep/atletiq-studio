@@ -22,6 +22,7 @@ import {
   instantiateMirlGarmentGroup,
   buildNeckLabelCanvasTexture,
 } from './mirlModelLoader';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import {
   loadFishDesignMasks,
   resolveActiveFishDesignMeta,
@@ -120,10 +121,11 @@ function applyOwayoInnerSublimationShader(material, keySuffix) {
 
 const bumpTextureCache = new Map();
 function getOrLoadRealBumpTexture(url, repeatX = 48, repeatY = 48) {
-  const key = `${url}|${repeatX}|${repeatY}`;
+  const resolved = resolveAssetUrl(url);
+  const key = `${resolved}|${repeatX}|${repeatY}`;
   if (bumpTextureCache.has(key)) return bumpTextureCache.get(key);
   const loader = new THREE.TextureLoader();
-  const tex = loader.load(url);
+  const tex = loader.load(resolved);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(repeatX, repeatY);

@@ -14,6 +14,7 @@ import { getPartSpec, resolveMirlKeyForProduct, computeAutoCondenseScaleX } from
 import { getDesignsForProduct } from '../core/designStore';
 import { getFilteredArtworkDrawable } from '../core/dpiValidator';
 import { drawLigaMxGraphicMm, drawLigaMxCrestMm } from './ligaMxKitsEngine';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 
 // Caché de máscaras decodificadas `.fish`: key = `${fishUrl}` -> Promise<Map<partName, { width, height, zones: Uint8Array }>>
 export const decodedFishCache = new Map();
@@ -121,13 +122,17 @@ export async function loadFishDesignMasks(fishUrl) {
   if (!fishUrl) {
     return new Map();
   }
+  const resolvedUrl = resolveAssetUrl(fishUrl);
   if (decodedFishCache.has(fishUrl)) {
     return decodedFishCache.get(fishUrl);
   }
+  if (decodedFishCache.has(resolvedUrl)) {
+    return decodedFishCache.get(resolvedUrl);
+  }
 
   const pending = (async () => {
-    const resp = await fetch(fishUrl);
-    if (!resp.ok) throw new Error(`Error cargando diseño ${fishUrl}: ${resp.status}`);
+    const resp = await fetch(resolvedUrl);
+    if (!resp.ok) throw new Error(`Error cargando diseño ${resolvedUrl}: ${resp.status}`);
     const arrayBuffer = await resp.arrayBuffer();
     const view = new DataView(arrayBuffer);
     const bytes = new Uint8Array(arrayBuffer);
@@ -209,10 +214,12 @@ export async function loadFishDesignMasks(fishUrl) {
     }
 
     resolvedFishMasksCache.set(fishUrl, partMap);
+    resolvedFishMasksCache.set(resolvedUrl, partMap);
     return partMap;
   })();
 
   decodedFishCache.set(fishUrl, pending);
+  decodedFishCache.set(resolvedUrl, pending);
   return pending;
 }
 

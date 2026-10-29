@@ -272,13 +272,6 @@ export default function HybridStudioWorkspace({
   const fileInputRef = useRef(null);
   const canvasSnapshotRef = useRef(null);
 
-  // Carga progresiva condicional de `input-switch-polyfill` según Modern Web Guidance (`switch`)
-  useEffect(() => {
-    if (typeof HTMLInputElement !== 'undefined' && !('switch' in HTMLInputElement.prototype)) {
-      import('input-switch-polyfill').catch(() => {});
-    }
-  }, []);
-
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => {

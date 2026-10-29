@@ -13,6 +13,7 @@
 
 import * as THREE from 'three';
 import { mapMeshPartNameToPanel } from '../core/boundingBoxMath';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 
 const parsedMirlCache = new Map();
 const patternMask2DCache = new Map();
@@ -187,21 +188,22 @@ function parseMirlBytes(bytes, mirlUrl = '') {
 }
 
 export async function loadMirlModelTemplate(mirlUrl = '/models/football_f3_ka.mirl') {
-  if (parsedMirlCache.has(mirlUrl)) {
-    return parsedMirlCache.get(mirlUrl);
+  const resolvedUrl = resolveAssetUrl(mirlUrl);
+  if (parsedMirlCache.has(resolvedUrl)) {
+    return parsedMirlCache.get(resolvedUrl);
   }
 
   const pending = (async () => {
-    const resp = await fetch(mirlUrl);
+    const resp = await fetch(resolvedUrl);
     if (!resp.ok) {
-      throw new Error(`No se pudo cargar ${mirlUrl} (${resp.status})`);
+      throw new Error(`No se pudo cargar ${resolvedUrl} (${resp.status})`);
     }
     const rawBuf = await resp.arrayBuffer();
     const gunzipped = await gunzipIfNeeded(rawBuf);
-    return parseMirlBytes(gunzipped, mirlUrl);
+    return parseMirlBytes(gunzipped, resolvedUrl);
   })();
 
-  parsedMirlCache.set(mirlUrl, pending);
+  parsedMirlCache.set(resolvedUrl, pending);
   return pending;
 }
 

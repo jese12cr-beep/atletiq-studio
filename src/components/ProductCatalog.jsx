@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 const CATALOG_ITEMS = [
   {
@@ -7,64 +7,64 @@ const CATALOG_ITEMS = [
     title: 'Camiseta Fútbol F3 Matchday',
     category: 'futbol',
     gender: 'Hombre / Unisex',
-    price: '34.00',
+    price: '$34.00 USD',
     image: './assets/stitch/ghost_mannequin.png',
-    badge: 'Best Seller',
-    description: 'Tejido transpirable TS-Tex con cuello en V reforzado y sublimación 100% integral.',
+    badge: 'Más Vendido',
+    description: 'Tejido transpirable TS-Tex con cuello en V reforzado y sublimación integral de alta definición.',
   },
   {
     engineId: 'basketball_b6_hero',
     title: 'Camiseta Baloncesto B6 Hero',
     category: 'basket',
     gender: 'Hombre',
-    price: '32.00',
+    price: '$32.00 USD',
     image: './assets/stitch/basketball_arena.png',
-    badge: 'FIBA Compliant',
-    description: 'Micromesh K-Tex antibacteriano, tirantes elásticos y panel de ventilación.',
+    badge: 'Normativa FIBA',
+    description: 'Micromesh K-Tex antibacteriano, tirantes elásticos y panel de ventilación lateral.',
   },
   {
     engineId: 'basketball_b7w_epic_women',
     title: 'Camiseta Baloncesto B7W Dama',
     category: 'basket',
     gender: 'Mujer (Corte Dama)',
-    price: '32.00',
+    price: '$32.00 USD',
     image: './assets/stitch/basketball_arena.png',
     badge: 'Corte Femenino',
-    description: 'Patrón anatómico entallado femenino con sisa y pecho ergonómico.',
+    description: 'Patrón anatómico entallado femenino con sisa ergonómica y corte especial para mujer.',
   },
   {
     engineId: 'jacket_softshell_601m_men',
     title: 'Chaqueta Softshell 601M',
     category: 'chaquetas',
     gender: 'Hombre',
-    price: '58.00',
+    price: '$58.00 USD',
     image: './assets/stitch/football_celebration.png',
-    badge: 'Técnico / Viaje',
-    description: 'Microfibra cortavientos con cremallera completa termosellada y bolsillos.',
+    badge: 'Staff & Viaje',
+    description: 'Microfibra cortavientos con cremallera completa termosellada y bolsillos con cremallera.',
   },
   {
     engineId: 'jacket_softshell_601w_women',
     title: 'Chaqueta Softshell 601W Dama',
     category: 'chaquetas',
     gender: 'Mujer (Corte Dama)',
-    price: '58.00',
+    price: '$58.00 USD',
     image: './assets/stitch/football_celebration.png',
     badge: 'Corte Femenino',
-    description: 'Chaqueta técnica entallada repelente al agua para banquillo y paseo.',
+    description: 'Chaqueta técnica entallada repelente al agua para banquillo, calentamiento y concentración.',
   },
   {
     engineId: 'football_shorts_fp3',
     title: 'Pantalón Corto Fútbol FP3',
     category: 'futbol',
     gender: 'Hombre / Unisex',
-    price: '22.00',
+    price: '$22.00 USD',
     image: './assets/stitch/ghost_mannequin.png',
     badge: 'A juego con F3',
     description: 'Tejido elástico de alta movilidad con cordón interior y sin costuras laterales molestas.',
   },
 ];
 
-export default function ProductCatalog({ onSelectProduct, onOpenQuote }) {
+export default function ProductCatalog({ onSelectProduct }) {
   const [filter, setFilter] = useState('all');
 
   const filtered = filter === 'all'
@@ -82,7 +82,7 @@ export default function ProductCatalog({ onSelectProduct, onOpenQuote }) {
             Equipaciones Deportivas Personalizables
           </h2>
           <p className="text-slate-600 text-sm mt-1 max-w-xl">
-            Prendas de grado profesional con patronaje oficial para clubes y atletas. Elige una prenda y configúrala en el motor 3D.
+            Prendas de grado profesional con patronaje oficial para clubes y atletas. Elige una prenda para comenzar a personalizarla.
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export default function ProductCatalog({ onSelectProduct, onOpenQuote }) {
               onClick={() => setFilter(cat.id)}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 filter === cat.id
-                  ? 'bg-sky-600 text-white shadow-sm'
+                  ? 'bg-slate-900 text-white shadow-xs'
                   : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -114,30 +114,30 @@ export default function ProductCatalog({ onSelectProduct, onOpenQuote }) {
         {filtered.map((item) => (
           <div
             key={item.engineId}
-            className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-sky-300 hover:shadow-xl transition-all flex flex-col justify-between"
+            className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-slate-300 hover:shadow-lg transition-all flex flex-col justify-between"
           >
             {/* Visual Image container */}
-            <div className="relative aspect-4/3 overflow-hidden bg-slate-100 flex items-center justify-center p-4">
+            <div className="relative aspect-4/3 overflow-hidden bg-slate-50 flex items-center justify-center p-4">
               <img
                 src={item.image}
                 alt={item.title}
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
               />
-              <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm border border-slate-200 text-slate-800 text-[11px] font-bold px-3 py-1 rounded-full shadow-xs">
+              <span className="absolute top-4 left-4 bg-white/95 border border-slate-200 text-slate-800 text-[11px] font-bold px-3 py-1 rounded-full shadow-xs">
                 {item.badge}
               </span>
               <span className="absolute bottom-4 right-4 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full">
-                Desde €{item.price}
+                {item.price}
               </span>
             </div>
 
             {/* Content info */}
             <div className="p-6 flex flex-col flex-1 justify-between gap-4">
               <div>
-                <span className="text-[11px] font-bold text-sky-600 uppercase tracking-wider block mb-1">
+                <span className="text-[11px] font-bold text-sky-700 uppercase tracking-wider block mb-1">
                   {item.gender}
                 </span>
-                <h3 className="font-extrabold text-lg text-slate-900 group-hover:text-sky-600 transition-colors">
+                <h3 className="font-extrabold text-lg text-slate-900 group-hover:text-sky-700 transition-colors">
                   {item.title}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -145,14 +145,13 @@ export default function ProductCatalog({ onSelectProduct, onOpenQuote }) {
                 </p>
               </div>
 
-              {/* Action Button */}
+              {/* Action Button: Clean and Professional */}
               <button
                 onClick={() => onSelectProduct(item.engineId)}
-                className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer group/btn"
               >
-                <Box className="w-4 h-4" />
-                <span>Personalizar en 3D</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Personalizar diseño</span>
+                <ArrowRight className="w-4 h-4 text-sky-400 group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>

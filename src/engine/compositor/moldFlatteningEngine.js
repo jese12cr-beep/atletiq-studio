@@ -15,6 +15,7 @@ import {
   resolveActiveFishDesignMeta,
   resolvedFishMasksCache,
 } from './fishPartCompositor';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 
 // ============================================================================
 // CONSTANTES Y TRAZOS MAESTROS DE "MOLDE CAMISA.SVG"
@@ -1099,7 +1100,12 @@ export function composeDirect3DTextures(design, activePlayer = {}, artworkRegist
   if (typeof document === 'undefined') return null;
 
   const activeFish = resolveActiveFishDesignMeta(design);
-  const activeMasksMap = masksMap || (activeFish?.fileUrl ? resolvedFishMasksCache.get(activeFish.fileUrl) : null);
+  const activeMasksMap =
+    masksMap ||
+    (activeFish?.fileUrl
+      ? resolvedFishMasksCache.get(activeFish.fileUrl) ||
+        resolvedFishMasksCache.get(resolveAssetUrl(activeFish.fileUrl))
+      : null);
 
   // Sincronizar y montar cualquier imagen de decal no inicializada
   const decals = design?.decals || [];

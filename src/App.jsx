@@ -322,9 +322,12 @@ export default function App() {
                 }
               }}
             />
-            <HowItWorks onOpenStudio={() => switchMode('studio')} />
             <ProductCatalog
               onSelectProduct={handleSelectCatalogProduct}
+              onOpenQuote={() => setIsQuoteModalOpen(true)}
+            />
+            <HowItWorks
+              onOpenStudio={() => switchMode('studio')}
               onOpenQuote={() => setIsQuoteModalOpen(true)}
             />
             <SizeGuideAndSamples />
