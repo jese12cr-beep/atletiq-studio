@@ -190,15 +190,102 @@ export default function JerseyThumbnailMiniature({ kit, size = 68, className = '
             </g>
           )}
 
+          {/* --- PATRONES GENERALES DE DISEÑO PERSONALIZABLE ATLETIQ --- */}
+          {(id === 'tackle' || id === 'rayas_clasicas' || id === 'franjas_elite' || id === 'steps' || id.includes('stripes')) && (
+            <g>
+              <rect x="25" y="10" width="10" height="90" fill={secondary} />
+              <rect x="45" y="10" width="10" height="90" fill={secondary} />
+              <rect x="65" y="10" width="10" height="90" fill={secondary} />
+              <line x1="30" y1="10" x2="30" y2="100" stroke={accents} strokeWidth="1" />
+              <line x1="50" y1="10" x2="50" y2="100" stroke={accents} strokeWidth="1" />
+              <line x1="70" y1="10" x2="70" y2="100" stroke={accents} strokeWidth="1" />
+            </g>
+          )}
+
+          {(id === 'strike' || id === 'diagonal_hyper' || id === 'banda_cruzada' || id.includes('diagonal')) && (
+            <g>
+              <polygon points="12,25 32,15 88,78 68,88" fill={secondary} />
+              <line x1="12" y1="25" x2="68" y2="88" stroke={accents} strokeWidth="2" />
+              <line x1="32" y1="15" x2="88" y2="78" stroke={accents} strokeWidth="2" />
+            </g>
+          )}
+
+          {(id === 'city' || id === 'horizon' || id === 'fusion_prisma' || id.includes('chest_band')) && (
+            <g>
+              <rect x="10" y="44" width="80" height="20" fill={secondary} />
+              <rect x="10" y="42" width="80" height="2" fill={accents} />
+              <rect x="10" y="64" width="80" height="2" fill={accents} />
+            </g>
+          )}
+
+          {(id === 'champion' || id === 'chevron_center' || id.includes('chevron')) && (
+            <g>
+              <polygon points="10,30 50,55 90,30 90,44 50,69 10,44" fill={secondary} />
+              <polygon points="10,48 50,73 90,48 90,56 50,81 10,56" fill={accents} />
+            </g>
+          )}
+
+          {(id === 'gladiator' || id === 'dinamico_pro' || id.includes('gladiator')) && (
+            <g>
+              <polygon points="10,10 50,60 90,10" fill={secondary} opacity="0.85" />
+              <polygon points="20,10 50,50 80,10" fill={accents} opacity="0.6" />
+              <polygon points="10,95 50,45 90,95" fill={secondary} opacity="0.7" />
+            </g>
+          )}
+
+          {(id === 'fight' || id === 'vanguardia_dual' || id.includes('half_split')) && (
+            <g>
+              <polygon points="10,10 90,10 10,95" fill={secondary} />
+              <polygon points="90,10 90,95 10,95" fill={primary} />
+              <line x1="90" y1="10" x2="10" y2="95" stroke={accents} strokeWidth="2" />
+            </g>
+          )}
+
+          {(id === 'level' || id === 'mosaico_cyber' || id.includes('matrix')) && (
+            <g opacity="0.5">
+              <line x1="10" y1="30" x2="90" y2="30" stroke={secondary} strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="10" y1="50" x2="90" y2="50" stroke={secondary} strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="10" y1="70" x2="90" y2="70" stroke={secondary} strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="30" y1="10" x2="30" y2="95" stroke={secondary} strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="50" y1="10" x2="50" y2="95" stroke={secondary} strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="70" y1="10" x2="70" y2="95" stroke={secondary} strokeWidth="1" strokeDasharray="3,3" />
+            </g>
+          )}
+
+          {(id === 'style' || id === 'acento_hombros') && (
+            <g>
+              <polygon points="10,10 90,10 90,32 50,42 10,32" fill={secondary} />
+              <line x1="10" y1="32" x2="50" y2="42" stroke={accents} strokeWidth="2" />
+              <line x1="90" y1="32" x2="50" y2="42" stroke={accents} strokeWidth="2" />
+            </g>
+          )}
+
+          {id === 'rayo' && (
+            <g>
+              <polygon points="45,10 58,10 38,50 62,50 35,95 48,56 28,56" fill={accents} stroke={secondary} strokeWidth="1" />
+            </g>
+          )}
+
+          {(id === 'sweep' || id === 'topografia_tech') && (
+            <g opacity="0.7">
+              <path d="M10 35 Q50 60 90 35" stroke={secondary} strokeWidth="3" fill="none" />
+              <path d="M10 55 Q50 80 90 55" stroke={accents} strokeWidth="3" fill="none" />
+              <path d="M10 75 Q50 100 90 75" stroke={secondary} strokeWidth="2" fill="none" />
+            </g>
+          )}
+
           {/* Sombra de relieve de pliegues */}
           <rect x="10" y="10" width="80" height="90" fill={`url(#fold-grad-${id})`} />
         </g>
 
-        {/* --- 3. Escudo en el Pecho Izquierdo --- */}
-        <circle cx="62" cy="36" r="5" fill="#ffffff" stroke={secondary} strokeWidth="1.2" />
-        {/* Letra o ícono interior del escudo */}
-        <circle cx="62" cy="36" r="3.2" fill={secondary} />
-        <circle cx="62" cy="36" r="1.5" fill={accents} />
+        {/* --- 3. Escudo en el Pecho Izquierdo (Opcional) --- */}
+        {kit.showShield !== false && (
+          <g>
+            <circle cx="62" cy="36" r="5" fill="#ffffff" stroke={secondary} strokeWidth="1.2" />
+            <circle cx="62" cy="36" r="3.2" fill={secondary} />
+            <circle cx="62" cy="36" r="1.5" fill={accents} />
+          </g>
+        )}
 
         {/* --- 4. Cuello V-Neck Anatómico --- */}
         <path

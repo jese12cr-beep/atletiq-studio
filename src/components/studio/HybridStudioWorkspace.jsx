@@ -80,8 +80,6 @@ import {
 } from '../../engine/core/boundingBoxMath';
 
 import GarmentCanvas3D from '../../engine/viewer3d/GarmentCanvas3D';
-import ProGarmentCanvas3D from '../../engine/viewer3d/ProGarmentCanvas3D';
-import ProStudioCardsContainer from './ProStudioCardsContainer';
 import { ATLETIQ_PRO_PATTERNS } from '../../data/atletiqProPatterns';
 import JerseyThumbnailMiniature from './JerseyThumbnailMiniature';
 import ProductionMoldModal from './ProductionMoldModal';
@@ -250,8 +248,8 @@ export default function HybridStudioWorkspace({
   onSwitchToStorefront,
 }) {
   const [activeTab, setActiveTab] = useState('design'); // 'design' | 'colors' | 'text' | 'logo'
-  const [uiMode, setUiMode] = useState('pro_cards'); // 'pro_cards' (nuevos recuadros deportivos) | 'classic'
-  const [viewportMode, setViewportMode] = useState('pro3d'); // 'pro3d' (muestreo 3D de alta definición) | '3d' | '2d'
+  const [viewportMode, setViewportMode] = useState('3d'); // '3d' (CAD 3D Textil PBR) | '2d' (Plano de corte)
+  const [patternCategoryFilter, setPatternCategoryFilter] = useState('Todos');
   const [cameraPreset, setCameraPreset] = useState('three_quarter');
   const [autoRotate, setAutoRotate] = useState(false);
   const [panel2D, setPanel2D] = useState('front');
@@ -1192,39 +1190,26 @@ export default function HybridStudioWorkspace({
           )}
         </div>
 
-        {/* Selector de Modo CAD: 3D Pro ↔ 3D Estándar ↔ 2D Plano */}
+        {/* Selector de Modo CAD: 3D CAD ↔ 2D PLANO */}
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-2xs">
-          <button
-            id="btn-desktop-view-3d-pro"
-            type="button"
-            onClick={() => setViewportMode('pro3d')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
-              viewportMode === 'pro3d'
-                ? 'bg-emerald-500 text-slate-950 shadow-xs ring-1 ring-emerald-400'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-950" />
-            <span>3D Pro</span>
-          </button>
           <button
             id="btn-desktop-view-3d"
             type="button"
             onClick={() => setViewportMode('3d')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
               viewportMode === '3d'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
             }`}
           >
             <Box className="w-3.5 h-3.5 text-sky-400" />
-            <span>3D Clásico</span>
+            <span>3D CAD</span>
           </button>
           <button
             id="btn-desktop-view-2d"
             type="button"
             onClick={() => setViewportMode('2d')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
               viewportMode === '2d'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
@@ -1283,25 +1268,13 @@ export default function HybridStudioWorkspace({
           </button>
         </div>
 
-        {/* Toggle 3D Pro / 3D / 2D en Móvil */}
+        {/* Toggle 3D / 2D en Móvil */}
         <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-xl border border-slate-200 shrink-0">
-          <button
-            id="btn-mobile-view-3d-pro"
-            type="button"
-            onClick={() => setViewportMode('pro3d')}
-            className={`px-1.5 py-0.5 rounded-lg text-[9px] font-black transition-all cursor-pointer ${
-              viewportMode === 'pro3d'
-                ? 'bg-emerald-500 text-slate-950 shadow-2xs font-bold'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            3D Pro
-          </button>
           <button
             id="btn-mobile-view-3d"
             type="button"
             onClick={() => setViewportMode('3d')}
-            className={`px-1.5 py-0.5 rounded-lg text-[9px] font-black transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
               viewportMode === '3d'
                 ? 'bg-slate-900 text-white shadow-2xs'
                 : 'text-slate-600 hover:bg-slate-200'
@@ -1313,7 +1286,7 @@ export default function HybridStudioWorkspace({
             id="btn-mobile-view-2d"
             type="button"
             onClick={() => setViewportMode('2d')}
-            className={`px-1.5 py-0.5 rounded-lg text-[9px] font-black transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
               viewportMode === '2d'
                 ? 'bg-slate-900 text-white shadow-2xs'
                 : 'text-slate-600 hover:bg-slate-200'
@@ -1373,43 +1346,31 @@ export default function HybridStudioWorkspace({
               : 'h-[44vh] sm:h-[48vh] lg:h-auto lg:flex-1 shrink-0 lg:shrink'
           }`}
         >
-          {/* Conmutador flotante táctil móvil 3D Pro / 3D / 2D PLANO directo en el visor */}
+          {/* Conmutador flotante táctil móvil 3D / 2D directo en el visor */}
           <div className="sm:hidden absolute top-2.5 left-2.5 z-30 pointer-events-auto flex items-center gap-1 bg-slate-900/90 text-white p-1 rounded-full border border-slate-700/80 shadow-lg backdrop-blur-md">
             <button
               type="button"
-              onClick={() => setViewportMode('pro3d')}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-black transition-all flex items-center gap-1 ${
-                viewportMode === 'pro3d'
-                  ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <Sparkles className="w-3 h-3 text-slate-950" />
-              <span>3D Pro</span>
-            </button>
-            <button
-              type="button"
               onClick={() => setViewportMode('3d')}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-black transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-full text-[10px] font-black transition-all flex items-center gap-1 ${
                 viewportMode === '3d'
                   ? 'bg-sky-500 text-slate-950 shadow-xs'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
               <Box className="w-3 h-3" />
-              <span>3D</span>
+              <span>3D CAD</span>
             </button>
             <button
               type="button"
               onClick={() => setViewportMode('2d')}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-black transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-full text-[10px] font-black transition-all flex items-center gap-1 ${
                 viewportMode === '2d'
                   ? 'bg-emerald-500 text-slate-950 shadow-xs'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
               <Eye className="w-3 h-3" />
-              <span>2D</span>
+              <span>2D PLANO</span>
             </button>
           </div>
 
@@ -1421,26 +1382,6 @@ export default function HybridStudioWorkspace({
               selectedPanel={panel2D}
               onChangePanel={setPanel2D}
               onOpenProductionMold={() => setIsProductionMoldModalOpen(true)}
-            />
-          ) : viewportMode === 'pro3d' ? (
-            <ProGarmentCanvas3D
-              patternSvgPath={activeProPattern?.svgPath || '/assets/patterns/atletiq_pro_01.svg'}
-              colorZoneMap={proColorZoneMap}
-              playerName={activePlayer?.name || 'ATLETIQ'}
-              playerNumber={activePlayer?.number || '10'}
-              frontNumberActive={proFrontNumberActive}
-              fontFamily={proFontFamily}
-              numberFillColor={proNumberFillColor}
-              numberOutlineColor={proNumberOutlineColor}
-              numberShadowColor={proNumberShadowColor}
-              nameFillColor={proNameFillColor}
-              nameOutlineColor={proNameOutlineColor}
-              nameCurveAngle={proNameCurveAngle}
-              activeCrest={proSampleCrest}
-              sponsorText={proSponsorText}
-              sponsorImage={proSponsorImage}
-              activeCollar={proCollar}
-              autoRotate={autoRotate}
             />
           ) : isFaux3DAccessory ? (
             <LayerStack25DViewer
@@ -1529,33 +1470,6 @@ export default function HybridStudioWorkspace({
                 </div>
               </div>
 
-              {/* Selector de Interfaz: Recuadros Pro vs Clásico */}
-              <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setUiMode('pro_cards')}
-                  className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-black transition-all flex items-center gap-1 cursor-pointer ${
-                    uiMode === 'pro_cards'
-                      ? 'bg-emerald-500 text-slate-950 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <Sparkles className="w-3 h-3 text-emerald-950 stroke-[2.5]" />
-                  <span>Recuadros Pro</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUiMode('classic')}
-                  className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-black transition-all flex items-center gap-1 cursor-pointer ${
-                    uiMode === 'classic'
-                      ? 'bg-slate-900 text-white shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <span>Clásico</span>
-                </button>
-              </div>
-
               {/* Botón expandir/colapsar en móviles */}
               <div className="flex items-center gap-1 shrink-0">
                 <button
@@ -1588,8 +1502,8 @@ export default function HybridStudioWorkspace({
               </div>
             </div>
 
-            {/* Pestañas de píldora Clásicas (solo visibles cuando uiMode === 'classic') */}
-            {!isMobilePanelCollapsed && uiMode === 'classic' && (
+            {/* Pestañas de píldora Clásicas */}
+            {!isMobilePanelCollapsed && (
               <div className="flex items-center gap-1.5 sm:gap-2 mt-2.5 sm:mt-3.5">
                 {OWAYO_TABS.map((t) => {
                   const isActive = activeTab === t.id;
@@ -1615,128 +1529,8 @@ export default function HybridStudioWorkspace({
             )}
           </div>
 
-          {uiMode === 'pro_cards' ? (
-            <div className="flex-1 min-h-0 flex flex-col p-2 sm:p-3 overflow-hidden bg-slate-950">
-              <ProStudioCardsContainer
-                activePatternId={proPatternId}
-                onSelectPattern={(pat) => {
-                  setProPatternId(pat.id);
-                  if (viewportMode !== 'pro3d') setViewportMode('pro3d');
-                  setToastMessage(`Patrón ${pat.name} activado`);
-                  setTimeout(() => setToastMessage(''), 2500);
-                }}
-                colorZoneMap={proColorZoneMap}
-                onChangeZoneColor={(zoneId, hex) => {
-                  setProColorZoneMap((prev) => ({ ...prev, [zoneId]: hex }));
-                  if (zoneId === 'c1' || zoneId === 'c2') {
-                    onCommitDesign({ ...design, primaryColor: hex });
-                  } else if (zoneId === 'c6' || zoneId === 'c3' || zoneId === 'c4') {
-                    onCommitDesign({ ...design, secondaryColor: hex });
-                  } else {
-                    onCommitDesign({ ...design, accentColor: hex });
-                  }
-                }}
-                onResetZoneColors={() => {
-                  setProColorZoneMap({
-                    c1: '#085dbf',
-                    c2: '#085dbf',
-                    c3: '#085dbf',
-                    c4: '#085dbf',
-                    c5: '#085dbf',
-                    c6: '#072661',
-                    c7: '#ffffff',
-                    c8: '#8bb8e8',
-                    c9: '#004c97',
-                  });
-                }}
-                activeCollar={proCollar}
-                onChangeCollar={setProCollar}
-                activeCut={proCut}
-                onChangeCut={setProCut}
-                activeSize={activePlayer?.size || 'L'}
-                onChangeSize={(sz) => {
-                  const updated = [...roster];
-                  if (updated[activeRosterIndex]) {
-                    updated[activeRosterIndex] = { ...updated[activeRosterIndex], size: sz };
-                    onUpdateRoster(updated);
-                  }
-                }}
-                playerNumber={activePlayer?.number || '10'}
-                onChangeNumber={(num) => {
-                  const updated = [...roster];
-                  if (updated[activeRosterIndex]) {
-                    updated[activeRosterIndex] = { ...updated[activeRosterIndex], number: num };
-                    onUpdateRoster(updated);
-                  }
-                }}
-                playerName={activePlayer?.name || 'ATLETIQ'}
-                onChangeName={(nm) => {
-                  const updated = [...roster];
-                  if (updated[activeRosterIndex]) {
-                    updated[activeRosterIndex] = { ...updated[activeRosterIndex], name: nm };
-                    onUpdateRoster(updated);
-                  }
-                }}
-                frontNumberActive={proFrontNumberActive}
-                onToggleFrontNumber={setProFrontNumberActive}
-                fontFamily={proFontFamily}
-                onChangeFont={setProFontFamily}
-                numberFillColor={proNumberFillColor}
-                onChangeNumberFill={setProNumberFillColor}
-                numberOutlineColor={proNumberOutlineColor}
-                onChangeNumberOutline={setProNumberOutlineColor}
-                numberShadowColor={proNumberShadowColor}
-                onChangeNumberShadow={setProNumberShadowColor}
-                nameFillColor={proNameFillColor}
-                onChangeNameFill={setProNameFillColor}
-                nameOutlineColor={proNameOutlineColor}
-                onChangeNameOutline={setProNameOutlineColor}
-                nameCurveAngle={proNameCurveAngle}
-                onChangeNameCurve={setProNameCurveAngle}
-                activeCrest={proSampleCrest}
-                onSelectCrest={(url, name) => {
-                  setProSampleCrest(url);
-                  setToastMessage(`Escudo ${name} colocado en pecho`);
-                  setTimeout(() => setToastMessage(''), 2500);
-                }}
-                onClearCrest={() => setProSampleCrest(null)}
-                onUploadCustomCrest={(url) => {
-                  setProSampleCrest(url);
-                  setToastMessage('Escudo personalizado aplicado');
-                  setTimeout(() => setToastMessage(''), 2500);
-                }}
-                sponsorText={proSponsorText}
-                onChangeSponsorText={setProSponsorText}
-                sponsorImage={proSponsorImage}
-                onUploadSponsor={setProSponsorImage}
-                onClearSponsor={() => {
-                  setProSponsorImage(null);
-                  setProSponsorText('');
-                }}
-                onOpenMoldModal={() => setIsProductionMoldModalOpen(true)}
-                onSaveToGallery={() => {
-                  saveDesignToGallery({
-                    title: `ATLETIQ Pro - ${activeProPattern?.name || 'Diseño'}`,
-                    productName: currentProduct.name,
-                    design: {
-                      ...design,
-                      proPatternId,
-                      proColorZoneMap,
-                      proCollar,
-                      proCut,
-                      proSampleCrest,
-                      proSponsorText,
-                    },
-                  });
-                  setToastMessage('Diseño guardado con éxito en Mi Galería');
-                  setTimeout(() => setToastMessage(''), 2500);
-                }}
-              />
-            </div>
-          ) : (
-            <>
-              {/* Contenido desplazable de la pestaña activa Owayo */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Contenido desplazable de la pestaña activa */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* ==================== PESTAÑA 1: DISEÑO ==================== */}
             {activeTab === 'design' && (
               <div className="space-y-4">
@@ -1917,7 +1711,7 @@ export default function HybridStudioWorkspace({
                     </div>
 
                     <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-                      <span className="text-xs font-bold text-slate-700">
+                      <span className="text-xs font-black text-slate-800">
                         Estilos de corte disponibles ({availableFishDesigns.length}):
                       </span>
                       <span className="text-[10px] font-mono text-slate-500 font-semibold">
@@ -1925,30 +1719,98 @@ export default function HybridStudioWorkspace({
                       </span>
                     </div>
 
-                    {/* Cuadrícula Limpia Owayo: Solo Nombres de Estilos de Diseño (Sin imagen) */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {availableFishDesigns.map((dMeta) => {
-                        const isSelected = design.patternId === dMeta.id;
-                        return (
-                          <button
-                            key={dMeta.id}
-                            type="button"
-                            onClick={() => {
-                              setActiveMexicoKitId(null);
-                              onCommitDesign({ ...design, patternId: dMeta.id, mexicoKitId: null }, true);
-                            }}
-                            className={`px-3 py-3 rounded-xl border text-center transition-all flex items-center justify-center cursor-pointer min-h-[46px] ${
-                              isSelected
-                                ? 'bg-slate-100 border-2 border-slate-900 text-slate-950 font-black shadow-xs'
-                                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold'
-                            }`}
-                          >
-                            <span className="text-xs truncate w-full tracking-tight">
-                              {dMeta.name}
-                            </span>
-                          </button>
-                        );
-                      })}
+                    {/* Filtro por Categoría de Estilo */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                      {['Todos', 'Moderno', 'Rayas', 'Geométrico', 'Degradado', 'Minimalista'].map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setPatternCategoryFilter(cat)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight transition-all whitespace-nowrap cursor-pointer ${
+                            patternCategoryFilter === cat
+                              ? 'bg-slate-900 text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 border border-slate-200/60'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Cuadrícula de Recuadros Deportivos de Personalización */}
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                      {availableFishDesigns
+                        .filter((d) => {
+                          if (patternCategoryFilter === 'Todos') return true;
+                          return (d.category || 'Moderno') === patternCategoryFilter;
+                        })
+                        .map((dMeta) => {
+                          const isSelected = design.patternId === dMeta.id && !activeMexicoKitId;
+                          const catLabel = dMeta.category || 'Clásico';
+                          return (
+                            <div
+                              key={dMeta.id}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => {
+                                setActiveMexicoKitId(null);
+                                onCommitDesign({ ...design, patternId: dMeta.id, mexicoKitId: null }, true);
+                                setToastMessage(`Estilo ${dMeta.name} aplicado`);
+                                setTimeout(() => setToastMessage(''), 2000);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  setActiveMexicoKitId(null);
+                                  onCommitDesign({ ...design, patternId: dMeta.id, mexicoKitId: null }, true);
+                                }
+                              }}
+                              className={`group relative flex flex-col rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 text-left border ${
+                                isSelected
+                                  ? 'border-2 border-emerald-500 bg-emerald-50/20 shadow-md ring-2 ring-emerald-500/20'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                              }`}
+                            >
+                              {/* Badge de Selección Activa */}
+                              {isSelected && (
+                                <div className="absolute top-2 right-2 z-10 bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                  <span>Activo</span>
+                                </div>
+                              )}
+
+                              {/* Badge de Categoría */}
+                              <div className="absolute top-2 left-2 z-10 bg-slate-900/80 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider">
+                                {catLabel}
+                              </div>
+
+                              {/* Miniatura Visual Reactiva */}
+                              <div className="relative aspect-square w-full bg-gradient-to-b from-slate-50 to-slate-100 p-2 flex items-center justify-center overflow-hidden">
+                                <JerseyThumbnailMiniature
+                                  kit={{
+                                    id: dMeta.id,
+                                    name: dMeta.name,
+                                    colorZones: design.colorZones,
+                                    showShield: false,
+                                  }}
+                                  size={72}
+                                  className="group-hover:scale-106 transition-transform duration-200"
+                                />
+                              </div>
+
+                              {/* Datos del Recuadro Deportivo */}
+                              <div className="p-2.5 bg-white flex flex-col gap-0.5 border-t border-slate-100">
+                                <div className="text-xs font-black text-slate-900 leading-tight line-clamp-1 group-hover:text-emerald-700 transition-colors">
+                                  {dMeta.name}
+                                </div>
+                                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                                  <span>{dMeta.baseColors?.length || 3} Zonas</span>
+                                  <span className="text-slate-400 font-mono text-[9px]">3D CAD</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </>
                 )}
@@ -3681,8 +3543,6 @@ export default function HybridStudioWorkspace({
               <span>Ver Plantilla 2D</span>
             </button>
           </div>
-            </>
-          )}
         </aside>
       </div>
 
