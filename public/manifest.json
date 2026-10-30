@@ -1,0 +1,19 @@
+{
+  "name": "ATLETIQ Studio — Ropa Deportiva Personalizada",
+  "short_name": "ATLETIQ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "description": "Estudio de personalización textil y visualización 3D para clubes y equipos deportivos.",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
