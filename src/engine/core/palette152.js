@@ -1815,124 +1815,134 @@ export const FOOTBALL_FISH_DESIGNS = [
     "sizeKB": 32.4
   },
   {
-    "id": "dinamico_pro",
-    "name": "Dinámico Pro",
-    "category": "Moderno",
-    "fileUrl": "/designs/football_f3_ka/gladiator.fish",
+    "id": "cross",
+    "name": "Cross V2",
+    "category": "Geométrico",
+    "fileUrl": "/designs/football_f3_ka/cross.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 38.2
+    "sizeKB": 24.8
+  },
+  {
+    "id": "pool",
+    "name": "Pool Wave",
+    "category": "Degradado",
+    "fileUrl": "/designs/football_f3_ka/pool.fish",
+    "baseColors": ["A", "B", "C"],
+    "outlineZones": [],
+    "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
+    "sizeKB": 24.8
+  },
+  {
+    "id": "dinamico_pro",
+    "name": "Dinámico Pro",
+    "category": "Moderno",
+    "fileUrl": "/designs/football_f3_ka/dinamico_pro.fish",
+    "baseColors": ["A", "B", "C"],
+    "outlineZones": [],
+    "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
+    "sizeKB": 46.8
   },
   {
     "id": "franjas_elite",
     "name": "Franjas Élite",
     "category": "Rayas",
-    "fileUrl": "/designs/football_f3_ka/steps.fish",
+    "fileUrl": "/designs/football_f3_ka/franjas_elite.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 36.5
+    "sizeKB": 24.5
   },
   {
     "id": "diagonal_hyper",
     "name": "Diagonal Hyper",
     "category": "Moderno",
-    "fileUrl": "/designs/football_f3_ka/strike.fish",
+    "fileUrl": "/designs/football_f3_ka/diagonal_hyper.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 35.1
+    "sizeKB": 35.9
   },
   {
     "id": "vanguardia_dual",
     "name": "Vanguardia Dual",
     "category": "Geométrico",
-    "fileUrl": "/designs/football_f3_ka/fight.fish",
+    "fileUrl": "/designs/football_f3_ka/vanguardia_dual.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 34.8
+    "sizeKB": 24.5
   },
   {
     "id": "chevron_center",
     "name": "Chevron Centrado",
     "category": "Rayas",
-    "fileUrl": "/designs/football_f3_ka/champion.fish",
+    "fileUrl": "/designs/football_f3_ka/chevron_center.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 37.0
+    "sizeKB": 50.1
   },
   {
     "id": "fusion_prisma",
     "name": "Fusión Prisma",
     "category": "Degradado",
-    "fileUrl": "/designs/football_f3_ka/horizon.fish",
+    "fileUrl": "/designs/football_f3_ka/fusion_prisma.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 35.6
+    "sizeKB": 27.0
   },
   {
     "id": "rayas_clasicas",
     "name": "Rayas Clásicas",
     "category": "Rayas",
-    "fileUrl": "/designs/football_f3_ka/tackle.fish",
+    "fileUrl": "/designs/football_f3_ka/rayas_clasicas.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 36.7
+    "sizeKB": 24.6
   },
   {
     "id": "mosaico_cyber",
     "name": "Mosaico Cyber",
     "category": "Geométrico",
-    "fileUrl": "/designs/football_f3_ka/level.fish",
+    "fileUrl": "/designs/football_f3_ka/mosaico_cyber.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 34.2
+    "sizeKB": 25.0
   },
   {
     "id": "acento_hombros",
     "name": "Acento Hombros",
     "category": "Minimalista",
-    "fileUrl": "/designs/football_f3_ka/style.fish",
+    "fileUrl": "/designs/football_f3_ka/acento_hombros.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 33.9
+    "sizeKB": 31.5
   },
   {
     "id": "banda_cruzada",
     "name": "Banda Cruzada",
     "category": "Rayas",
-    "fileUrl": "/designs/football_f3_ka/rayo.fish",
+    "fileUrl": "/designs/football_f3_ka/banda_cruzada.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 35.8
+    "sizeKB": 35.3
   },
   {
     "id": "topografia_tech",
     "name": "Topografía Tech",
     "category": "Geométrico",
-    "fileUrl": "/designs/football_f3_ka/sweep.fish",
+    "fileUrl": "/designs/football_f3_ka/topografia_tech.fish",
     "baseColors": ["A", "B", "C"],
     "outlineZones": [],
     "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 36.1
-  },
-  {
-    "id": "monocromo_match",
-    "name": "Monocromo Match",
-    "category": "Minimalista",
-    "fileUrl": "/designs/football_f3_ka/pure.fish",
-    "baseColors": ["A"],
-    "outlineZones": [],
-    "parts": ["Back", "Collar", "Front", "LeftArm", "RightArm"],
-    "sizeKB": 32.4
+    "sizeKB": 43.6
   }
 ];
 
