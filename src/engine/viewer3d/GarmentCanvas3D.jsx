@@ -327,6 +327,18 @@ export default function GarmentCanvas3D({
       .sort((a, b) => (b.zIndex ?? 10) - (a.zIndex ?? 10));
 
     for (const d of matchingDecals) {
+      // Gráficos estructurales de kits (LIGAMX_GRAPHIC, rayas, patrones de tela, chevrones)
+      // o elementos bloqueados/fijados: NUNCA interceptar ni mover al rotar la prenda en 3D
+      if (
+        d.type === 'LIGAMX_GRAPHIC' ||
+        d.isPattern ||
+        d.isBackgroundGraphic ||
+        d.locked === true ||
+        d.pinned === true
+      ) {
+        continue;
+      }
+
       const hw = (d.sizeMm.width * (d.scale ?? 1)) / 2 + 14;
       const hh = (d.sizeMm.height * (d.scale ?? 1)) / 2 + 14;
       if (Math.abs(xMm - d.centerMm.x) <= hw && Math.abs(yMm - d.centerMm.y) <= hh) {
@@ -925,8 +937,10 @@ export default function GarmentCanvas3D({
     if (!found) return;
 
     if (found.kind === 'decal') {
+      if (found.pinned || found.decal?.locked || found.decal?.type === 'LIGAMX_GRAPHIC' || !onUpdateDecalFrom3D) {
+        return;
+      }
       onSelectDecalFrom3D?.(found.decal.id, hit.panel);
-      if (found.pinned || !onUpdateDecalFrom3D) return;
 
       sceneStateRef.current.controls.enabled = false;
       dragSessionRef.current = {

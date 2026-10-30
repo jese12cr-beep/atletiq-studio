@@ -850,7 +850,12 @@ export default function HybridStudioWorkspace({
         ...baseDesign.colorZones,
         ...kit.colorZones,
       },
-      decals: kit.decals && kit.decals.length > 0 ? kit.decals : (baseDesign.decals || []),
+      decals: (kit.decals && kit.decals.length > 0 ? kit.decals : (baseDesign.decals || [])).map((d) => ({
+        ...d,
+        pinned: true,
+        locked: true,
+        isPattern: d.type === 'LIGAMX_GRAPHIC',
+      })),
       surfacePatternId: kit.surfacePatternId || 'none',
       surfacePatternOpacity: kit.surfacePatternOpacity ?? 0.16,
       variableSlots: {
