@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Check,
   Shield,
+  Lock,
   Type,
   Users,
   Palette,
@@ -42,11 +43,13 @@ import {
   Minimize2,
   FolderHeart,
   Layers,
+  RotateCw,
 } from 'lucide-react';
 import Interactive2DLab from '../../engine/compositor/Interactive2DLab';
 import LayerStack25DViewer from '../../engine/compositor/LayerStack25DViewer';
-import GarmentCanvas2DStage from '../../engine/compositor/GarmentCanvas2DStage';
 import UserDesignGalleryModal from './UserDesignGalleryModal';
+import UserAuthModal from '../auth/UserAuthModal';
+import { useAuth } from '../../engine/auth/authManager';
 import {
   LIGA_MX_PRESETS,
   WORLD_CUP_PRESETS,
@@ -248,11 +251,16 @@ export default function HybridStudioWorkspace({
   onSwitchToStorefront,
 }) {
   const [activeTab, setActiveTab] = useState('design'); // 'design' | 'colors' | 'text' | 'logo'
-  const [viewportMode, setViewportMode] = useState('3d'); // '3d' (CAD 3D Textil PBR) | '2d' (Plano de corte)
+  const [viewportMode, setViewportMode] = useState('3d'); // '3d' (CAD 3D Textil PBR)
   const [patternCategoryFilter, setPatternCategoryFilter] = useState('Todos');
   const [cameraPreset, setCameraPreset] = useState('three_quarter');
   const [autoRotate, setAutoRotate] = useState(false);
   const [panel2D, setPanel2D] = useState('front');
+
+  // Control de autenticación y privilegios
+  const { currentUser, isAdmin, isAuthenticated, setAdminMode } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const pendingAuthActionRef = useRef(null);
 
   // Estados del Muestreo 3D Pro y Recuadros Deportivos
   const [proPatternId, setProPatternId] = useState(design.proPatternId || 'ATLETIQ_PRO_01');
@@ -781,7 +789,7 @@ export default function HybridStudioWorkspace({
   };
 
   // --- Guardado de Bocetos Locales & Galería Interna ---
-  const handleSaveDraft = () => {
+  const executeSaveDraft = () => {
     let thumb = null;
     try {
       if (canvasSnapshotRef?.current) {
@@ -826,6 +834,15 @@ export default function HybridStudioWorkspace({
       localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(next));
     } catch {}
     showToast(`¡Diseño guardado en tu Galería Personal!`);
+  };
+
+  const handleSaveDraft = () => {
+    if (!isAuthenticated) {
+      pendingAuthActionRef.current = 'save_draft';
+      setIsAuthModalOpen(true);
+      return;
+    }
+    executeSaveDraft();
   };
 
   const handleLoadFromGallery = (galleryItem) => {
@@ -1190,34 +1207,38 @@ export default function HybridStudioWorkspace({
           )}
         </div>
 
-        {/* Selector de Modo CAD: 3D CAD ↔ 2D PLANO */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-2xs">
-          <button
-            id="btn-desktop-view-3d"
-            type="button"
-            onClick={() => setViewportMode('3d')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
-              viewportMode === '3d'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
-            }`}
-          >
-            <Box className="w-3.5 h-3.5 text-sky-400" />
-            <span>3D CAD</span>
-          </button>
-          <button
-            id="btn-desktop-view-2d"
-            type="button"
-            onClick={() => setViewportMode('2d')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
-              viewportMode === '2d'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5 text-emerald-400" />
-            <span>2D PLANO</span>
-          </button>
+        {/* Estado de Privilegios e Identidad: Administrador Master / Cuenta de Club */}
+        <div className="flex items-center gap-2">
+          {isAdmin ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-900 text-emerald-400 border border-slate-800 text-xs font-black uppercase tracking-wider shadow-2xs">
+              <Shield className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Admin Master</span>
+              <button
+                type="button"
+                onClick={() => setAdminMode(false)}
+                title="Probar vista de cliente (requiere crear cuenta para descargar plantillas)"
+                className="ml-1 text-[9px] text-slate-400 hover:text-white underline cursor-pointer"
+              >
+                (Modo Cliente)
+              </button>
+            </div>
+          ) : isAuthenticated ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-sky-50 text-sky-800 border border-sky-200 text-xs font-bold shadow-2xs">
+              <span>👤 {currentUser?.name}</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                pendingAuthActionRef.current = null;
+                setIsAuthModalOpen(true);
+              }}
+              className="px-3 py-1.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+            >
+              <Lock className="w-3.5 h-3.5 text-amber-600" />
+              <span>Cuenta de Club</span>
+            </button>
+          )}
         </div>
 
         {/* Acciones Rápidas: Plantilla 2D y Galería Desktop */}
@@ -1268,41 +1289,13 @@ export default function HybridStudioWorkspace({
           </button>
         </div>
 
-        {/* Toggle 3D / 2D en Móvil */}
-        <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-xl border border-slate-200 shrink-0">
-          <button
-            id="btn-mobile-view-3d"
-            type="button"
-            onClick={() => setViewportMode('3d')}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
-              viewportMode === '3d'
-                ? 'bg-slate-900 text-white shadow-2xs'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            3D
-          </button>
-          <button
-            id="btn-mobile-view-2d"
-            type="button"
-            onClick={() => setViewportMode('2d')}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
-              viewportMode === '2d'
-                ? 'bg-slate-900 text-white shadow-2xs'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            2D
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             id="btn-mobile-header-production-mold"
             onClick={() => setIsProductionMoldModalOpen(true)}
             title="Ver Plantilla 2D"
-            className="px-2 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+            className="px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
           >
             <Scissors className="w-3.5 h-3.5 text-emerald-600" />
             <span>Plantilla</span>
@@ -1346,44 +1339,7 @@ export default function HybridStudioWorkspace({
               : 'h-[44vh] sm:h-[48vh] lg:h-auto lg:flex-1 shrink-0 lg:shrink'
           }`}
         >
-          {/* Conmutador flotante táctil móvil 3D / 2D directo en el visor */}
-          <div className="sm:hidden absolute top-2.5 left-2.5 z-30 pointer-events-auto flex items-center gap-1 bg-slate-900/90 text-white p-1 rounded-full border border-slate-700/80 shadow-lg backdrop-blur-md">
-            <button
-              type="button"
-              onClick={() => setViewportMode('3d')}
-              className={`px-3 py-1 rounded-full text-[10px] font-black transition-all flex items-center gap-1 ${
-                viewportMode === '3d'
-                  ? 'bg-sky-500 text-slate-950 shadow-xs'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <Box className="w-3 h-3" />
-              <span>3D CAD</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewportMode('2d')}
-              className={`px-3 py-1 rounded-full text-[10px] font-black transition-all flex items-center gap-1 ${
-                viewportMode === '2d'
-                  ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <Eye className="w-3 h-3" />
-              <span>2D PLANO</span>
-            </button>
-          </div>
-
-          {viewportMode === '2d' ? (
-            <GarmentCanvas2DStage
-              design={design}
-              activePlayer={activePlayer}
-              artworkRegistry={artworkRegistry}
-              selectedPanel={panel2D}
-              onChangePanel={setPanel2D}
-              onOpenProductionMold={() => setIsProductionMoldModalOpen(true)}
-            />
-          ) : isFaux3DAccessory ? (
+          {isFaux3DAccessory ? (
             <LayerStack25DViewer
               design={design}
               product={currentProduct}
@@ -4476,6 +4432,19 @@ export default function HybridStudioWorkspace({
         canvasSnapshotRef={canvasSnapshotRef}
       />
 
+      {/* ==================== MODAL 8: REGISTRO / ACCESO DE CUENTA DE CLUB ==================== */}
+      <UserAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => {
+          if (pendingAuthActionRef.current === 'save_draft') {
+            executeSaveDraft();
+          }
+          pendingAuthActionRef.current = null;
+        }}
+        actionLabel="guardar y registrar tus diseños de equipaciones"
+      />
+
       {/* ==================== BURBUJA FLOTANTE TÁCTIL (FAB) EXCLUSIVA PARA MÓVIL ==================== */}
       {/* Botón flotante siempre visible y cómodo al pulgar en la esquina inferior derecha */}
       <div className="sm:hidden fixed bottom-5 right-4 z-40 pointer-events-auto">
@@ -4556,28 +4525,28 @@ export default function HybridStudioWorkspace({
                 </div>
               </button>
 
-              {/* 2. Conmutar Vista 3D / 2D */}
+              {/* 2. Auto-Rotación 3D 360° */}
               <button
                 type="button"
                 onClick={() => {
-                  setViewportMode(viewportMode === '3d' ? '2d' : '3d');
+                  setAutoRotate((r) => !r);
                   setIsMobileFabOpen(false);
                 }}
                 className="p-3 rounded-2xl bg-emerald-50/90 hover:bg-emerald-100/90 border border-emerald-200/90 text-left flex flex-col justify-between gap-1 transition-colors cursor-pointer group"
               >
                 <div className="flex items-center justify-between">
                   <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                    {viewportMode === '3d' ? <Eye className="w-4 h-4" /> : <Box className="w-4 h-4" />}
+                    <RotateCw className={`w-4 h-4 ${autoRotate ? 'animate-spin' : ''}`} />
                   </div>
                   <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full">
-                    {viewportMode === '3d' ? 'Ver 2D' : 'Ver 3D'}
+                    {autoRotate ? 'Girando' : 'Girar 360°'}
                   </span>
                 </div>
                 <div>
                   <div className="text-xs font-black text-slate-900">
-                    {viewportMode === '3d' ? 'Vista 2D Plano' : 'Vista 3D CAD'}
+                    Inspección 3D
                   </div>
-                  <div className="text-[10px] text-slate-500">Alternar lienzo</div>
+                  <div className="text-[10px] text-slate-500">Giro continuo</div>
                 </div>
               </button>
 

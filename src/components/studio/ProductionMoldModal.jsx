@@ -7,6 +7,8 @@ import {
   preloadDesignArtworkImages,
   MOLD_CONSTANTS,
 } from '../../engine/compositor/moldFlatteningEngine';
+import { useAuth } from '../../engine/auth/authManager';
+import UserAuthModal from '../auth/UserAuthModal';
 
 /**
  * ATLETIQ — ProductionMoldModal
@@ -41,6 +43,11 @@ export default function ProductionMoldModal({
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
   const [directTextures, setDirectTextures] = useState(null);
+
+  // Control de autenticación y privilegios de descarga
+  const { currentUser, isAdmin, isAuthenticated, setAdminMode } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const pendingActionRef = useRef(null);
 
   const containerRef = useRef(null);
 
@@ -99,7 +106,7 @@ export default function ProductionMoldModal({
   if (!isOpen) return null;
 
   // Descarga directa SVG 1:1 con logotipos PNG embebidos en base64
-  const handleDownloadSvg = async () => {
+  const executeDownloadSvg = async () => {
     const textures = directTextures || (await composeDirect3DTexturesAsync(design, activePlayer, artworkRegistry));
     downloadProductionMoldSvg(design, activePlayer, null, {
       showCutLines,
@@ -110,8 +117,17 @@ export default function ProductionMoldModal({
     });
   };
 
+  const handleDownloadSvg = () => {
+    if (!isAuthenticated) {
+      pendingActionRef.current = 'svg';
+      setIsAuthModalOpen(true);
+      return;
+    }
+    executeDownloadSvg();
+  };
+
   // Descarga como imagen PNG de alta resolución mediante Canvas
-  const handleDownloadPng = async () => {
+  const executeDownloadPng = async () => {
     setIsExporting(true);
     try {
       const textures = directTextures || (await composeDirect3DTexturesAsync(design, activePlayer, artworkRegistry));
@@ -157,6 +173,15 @@ export default function ProductionMoldModal({
     }
   };
 
+  const handleDownloadPng = () => {
+    if (!isAuthenticated) {
+      pendingActionRef.current = 'png';
+      setIsAuthModalOpen(true);
+      return;
+    }
+    executeDownloadPng();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in select-none">
       <div className="relative w-full max-w-7xl h-[94vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
@@ -185,6 +210,35 @@ export default function ProductionMoldModal({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {isAdmin ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
+                <span>🛡️ Admin Master</span>
+                <button
+                  type="button"
+                  onClick={() => setAdminMode(false)}
+                  title="Alternar a modo cliente para probar el registro"
+                  className="ml-1 text-[9px] underline opacity-70 hover:opacity-100 cursor-pointer"
+                >
+                  (Probar Cliente)
+                </button>
+              </div>
+            ) : isAuthenticated ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-300 text-[10px] font-bold">
+                <span>👤 {currentUser?.name || 'Cliente'}</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  pendingActionRef.current = 'svg';
+                  setIsAuthModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-bold hover:bg-amber-500/30 transition-colors cursor-pointer"
+              >
+                <span>🔒 Cuenta Requerida</span>
+              </button>
+            )}
+
             <button
               id="btn-close-production-mold"
               type="button"
@@ -356,6 +410,18 @@ export default function ProductionMoldModal({
           </div>
         </div>
       </div>
+
+      {/* Modal de Registro / Login para Clientes Externos */}
+      <UserAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => {
+          if (pendingActionRef.current === 'svg') executeDownloadSvg();
+          else if (pendingActionRef.current === 'png') executeDownloadPng();
+          pendingActionRef.current = null;
+        }}
+        actionLabel="descargar la plantilla técnica de producción"
+      />
     </div>
   );
 }

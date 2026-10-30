@@ -144,6 +144,7 @@ export async function loadFishDesignMasks(fishUrl) {
     while (offset + 30 <= bytes.byteLength) {
       const sig = view.getUint32(offset, true);
       if (sig !== 0x04034b50) break;
+      const compressionMethod = view.getUint16(offset + 8, true);
       const compSize = view.getUint32(offset + 18, true);
       const nameLen = view.getUint16(offset + 26, true);
       const extraLen = view.getUint16(offset + 28, true);
@@ -155,7 +156,21 @@ export async function loadFishDesignMasks(fishUrl) {
       if (!rawName.toLowerCase().endsWith('.png')) continue;
       const partName = rawName.replace(/\.png$/i, '');
 
-      const blob = new Blob([pngSlice], { type: 'image/png' });
+      let finalPngBytes = pngSlice;
+      if (compressionMethod === 8 && typeof DecompressionStream !== 'undefined') {
+        try {
+          const ds = new DecompressionStream('deflate-raw');
+          const writer = ds.writable.getWriter();
+          writer.write(pngSlice);
+          writer.close();
+          const decompressedBuf = await new Response(ds.readable).arrayBuffer();
+          finalPngBytes = new Uint8Array(decompressedBuf);
+        } catch (decompErr) {
+          console.warn(`[fishPartCompositor] Fallback descompresión en ${rawName}:`, decompErr);
+        }
+      }
+
+      const blob = new Blob([finalPngBytes], { type: 'image/png' });
       let drawable;
       if (typeof createImageBitmap !== 'undefined') {
         try {
