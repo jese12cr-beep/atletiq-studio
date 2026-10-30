@@ -36,6 +36,10 @@ import {
   Menu,
   User,
   Share2,
+  Undo2,
+  Redo2,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import Interactive2DLab from '../../engine/compositor/Interactive2DLab';
 import LayerStack25DViewer from '../../engine/compositor/LayerStack25DViewer';
@@ -252,7 +256,8 @@ export default function HybridStudioWorkspace({
   const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
   const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [isGarmentMenuOpen, setIsGarmentMenuOpen] = useState(true);
+  const [isGarmentMenuOpen, setIsGarmentMenuOpen] = useState(false);
+  const [isMobilePanelCollapsed, setIsMobilePanelCollapsed] = useState(false);
   const [isMexicoKitsModalOpen, setIsMexicoKitsModalOpen] = useState(false);
   const [isProductionMoldModalOpen, setIsProductionMoldModalOpen] = useState(false);
   const [garmentMenuMenSection, setGarmentMenuMenSection] = useState('custom'); // 'custom' | 'ligamx'
@@ -980,8 +985,8 @@ export default function HybridStudioWorkspace({
 
   return (
     <div className="h-dvh flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans">
-      {/* 1. CABECERA MULTI-PRENDA (MÓDULOS CABALLERO & DAMA: BALONCESTO, FÚTBOL, CHAQUETAS SOFTSHELL) */}
-      <header className="shrink-0 px-3 sm:px-5 py-2.5 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 shadow-xs z-30">
+      {/* 1. CABECERA DESKTOP (PANTALLAS MEDIANAS Y GRANDES) */}
+      <header className="hidden sm:flex shrink-0 px-3 sm:px-5 py-2.5 bg-white border-b border-slate-200 flex-wrap items-center justify-between gap-2 shadow-xs z-30">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -1080,7 +1085,7 @@ export default function HybridStudioWorkspace({
           )}
         </div>
 
-        {/* Carrito */}
+        {/* Carrito Desktop */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -1089,6 +1094,72 @@ export default function HybridStudioWorkspace({
           >
             <ShoppingBag className="w-4 h-4 text-sky-600" />
             <span>Cesta ({cartCount})</span>
+          </button>
+        </div>
+      </header>
+
+      {/* 1. CABECERA MOBILE COMPACTA (1 SOLA FILA LIMPIA DE 48PX) */}
+      <header className="flex sm:hidden shrink-0 h-12 px-2.5 bg-white border-b border-slate-200 items-center justify-between z-30 shadow-2xs">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <button
+            type="button"
+            onClick={onSwitchToStorefront}
+            title="Volver a la tienda"
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsGarmentMenuOpen(true)}
+            className="px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-900 flex items-center gap-1 truncate cursor-pointer shadow-2xs max-w-[150px]"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <span className="truncate">{currentProduct.shortName || currentProduct.name}</span>
+            <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            title="Deshacer"
+            className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 disabled:opacity-25 cursor-pointer"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={!canRedo}
+            title="Rehacer"
+            className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 disabled:opacity-25 cursor-pointer"
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsProductionMoldModalOpen(true)}
+            title="Ver Plantilla 2D"
+            className="p-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 cursor-pointer"
+          >
+            <Scissors className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onOpenCart}
+            title="Ver Cesta"
+            className="relative p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-sky-600 text-white text-[9px] font-black flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -1104,7 +1175,13 @@ export default function HybridStudioWorkspace({
       {/* 2. CUERPO CENTRAL OWAYO EN 2 COLUMNAS: ESCENARIO INTERACTIVO (IZQ) + PANEL DE 4 PESTAÑAS (DER) */}
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
         {/* ESCENARIO 3D INTERACTIVO CON ILUMINACIÓN PROFESIONAL DE ESTUDIO */}
-        <main className="flex-1 min-h-[340px] relative bg-[radial-gradient(circle_at_50%_38%,#ffffff_0%,#f1f5f9_60%,#e2e8f0_100%)] overflow-hidden flex flex-col">
+        <main
+          className={`relative bg-[radial-gradient(circle_at_50%_38%,#ffffff_0%,#f1f5f9_60%,#e2e8f0_100%)] overflow-hidden flex flex-col transition-all duration-300 ${
+            isMobilePanelCollapsed
+              ? 'flex-1 h-full'
+              : 'h-[44vh] sm:h-[48vh] lg:h-auto lg:flex-1 shrink-0 lg:shrink'
+          }`}
+        >
           {isFaux3DAccessory ? (
             <LayerStack25DViewer
               design={design}
@@ -1166,78 +1243,89 @@ export default function HybridStudioWorkspace({
         </main>
 
         {/* PANEL LATERAL DERECHO OWAYO (`Diseño | Colores | Text | Logo`) */}
-        <aside className="w-full lg:w-[430px] xl:w-[465px] shrink-0 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col min-h-0 max-h-[55vh] lg:max-h-none shadow-xs">
-          {/* Cabecera del Panel Owayo: Nombre Prenda + Enlace 'Cambiar producto' + Iconos (Menú, Usuario, Cesta) */}
-          <div className="shrink-0 p-4 pb-3 border-b border-slate-200 bg-white">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h2 className="text-lg font-black text-slate-900 tracking-tight leading-tight truncate">
-                  {currentProduct.name}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setIsGarmentMenuOpen(true)}
-                  className="mt-0.5 text-xs font-semibold text-slate-600 hover:text-slate-900 underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Cambiar producto</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-                </button>
+        <aside
+          className={`w-full lg:w-[430px] xl:w-[465px] shrink-0 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col min-h-0 shadow-md z-20 transition-all duration-300 ${
+            isMobilePanelCollapsed
+              ? 'h-13 overflow-hidden'
+              : 'flex-1 lg:flex-initial lg:h-auto lg:max-h-none'
+          }`}
+        >
+          {/* Cabecera del Panel Owayo: Nombre Prenda + Enlace 'Cambiar producto' + Toggle Mobile */}
+          <div className="shrink-0 px-3.5 py-2.5 sm:p-4 sm:pb-3 border-b border-slate-200 bg-white">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 tracking-tight leading-tight truncate">
+                    {currentProduct.name}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsGarmentMenuOpen(true)}
+                    className="text-[11px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-200 hover:bg-sky-100 flex items-center gap-1 cursor-pointer shrink-0"
+                  >
+                    <span>Cambiar</span>
+                    <ChevronDown className="w-3 h-3 text-sky-600" />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-0.5 shrink-0">
+              {/* Botón expandir/colapsar en móviles */}
+              <div className="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setIsGarmentMenuOpen(true)}
-                  title="Catálogo interactivo de deportes"
-                  className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                  onClick={() => setIsMobilePanelCollapsed((prev) => !prev)}
+                  className="sm:hidden px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer border border-slate-200"
+                  title={isMobilePanelCollapsed ? 'Abrir herramientas de edición' : 'Ver modelo 3D en pantalla completa'}
                 >
-                  <Menu className="w-5 h-5" />
+                  {isMobilePanelCollapsed ? (
+                    <>
+                      <Minimize2 className="w-3.5 h-3.5 text-sky-600" />
+                      <span>Editar</span>
+                    </>
+                  ) : (
+                    <>
+                      <Maximize2 className="w-3.5 h-3.5 text-slate-600" />
+                      <span>Ver 3D</span>
+                    </>
+                  )}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setIsRosterModalOpen(true)}
                   title="Lista de ejemplares y tallas"
-                  className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                  className="hidden sm:flex p-2 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   <User className="w-5 h-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={onOpenCart}
-                  title="Cesta de la compra"
-                  className="relative p-2 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-black flex items-center justify-center">
-                      {cartCount}
-                    </span>
-                  )}
                 </button>
               </div>
             </div>
 
             {/* Pestañas de píldora: [ Diseño ] [ Colores ] [ Text ] [ Logo ] */}
-            <div className="flex items-center gap-2 mt-3.5">
-              {OWAYO_TABS.map((t) => {
-                const isActive = activeTab === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    id={`tab-pill-${t.id}`}
-                    type="button"
-                    onClick={() => setActiveTab(t.id)}
-                    className={`flex-1 py-1.5 px-2.5 rounded-full text-xs transition-all text-center cursor-pointer ${
-                      isActive
-                        ? 'bg-white text-slate-900 border-2 border-slate-900 shadow-sm font-black'
-                        : 'bg-slate-100/90 text-slate-600 hover:bg-slate-200/80 hover:text-slate-900 border border-slate-200/60 font-semibold'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                );
-              })}
-            </div>
+            {!isMobilePanelCollapsed && (
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-2.5 sm:mt-3.5">
+                {OWAYO_TABS.map((t) => {
+                  const isActive = activeTab === t.id;
+                  const Icon = t.icon;
+                  return (
+                    <button
+                      key={t.id}
+                      id={`tab-pill-${t.id}`}
+                      type="button"
+                      onClick={() => setActiveTab(t.id)}
+                      className={`flex-1 py-1.5 sm:py-2 px-2 rounded-xl sm:rounded-full text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        isActive
+                          ? 'bg-slate-900 text-white shadow-xs font-bold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 border border-slate-200/60 font-semibold'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{t.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Contenido desplazable de la pestaña activa */}
@@ -2992,58 +3080,59 @@ export default function HybridStudioWorkspace({
           </div>
 
           {/* BARRA INFERIOR OWAYO DENTRO DEL PANEL LATERAL */}
-          <div className="shrink-0 border-t border-slate-200 bg-white p-3 sm:p-4 space-y-3">
-            {/* 5 Acciones: Guardar | Mis bocetos | Ejemplares | Revisión del diseño | Compartir diseño */}
-            <div className="grid grid-cols-5 gap-1 text-center">
+          <div className="shrink-0 border-t border-slate-200 bg-white p-2.5 sm:p-4 space-y-2.5 sm:space-y-3">
+            {/* Acciones Secundarias: Guardar | Bocetos | Ejemplares | Revisión | Compartir */}
+            <div className="grid grid-cols-5 sm:grid-cols-6 gap-1 text-center">
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
                 title="Guardar diseño actual"
               >
-                <Save className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Guardar</span>
+                <Save className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Guardar</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsDraftsModalOpen(true)}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
                 title="Abrir mis bocetos guardados"
               >
-                <FolderOpen className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Mis bocetos</span>
+                <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Bocetos</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsRosterModalOpen(true)}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
                 title="Lista de ejemplares y tallas"
               >
-                <Users className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Ejemplares</span>
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Ejemplares</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsReviewModalOpen(true)}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
                 title="Revisar resolución y reglas de costura"
               >
                 <ClipboardCheck
-                  className={`w-5 h-5 group-hover:scale-110 transition-transform ${
+                  className={`w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform ${
                     designReviewChecks.hasWarnings ? 'text-amber-500' : 'text-slate-600 group-hover:text-slate-900'
                   }`}
                 />
-                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Revisión</span>
+                <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Revisión</span>
               </button>
 
+              {/* Botón Plantilla 2D: Solo visible en sm+ (en móvil ya está en la barra superior fija de 48px) */}
               <button
                 type="button"
                 id="btn-open-production-mold"
                 onClick={() => setIsProductionMoldModalOpen(true)}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-blue-700 hover:text-blue-950 hover:bg-blue-50 transition-colors cursor-pointer group border border-blue-200/80 shadow-xs"
+                className="hidden sm:flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-blue-700 hover:text-blue-950 hover:bg-blue-50 transition-colors cursor-pointer group border border-blue-200/80 shadow-xs"
                 title="Previsualizar plantilla técnica de confección y corte a escala real 1:1"
               >
                 <Scissors className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
@@ -3058,28 +3147,28 @@ export default function HybridStudioWorkspace({
                   }
                   showToast('Enlace de diseño copiado para compartir');
                 }}
-                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
+                className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
                 title="Compartir enlace de este diseño"
               >
-                <Share2 className="w-5 h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Compartir</span>
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Compartir</span>
               </button>
             </div>
 
             {/* Resumen de Precio y Botón Prominente Añadir a la Cesta */}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
               <div>
-                <div className="text-[11px] text-slate-500 font-medium">
+                <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight">
                   {totalUnits} uds • ${unitPrice.toFixed(2)} c/u
                 </div>
-                <div className="text-base font-black text-slate-900">
+                <div className="text-sm sm:text-base font-black text-slate-900 leading-tight">
                   ${totalPrice.toFixed(2)} USD
                 </div>
               </div>
               <button
                 type="button"
                 onClick={onOpenProductionModal}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Añadir a la cesta</span>

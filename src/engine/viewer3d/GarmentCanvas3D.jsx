@@ -441,9 +441,22 @@ export default function GarmentCanvas3D({
 
     const scene = new THREE.Scene();
 
+    const computeFovForAspect = (aspect) => {
+      if (aspect < 0.8) {
+        return Math.min(48, CAMERA_STANDARD_FOV / (aspect * 0.94));
+      } else if (aspect < 1.0) {
+        return Math.min(38, CAMERA_STANDARD_FOV / (aspect * 0.98));
+      }
+      return CAMERA_STANDARD_FOV;
+    };
+
+    const initW = Math.max(1, container.clientWidth);
+    const initH = Math.max(1, container.clientHeight);
+    const initAspect = initW / initH;
+
     const camera = new THREE.PerspectiveCamera(
-      CAMERA_STANDARD_FOV,
-      Math.max(1, container.clientWidth) / Math.max(1, container.clientHeight),
+      computeFovForAspect(initAspect),
+      initAspect,
       0.1,
       60
     );
@@ -620,7 +633,9 @@ export default function GarmentCanvas3D({
     const ro = new ResizeObserver((entries) => {
       const rect = entries[0]?.contentRect;
       if (!rect || rect.width === 0 || rect.height === 0) return;
-      camera.aspect = rect.width / rect.height;
+      const aspect = rect.width / rect.height;
+      camera.aspect = aspect;
+      camera.fov = computeFovForAspect(aspect);
       camera.updateProjectionMatrix();
       renderer.setSize(rect.width, rect.height);
     });
@@ -1127,7 +1142,7 @@ export default function GarmentCanvas3D({
       ];
 
   return (
-    <div ref={stageWrapperRef} className="garment-3d-stage relative w-full h-full min-h-[420px]">
+    <div ref={stageWrapperRef} className="garment-3d-stage relative w-full h-full min-h-[280px] sm:min-h-[400px]">
       <div
         ref={mountRef}
         tabIndex={0}
@@ -1146,24 +1161,24 @@ export default function GarmentCanvas3D({
         }`}
       />
 
-      {/* Insignia superior izquierda Owayo: Logo + configurador ATLETIQ 3D */}
-      <div className="absolute top-4 left-4 flex items-center gap-2.5 z-10 select-none">
-        <div className="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center font-black text-xs italic tracking-tighter shadow-sm">
+      {/* Insignia superior izquierda: Solo en pantallas medianas y grandes */}
+      <div className="hidden sm:flex absolute top-4 left-4 items-center gap-2 z-10 select-none">
+        <div className="w-6 h-6 rounded-md bg-slate-900 text-white flex items-center justify-center font-black text-[10px] italic tracking-tighter shadow-sm">
           AQ
         </div>
         <span className="text-xs font-bold text-slate-500 tracking-wide">
-          configurador ATLETIQ 3D
+          AtletiQ 3D Studio
         </span>
       </div>
 
-      {/* Selector rápido de vistas 3D + Botón Exterior/Interior (`#trikotwenderbutton`) */}
-      <div className="absolute top-4 right-4 flex flex-wrap items-center justify-end gap-1 max-w-[75%] z-10">
+      {/* Selector rápido de vistas 3D: Barra horizontal centrada en móvil, a la derecha en desktop */}
+      <div className="absolute top-2.5 sm:top-4 left-2 right-2 sm:left-auto sm:right-4 flex items-center justify-center sm:justify-end gap-1 z-10 overflow-x-auto no-scrollbar py-0.5">
         {quickCameraButtons.map((btn) => (
           <button
             key={btn.id}
             type="button"
             onClick={() => onChangeCameraPreset?.(btn.id)}
-            className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all border cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold transition-all border cursor-pointer shrink-0 ${
               cameraPreset === btn.id
                 ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                 : 'bg-white/90 text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-900'
@@ -1174,10 +1189,10 @@ export default function GarmentCanvas3D({
         ))}
       </div>
 
-      {/* Barra flotante lateral `#toolbox` idéntica a Owayo (`Zoom +`, `Zoom -`, `Girar ↺/↻`, `Voltear Espalda`) */}
+      {/* Barra flotante lateral `#toolbox`: Oculta en móviles para dar 100% de área táctil sin interferencias */}
       <div
         aria-label="Herramientas de visor 3D"
-        className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 p-1.5 z-10"
+        className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 flex-col gap-3 p-1.5 z-10"
       >
         <button
           type="button"
