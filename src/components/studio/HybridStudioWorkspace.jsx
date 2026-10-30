@@ -1737,8 +1737,8 @@ export default function HybridStudioWorkspace({
                       ))}
                     </div>
 
-                    {/* Cuadrícula de Recuadros Deportivos de Personalización */}
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                    {/* Cuadrícula de Recuadros Deportivos de Personalización (Sin miniaturas de camiseta) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2">
                       {availableFishDesigns
                         .filter((d) => {
                           if (patternCategoryFilter === 'Todos') return true;
@@ -1748,67 +1748,46 @@ export default function HybridStudioWorkspace({
                           const isSelected = design.patternId === dMeta.id && !activeMexicoKitId;
                           const catLabel = dMeta.category || 'Clásico';
                           return (
-                            <div
+                            <button
                               key={dMeta.id}
-                              role="button"
-                              tabIndex={0}
+                              type="button"
                               onClick={() => {
                                 setActiveMexicoKitId(null);
                                 onCommitDesign({ ...design, patternId: dMeta.id, mexicoKitId: null }, true);
                                 setToastMessage(`Estilo ${dMeta.name} aplicado`);
                                 setTimeout(() => setToastMessage(''), 2000);
                               }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                  e.preventDefault();
-                                  setActiveMexicoKitId(null);
-                                  onCommitDesign({ ...design, patternId: dMeta.id, mexicoKitId: null }, true);
-                                }
-                              }}
-                              className={`group relative flex flex-col rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 text-left border ${
+                              className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-1.5 cursor-pointer relative group ${
                                 isSelected
-                                  ? 'border-2 border-emerald-500 bg-emerald-50/20 shadow-md ring-2 ring-emerald-500/20'
-                                  : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                                  ? 'border-2 border-emerald-500 bg-emerald-50/40 shadow-xs ring-2 ring-emerald-500/20'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                               }`}
                             >
-                              {/* Badge de Selección Activa */}
-                              {isSelected && (
-                                <div className="absolute top-2 right-2 z-10 bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                  <span>Activo</span>
-                                </div>
-                              )}
-
-                              {/* Badge de Categoría */}
-                              <div className="absolute top-2 left-2 z-10 bg-slate-900/80 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider">
-                                {catLabel}
+                              <div className="flex items-center justify-between gap-1 w-full">
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                                  {catLabel}
+                                </span>
+                                {isSelected ? (
+                                  <span className="text-[10px] font-black text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                    <span>Activo</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-mono text-slate-400 font-medium">
+                                    {dMeta.baseColors?.length || 3} zonas
+                                  </span>
+                                )}
                               </div>
 
-                              {/* Miniatura Visual Reactiva */}
-                              <div className="relative aspect-square w-full bg-gradient-to-b from-slate-50 to-slate-100 p-2 flex items-center justify-center overflow-hidden">
-                                <JerseyThumbnailMiniature
-                                  kit={{
-                                    id: dMeta.id,
-                                    name: dMeta.name,
-                                    colorZones: design.colorZones,
-                                    showShield: false,
-                                  }}
-                                  size={72}
-                                  className="group-hover:scale-106 transition-transform duration-200"
-                                />
+                              <div className="text-xs font-black text-slate-900 group-hover:text-emerald-700 transition-colors truncate w-full">
+                                {dMeta.name}
                               </div>
 
-                              {/* Datos del Recuadro Deportivo */}
-                              <div className="p-2.5 bg-white flex flex-col gap-0.5 border-t border-slate-100">
-                                <div className="text-xs font-black text-slate-900 leading-tight line-clamp-1 group-hover:text-emerald-700 transition-colors">
-                                  {dMeta.name}
-                                </div>
-                                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
-                                  <span>{dMeta.baseColors?.length || 3} Zonas</span>
-                                  <span className="text-slate-400 font-mono text-[9px]">3D CAD</span>
-                                </div>
+                              <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium w-full pt-1 border-t border-slate-100">
+                                <span className="text-[9px] font-mono text-slate-400">corte CAD</span>
+                                <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded font-mono">3D</span>
                               </div>
-                            </div>
+                            </button>
                           );
                         })}
                     </div>
