@@ -95,9 +95,9 @@ export default function CartDrawer({
         <div>
           <div className="flex items-center justify-between pb-4 border-b border-slate-200">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-sky-600" />
+              <CheckCircle2 className="w-5 h-5 text-sky-600" />
               <h2 id="cart-title" className="text-xl font-black text-slate-900">
-                Tu Carrito ({totalQuantity})
+                Tu Pedido ({totalQuantity})
               </h2>
             </div>
             <button
@@ -112,10 +112,10 @@ export default function CartDrawer({
           <div className="overflow-y-auto max-h-[calc(100vh-320px)] my-4 space-y-3 pr-1">
             {items.length === 0 ? (
               <div className="text-center py-16">
-                <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm font-bold text-slate-700">Tu carrito está vacío</p>
+                <CheckCircle2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-sm font-bold text-slate-700">No hay pedidos agregados</p>
                 <p className="text-xs text-slate-500 mt-1">
-                  Personaliza una camiseta o selecciona un artículo para comenzar.
+                  Personaliza una equipación en el diseñador 3D para comenzar.
                 </p>
               </div>
             ) : (

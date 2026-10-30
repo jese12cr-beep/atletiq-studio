@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Download, Copy, Check, Scissors, ShoppingBag, Database, Layers } from 'lucide-react';
+import { X, Download, Copy, Check, Scissors, ShoppingBag, Database, Layers, CheckCircle2 } from 'lucide-react';
 import {
   generateSublimationCutSheetSVG,
   buildShopifyAndManufacturingBundle,
@@ -307,8 +307,8 @@ export default function ProductionPayloadModal({
             }}
             className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2"
           >
-            <ShoppingBag className="w-4 h-4" />
-            Confirmar y Enviar Lote al Carrito
+            <CheckCircle2 className="w-4 h-4" />
+            Confirmar y Finalizar Pedido de Equipación
           </button>
         </div>
       </div>

@@ -274,6 +274,7 @@ export default function HybridStudioWorkspace({
   const [isMexicoKitsModalOpen, setIsMexicoKitsModalOpen] = useState(false);
   const [isProductionMoldModalOpen, setIsProductionMoldModalOpen] = useState(false);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [isMobileFabOpen, setIsMobileFabOpen] = useState(false);
   const [activeLogoCategory, setActiveLogoCategory] = useState('ligamx'); // 'ligamx' | 'mundial' | 'vector'
   const [galleryCount, setGalleryCount] = useState(() => {
     try {
@@ -1184,7 +1185,7 @@ export default function HybridStudioWorkspace({
           </button>
         </div>
 
-        {/* Acciones Rápidas: Galería y Carrito Desktop */}
+        {/* Acciones Rápidas: Galería Desktop */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -1194,15 +1195,6 @@ export default function HybridStudioWorkspace({
           >
             <FolderHeart className="w-4 h-4 text-rose-500" />
             <span>Mis Diseños ({galleryCount})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenCart}
-            className="relative px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
-          >
-            <ShoppingBag className="w-4 h-4 text-sky-600" />
-            <span>Cesta ({cartCount})</span>
           </button>
         </div>
       </header>
@@ -1277,40 +1269,6 @@ export default function HybridStudioWorkspace({
           >
             <Redo2 className="w-4 h-4" />
           </button>
-          <button
-            type="button"
-            onClick={() => setIsGalleryModalOpen(true)}
-            title="Mi Galería de Diseños"
-            className="relative p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer"
-          >
-            <FolderHeart className="w-4 h-4 text-rose-500" />
-            {galleryCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
-                {galleryCount}
-              </span>
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsProductionMoldModalOpen(true)}
-            title="Ver Plantilla 2D"
-            className="p-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 cursor-pointer"
-          >
-            <Scissors className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onOpenCart}
-            title="Ver Cesta"
-            className="relative p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-sky-600 text-white text-[9px] font-black flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </button>
         </div>
       </header>
 
@@ -1332,6 +1290,34 @@ export default function HybridStudioWorkspace({
               : 'h-[44vh] sm:h-[48vh] lg:h-auto lg:flex-1 shrink-0 lg:shrink'
           }`}
         >
+          {/* Conmutador flotante táctil móvil 3D / 2D PLANO directo en el visor */}
+          <div className="sm:hidden absolute top-2.5 left-2.5 z-30 pointer-events-auto flex items-center gap-1 bg-slate-900/90 text-white p-1 rounded-full border border-slate-700/80 shadow-lg backdrop-blur-md">
+            <button
+              type="button"
+              onClick={() => setViewportMode('3d')}
+              className={`px-3 py-1 rounded-full text-[11px] font-black transition-all flex items-center gap-1.5 ${
+                viewportMode === '3d'
+                  ? 'bg-sky-500 text-slate-950 shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Box className="w-3.5 h-3.5" />
+              <span>3D</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewportMode('2d')}
+              className={`px-3 py-1 rounded-full text-[11px] font-black transition-all flex items-center gap-1.5 ${
+                viewportMode === '2d'
+                  ? 'bg-emerald-500 text-slate-950 shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>2D PLANO</span>
+            </button>
+          </div>
+
           {viewportMode === '2d' ? (
             <GarmentCanvas2DStage
               design={design}
@@ -3318,8 +3304,8 @@ export default function HybridStudioWorkspace({
             )}
           </div>
 
-          {/* BARRA INFERIOR OWAYO DENTRO DEL PANEL LATERAL */}
-          <div className="shrink-0 border-t border-slate-200 bg-white p-2.5 sm:p-4 space-y-2.5 sm:space-y-3">
+          {/* BARRA INFERIOR OWAYO DENTRO DEL PANEL LATERAL: Visible en pantallas sm+ (en móvil se usa la burbuja flotante FAB para evitar saturación visual) */}
+          <div className="hidden sm:block shrink-0 border-t border-slate-200 bg-white p-2.5 sm:p-4 space-y-2.5 sm:space-y-3">
             {/* Acciones Secundarias: Guardar | Bocetos | Ejemplares | Revisión | Compartir */}
             <div className="grid grid-cols-5 sm:grid-cols-6 gap-1 text-center">
               <button
@@ -3366,7 +3352,7 @@ export default function HybridStudioWorkspace({
                 <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Revisión</span>
               </button>
 
-              {/* Botón Plantilla 2D: Solo visible en sm+ (en móvil ya está en la barra superior fija de 48px) */}
+              {/* Botón Plantilla 2D: Solo visible en sm+ */}
               <button
                 type="button"
                 id="btn-open-production-mold"
@@ -3394,7 +3380,7 @@ export default function HybridStudioWorkspace({
               </button>
             </div>
 
-            {/* Resumen de Precio y Botón Prominente Añadir a la Cesta */}
+            {/* Resumen de Precio y Botón Prominente Finalizar Equipación */}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
               <div>
                 <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight">
@@ -3409,8 +3395,8 @@ export default function HybridStudioWorkspace({
                 onClick={onOpenProductionModal}
                 className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
-                <ShoppingBag className="w-4 h-4" />
-                <span>Añadir a la cesta</span>
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Finalizar Equipación</span>
               </button>
             </div>
           </div>
@@ -4356,6 +4342,224 @@ export default function HybridStudioWorkspace({
         onLoadDesignFromGallery={handleLoadFromGallery}
         canvasSnapshotRef={canvasSnapshotRef}
       />
+
+      {/* ==================== BURBUJA FLOTANTE TÁCTIL (FAB) EXCLUSIVA PARA MÓVIL ==================== */}
+      {/* Botón flotante siempre visible y cómodo al pulgar en la esquina inferior derecha */}
+      <div className="sm:hidden fixed bottom-5 right-4 z-40 pointer-events-auto">
+        <button
+          type="button"
+          onClick={() => setIsMobileFabOpen(!isMobileFabOpen)}
+          aria-label="Abrir menú de herramientas y plantilla"
+          className="relative w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl border-2 border-sky-400 flex items-center justify-center cursor-pointer active:scale-95 transition-all group"
+        >
+          {isMobileFabOpen ? (
+            <X className="w-6 h-6 text-white" />
+          ) : (
+            <div className="relative flex items-center justify-center">
+              <Layers className="w-6 h-6 text-sky-400 group-hover:scale-110 transition-transform" />
+              {galleryCount > 0 && (
+                <span className="absolute -top-2.5 -right-2.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center border border-slate-900">
+                  {galleryCount}
+                </span>
+              )}
+            </div>
+          )}
+        </button>
+      </div>
+
+      {/* Menú emergente de la burbuja móvil */}
+      {isMobileFabOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 sm:hidden transition-opacity"
+            onClick={() => setIsMobileFabOpen(false)}
+          />
+          <div className="fixed bottom-22 right-4 left-4 sm:hidden z-50 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 animate-in fade-in slide-in-from-bottom-5 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-black">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                    Herramientas de Estudio
+                  </h3>
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    Acceso rápido y visor de corte
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileFabOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Opciones en rejilla táctil */}
+            <div className="grid grid-cols-2 gap-2 my-3">
+              {/* 1. Plantilla 2D Completa */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProductionMoldModalOpen(true);
+                  setIsMobileFabOpen(false);
+                }}
+                className="p-3 rounded-2xl bg-blue-50/90 hover:bg-blue-100/90 border border-blue-200/90 text-left flex flex-col justify-between gap-1 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                    <Scissors className="w-4 h-4" />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                    Patrón 1:1
+                  </span>
+                </div>
+                <div>
+                  <div className="text-xs font-black text-slate-900">Plantilla 2D</div>
+                  <div className="text-[10px] text-slate-500">Moldes de confección</div>
+                </div>
+              </button>
+
+              {/* 2. Conmutar Vista 3D / 2D */}
+              <button
+                type="button"
+                onClick={() => {
+                  setViewportMode(viewportMode === '3d' ? '2d' : '3d');
+                  setIsMobileFabOpen(false);
+                }}
+                className="p-3 rounded-2xl bg-emerald-50/90 hover:bg-emerald-100/90 border border-emerald-200/90 text-left flex flex-col justify-between gap-1 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                    {viewportMode === '3d' ? <Eye className="w-4 h-4" /> : <Box className="w-4 h-4" />}
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full">
+                    {viewportMode === '3d' ? 'Ver 2D' : 'Ver 3D'}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-xs font-black text-slate-900">
+                    {viewportMode === '3d' ? 'Vista 2D Plano' : 'Vista 3D CAD'}
+                  </div>
+                  <div className="text-[10px] text-slate-500">Alternar lienzo</div>
+                </div>
+              </button>
+
+              {/* 3. Guardar Diseño */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleSaveDraft();
+                  setIsMobileFabOpen(false);
+                }}
+                className="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-800 flex items-center justify-center shrink-0">
+                  <Save className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-slate-900 truncate">Guardar</div>
+                  <div className="text-[10px] text-slate-500 truncate">Guardar diseño</div>
+                </div>
+              </button>
+
+              {/* 4. Mi Galería */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsGalleryModalOpen(true);
+                  setIsMobileFabOpen(false);
+                }}
+                className="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <FolderHeart className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-slate-900 truncate">Mi Galería</div>
+                  <div className="text-[10px] text-slate-500 truncate">{galleryCount} guardados</div>
+                </div>
+              </button>
+
+              {/* 5. Ejemplares / Tallas */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRosterModalOpen(true);
+                  setIsMobileFabOpen(false);
+                }}
+                className="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-800 flex items-center justify-center shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-slate-900 truncate">Ejemplares</div>
+                  <div className="text-[10px] text-slate-500 truncate">{roster.length} jugadores</div>
+                </div>
+              </button>
+
+              {/* 6. Revisión Técnica */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsReviewModalOpen(true);
+                  setIsMobileFabOpen(false);
+                }}
+                className="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <ClipboardCheck className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-slate-900 truncate">Revisión</div>
+                  <div className="text-[10px] text-slate-500 truncate">Costuras y resolución</div>
+                </div>
+              </button>
+            </div>
+
+            {/* Botón Compartir + Finalizar Equipación */}
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-600 px-1">
+                <span>{totalUnits} prendas ({currentProduct.name})</span>
+                <span className="text-slate-900 font-black text-sm">${totalPrice.toFixed(2)} USD</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (navigator.clipboard) {
+                      navigator.clipboard.writeText(window.location.href);
+                    }
+                    showToast('Enlace de diseño copiado para compartir');
+                    setIsMobileFabOpen(false);
+                  }}
+                  className="p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 flex items-center justify-center cursor-pointer"
+                  title="Compartir enlace"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenProductionModal();
+                    setIsMobileFabOpen(false);
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Finalizar Equipación</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

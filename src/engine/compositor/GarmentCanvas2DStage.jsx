@@ -145,12 +145,13 @@ export default function GarmentCanvas2DStage({
         {onOpenProductionMold && (
           <button
             type="button"
+            id="btn-stage-open-production-mold"
             onClick={onOpenProductionMold}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/20 border border-emerald-400/40 backdrop-blur-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/20 border border-emerald-400/40 backdrop-blur-sm transition-all cursor-pointer shrink-0"
             title="Abrir plantilla 1:1 de confección y corte con todas las piezas"
           >
             <Scissors className="w-3.5 h-3.5" />
-            <span>Plantilla Completa</span>
+            <span>Plantilla 2D</span>
           </button>
         )}
       </div>

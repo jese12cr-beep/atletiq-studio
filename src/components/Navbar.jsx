@@ -82,20 +82,6 @@ export default function Navbar({
             <span className="hidden xs:inline">Diseñar</span>
             <span className="hidden sm:inline">Equipación</span>
           </button>
-
-          {/* Cart button */}
-          <button
-            onClick={onOpenCart}
-            className="relative p-2 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer border border-slate-200"
-            title="Ver Cesta"
-          >
-            <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-sky-600 text-white text-[9px] sm:text-[10px] font-black px-1.5 py-0.2 rounded-full shadow">
-                {cartCount}
-              </span>
-            )}
-          </button>
         </div>
       </div>
     </header>
