@@ -13,6 +13,7 @@ import {
   Palette,
   PackageCheck
 } from 'lucide-react';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 const FEATURED_HERO_GARMENTS = [
   {
@@ -25,7 +26,7 @@ const FEATURED_HERO_GARMENTS = [
     cutCode: 'Corte 204m',
     price: '$34.00 USD',
     colors: ['#00875a', '#ffffff', '#101820', '#facc15'],
-    image: './assets/stitch/ghost_mannequin.png',
+    image: resolveAssetUrl('assets/showcase/futbol_f3_jersey.jpg'),
   },
   {
     id: 'basketball_b6_hero',
@@ -37,7 +38,7 @@ const FEATURED_HERO_GARMENTS = [
     cutCode: 'Corte 222m',
     price: '$32.50 USD',
     colors: ['#c8102e', '#101820', '#ffd700', '#ffffff'],
-    image: './assets/stitch/basketball_arena.png',
+    image: resolveAssetUrl('assets/showcase/basket_b6_men.jpg'),
   },
   {
     id: 'jacket_softshell_601m_men',
@@ -49,7 +50,7 @@ const FEATURED_HERO_GARMENTS = [
     cutCode: 'Corte 601m',
     price: '$58.00 USD',
     colors: ['#0f172a', '#0284c7', '#ffffff', '#e11d48'],
-    image: './assets/stitch/football_celebration.png',
+    image: resolveAssetUrl('assets/showcase/jacket_601m_softshell.jpg'),
   },
 ];
 
@@ -166,21 +167,21 @@ export default function Hero({ onStartDesigning }) {
             </div>
 
             {/* Escenario Visual de Prenda */}
-            <div className="relative my-4 aspect-4/3 rounded-2xl bg-gradient-to-b from-slate-50 to-slate-100 border border-slate-100 flex items-center justify-center overflow-hidden group">
+            <div className="relative my-4 aspect-4/3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden group shadow-inner">
               <img
                 src={currentGarment.image}
                 alt={currentGarment.name}
-                className="max-h-[88%] max-w-[88%] object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
 
               {/* Insignia de patronaje */}
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-white/95 border border-slate-200 text-[10px] font-bold text-slate-800 shadow-xs flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-sky-600" />
+              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 text-[10px] font-bold text-white shadow-md flex items-center gap-1.5 backdrop-blur-xs">
+                <Users className="w-3.5 h-3.5 text-sky-400" />
                 <span>Patronaje ♂ y ♀</span>
               </div>
 
               {/* Vista 360 */}
-              <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-slate-900/90 text-white text-[10px] font-mono font-bold shadow-xs flex items-center gap-1.5">
+              <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-slate-900/90 text-white text-[10px] font-mono font-bold shadow-md flex items-center gap-1.5 border border-slate-700/80 backdrop-blur-xs">
                 <RotateCw className="w-3 h-3 text-sky-400" />
                 <span>360° Interactivo</span>
               </div>
@@ -228,6 +229,29 @@ export default function Hero({ onStartDesigning }) {
           </div>
         </div>
 
+      </div>
+
+      {/* BANNER CINEMATOGRÁFICO DE ALTO IMPACTO: ATLETAS DE ÉLITE */}
+      <div className="mt-12 relative rounded-3xl overflow-hidden shadow-xl border border-slate-800 bg-slate-950 group">
+        <div className="relative aspect-16/7 sm:aspect-21/8 min-h-[220px] max-h-[360px] overflow-hidden">
+          <img
+            src={resolveAssetUrl('assets/showcase/hero_athletes_banner.jpg')}
+            alt="Equipaciones Deportivas Oficiales de Competición"
+            className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-end p-6 sm:p-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300 text-[11px] font-black uppercase tracking-wider backdrop-blur-xs w-fit mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+              <span>Grado Profesional de Competición</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-tight">
+              Rendimiento Oficial para Clubes y Academias
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-xl mt-1 hidden sm:block">
+              Fútbol, baloncesto y entrenamiento técnico con tecnología de sublimación térmica indeleble y máxima transpirabilidad para competición.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* 2. LOS 4 PILARES DE SERVICIO OWAYO */}

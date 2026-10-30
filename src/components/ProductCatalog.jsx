@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 const CATALOG_ITEMS = [
   {
@@ -8,7 +9,7 @@ const CATALOG_ITEMS = [
     category: 'futbol',
     gender: 'Hombre / Unisex',
     price: '$34.00 USD',
-    image: './assets/stitch/ghost_mannequin.png',
+    image: resolveAssetUrl('assets/showcase/futbol_f3_jersey.jpg'),
     badge: 'Más Vendido',
     description: 'Tejido transpirable TS-Tex con cuello en V reforzado y sublimación integral de alta definición.',
   },
@@ -18,7 +19,7 @@ const CATALOG_ITEMS = [
     category: 'basket',
     gender: 'Hombre',
     price: '$32.00 USD',
-    image: './assets/stitch/basketball_arena.png',
+    image: resolveAssetUrl('assets/showcase/basket_b6_men.jpg'),
     badge: 'Normativa FIBA',
     description: 'Micromesh K-Tex antibacteriano, tirantes elásticos y panel de ventilación lateral.',
   },
@@ -28,7 +29,7 @@ const CATALOG_ITEMS = [
     category: 'basket',
     gender: 'Mujer (Corte Dama)',
     price: '$32.00 USD',
-    image: './assets/stitch/basketball_arena.png',
+    image: resolveAssetUrl('assets/showcase/basket_b7w_women.jpg'),
     badge: 'Corte Femenino',
     description: 'Patrón anatómico entallado femenino con sisa ergonómica y corte especial para mujer.',
   },
@@ -38,7 +39,7 @@ const CATALOG_ITEMS = [
     category: 'chaquetas',
     gender: 'Hombre',
     price: '$58.00 USD',
-    image: './assets/stitch/football_celebration.png',
+    image: resolveAssetUrl('assets/showcase/jacket_601m_softshell.jpg'),
     badge: 'Staff & Viaje',
     description: 'Microfibra cortavientos con cremallera completa termosellada y bolsillos con cremallera.',
   },
@@ -48,7 +49,7 @@ const CATALOG_ITEMS = [
     category: 'chaquetas',
     gender: 'Mujer (Corte Dama)',
     price: '$58.00 USD',
-    image: './assets/stitch/football_celebration.png',
+    image: resolveAssetUrl('assets/showcase/jacket_601w_women.jpg'),
     badge: 'Corte Femenino',
     description: 'Chaqueta técnica entallada repelente al agua para banquillo, calentamiento y concentración.',
   },
@@ -58,7 +59,7 @@ const CATALOG_ITEMS = [
     category: 'futbol',
     gender: 'Hombre / Unisex',
     price: '$22.00 USD',
-    image: './assets/stitch/ghost_mannequin.png',
+    image: resolveAssetUrl('assets/showcase/shorts_fp3_matchday.jpg'),
     badge: 'A juego con F3',
     description: 'Tejido elástico de alta movilidad con cordón interior y sin costuras laterales molestas.',
   },
@@ -117,16 +118,16 @@ export default function ProductCatalog({ onSelectProduct }) {
             className="group bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-slate-300 hover:shadow-lg transition-all flex flex-col justify-between"
           >
             {/* Visual Image container */}
-            <div className="relative aspect-4/3 overflow-hidden bg-slate-50 flex items-center justify-center p-4">
+            <div className="relative aspect-4/3 overflow-hidden bg-slate-950 flex items-center justify-center">
               <img
                 src={item.image}
                 alt={item.title}
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <span className="absolute top-4 left-4 bg-white/95 border border-slate-200 text-slate-800 text-[11px] font-bold px-3 py-1 rounded-full shadow-xs">
+              <span className="absolute top-4 left-4 bg-slate-900/90 border border-slate-700/80 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-md backdrop-blur-xs">
                 {item.badge}
               </span>
-              <span className="absolute bottom-4 right-4 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full">
+              <span className="absolute bottom-4 right-4 bg-white/95 border border-slate-200 text-slate-950 text-xs font-black px-3 py-1 rounded-full shadow-md">
                 {item.price}
               </span>
             </div>

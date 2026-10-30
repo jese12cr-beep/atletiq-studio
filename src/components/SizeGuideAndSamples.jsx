@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Ruler, Package, Check, Sparkles, Send, ShieldCheck, Info } from 'lucide-react';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 const SIZE_TABLES = {
   men: {
@@ -189,6 +190,18 @@ export default function SizeGuideAndSamples() {
             <p className="text-sm text-slate-600 leading-relaxed">
               Te enviamos una caja con prendas de muestra en diferentes tallas y nuestra carta de 24 colores deportivos impresa en tejido real para que toda la plantilla elija su talla con total seguridad.
             </p>
+
+            {/* Muestra Visual de Alta Calidad */}
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-md aspect-16/10 group bg-slate-950">
+              <img
+                src={resolveAssetUrl('assets/showcase/sample_fabric_box.jpg')}
+                alt="Caja de Muestras Oficial ATLETIQ"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute bottom-2.5 left-2.5 px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 backdrop-blur-xs text-white text-[10px] font-bold shadow-md">
+                📦 Muestrario Oficial con Tejidos y Carta Pantone
+              </div>
+            </div>
 
             <ul className="space-y-2.5 text-xs font-semibold text-slate-700">
               <li className="flex items-center gap-2">
