@@ -20,6 +20,7 @@ export default function ProductionMoldModal({
   design,
   roster = [],
   artworkRegistry = {},
+  onProceedToOrder,
 }) {
   const [selectedPlayerIdx, setSelectedPlayerIdx] = useState(0);
 
@@ -339,6 +340,19 @@ export default function ProductionMoldModal({
               <span>⬇</span>
               <span>Plantilla SVG 1:1</span>
             </button>
+
+            {/* Botón Opcional: Continuar a Pedido */}
+            {onProceedToOrder && (
+              <button
+                type="button"
+                id="btn-proceed-from-mold-to-order"
+                onClick={onProceedToOrder}
+                className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5"
+              >
+                <span>✓</span>
+                <span>Confirmar Equipación</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

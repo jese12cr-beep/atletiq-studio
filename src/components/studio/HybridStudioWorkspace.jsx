@@ -1185,8 +1185,19 @@ export default function HybridStudioWorkspace({
           </button>
         </div>
 
-        {/* Acciones Rápidas: Galería Desktop */}
+        {/* Acciones Rápidas: Plantilla 2D y Galería Desktop */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            id="btn-header-production-mold"
+            onClick={() => setIsProductionMoldModalOpen(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-xs font-black text-emerald-800 flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+            title="Abrir plantilla técnica de confección y corte a escala real 1:1"
+          >
+            <Scissors className="w-4 h-4 text-emerald-600" />
+            <span>Plantilla 2D</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setIsGalleryModalOpen(true)}
@@ -1251,6 +1262,16 @@ export default function HybridStudioWorkspace({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            id="btn-mobile-header-production-mold"
+            onClick={() => setIsProductionMoldModalOpen(true)}
+            title="Ver Plantilla 2D"
+            className="px-2 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+          >
+            <Scissors className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Plantilla</span>
+          </button>
           <button
             type="button"
             onClick={onUndo}
@@ -3352,16 +3373,16 @@ export default function HybridStudioWorkspace({
                 <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Revisión</span>
               </button>
 
-              {/* Botón Plantilla 2D: Solo visible en sm+ */}
+              {/* Botón Plantilla 2D: Acceso directo al pliego 1:1 */}
               <button
                 type="button"
                 id="btn-open-production-mold"
                 onClick={() => setIsProductionMoldModalOpen(true)}
-                className="hidden sm:flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-blue-700 hover:text-blue-950 hover:bg-blue-50 transition-colors cursor-pointer group border border-blue-200/80 shadow-xs"
+                className="flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl text-emerald-800 hover:text-emerald-950 hover:bg-emerald-100/80 transition-colors cursor-pointer group border border-emerald-300 bg-emerald-50/60 shadow-xs"
                 title="Previsualizar plantilla técnica de confección y corte a escala real 1:1"
               >
-                <Scissors className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black tracking-tight text-blue-700 leading-none">Plantilla</span>
+                <Scissors className="w-5 h-5 text-emerald-600 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black tracking-tight text-emerald-800 leading-none">Plantilla 2D</span>
               </button>
 
               <button
@@ -3380,7 +3401,7 @@ export default function HybridStudioWorkspace({
               </button>
             </div>
 
-            {/* Resumen de Precio y Botón Prominente Finalizar Equipación */}
+            {/* Resumen de Precio y Botón Prominente: Ver Plantilla 2D de Confección */}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
               <div>
                 <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight">
@@ -3392,13 +3413,32 @@ export default function HybridStudioWorkspace({
               </div>
               <button
                 type="button"
-                onClick={onOpenProductionModal}
-                className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                id="btn-finalize-production-mold"
+                onClick={() => setIsProductionMoldModalOpen(true)}
+                className="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                title="Abrir plantilla completa 1:1 de corte y confección para presentar o fabricar"
               >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Finalizar Equipación</span>
+                <Scissors className="w-4 h-4 text-emerald-200" />
+                <span>Ver Plantilla 2D (Confección)</span>
               </button>
             </div>
+          </div>
+
+          {/* BARRA INFERIOR EXCLUSIVA PARA MÓVIL: Acceso directo a la Plantilla 2D sin saturación */}
+          <div className="sm:hidden shrink-0 border-t border-slate-200 bg-white p-2.5 flex items-center justify-between gap-3 z-20 shadow-lg">
+            <div className="leading-tight">
+              <div className="text-[10px] text-slate-500 font-bold">{totalUnits} prendas</div>
+              <div className="text-sm font-black text-slate-900">${totalPrice.toFixed(2)} USD</div>
+            </div>
+            <button
+              type="button"
+              id="btn-mobile-open-mold"
+              onClick={() => setIsProductionMoldModalOpen(true)}
+              className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+            >
+              <Scissors className="w-4 h-4 text-emerald-200" />
+              <span>Ver Plantilla 2D</span>
+            </button>
           </div>
         </aside>
       </div>
@@ -4327,6 +4367,10 @@ export default function HybridStudioWorkspace({
         design={design}
         roster={roster}
         artworkRegistry={artworkRegistry}
+        onProceedToOrder={() => {
+          setIsProductionMoldModalOpen(false);
+          onOpenProductionModal?.();
+        }}
       />
 
       {/* ==================== MODAL 7: MI GALERÍA INTERNA DE DISEÑOS GUARDADOS ==================== */}
@@ -4546,14 +4590,15 @@ export default function HybridStudioWorkspace({
 
                 <button
                   type="button"
+                  id="btn-fab-open-mold"
                   onClick={() => {
-                    onOpenProductionModal();
+                    setIsProductionMoldModalOpen(true);
                     setIsMobileFabOpen(false);
                   }}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Finalizar Equipación</span>
+                  <Scissors className="w-4 h-4 text-emerald-200" />
+                  <span>Ver Plantilla 2D (Confección)</span>
                 </button>
               </div>
             </div>

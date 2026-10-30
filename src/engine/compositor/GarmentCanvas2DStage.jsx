@@ -15,6 +15,7 @@ import {
   resolveActiveFishDesignMeta,
   composeGarmentPartCanvas,
 } from './fishPartCompositor';
+import { generateProductionMoldSvgString } from './moldFlatteningEngine';
 import { getDroppablePanelsForProduct, getPartSpec } from '../core/boundingBoxMath';
 import { ENGINE_PRODUCTS } from '../core/designStore';
 
@@ -51,10 +52,28 @@ export default function GarmentCanvas2DStage({
   const [zoomLevel, setZoomLevel] = useState(1);
   const canvasRef = useRef(null);
 
-  const droppablePanels = useMemo(
-    () => getDroppablePanelsForProduct(design.productModelId),
-    [design.productModelId]
-  );
+  const droppablePanels = useMemo(() => {
+    const panels = getDroppablePanelsForProduct(design.productModelId) || [];
+    return [
+      ...panels,
+      { panelId: 'mold', label: '📐 Plantilla Completa 1:1' },
+    ];
+  }, [design.productModelId]);
+
+  const moldSvgMarkup = useMemo(() => {
+    if (currentPanel !== 'mold') return '';
+    try {
+      const svg = generateProductionMoldSvgString(design, activePlayer, {
+        showCutLines: true,
+        showRegistrationMarks: true,
+        showProductionLabels: true,
+        artworkRegistry,
+      });
+      return (svg || '').replace(/^<\?xml[^>]*\?>\s*/i, '');
+    } catch {
+      return '';
+    }
+  }, [currentPanel, design, activePlayer, artworkRegistry]);
 
   useEffect(() => {
     if (selectedPanel && droppablePanels.some((p) => p.panelId === selectedPanel)) {
@@ -82,6 +101,7 @@ export default function GarmentCanvas2DStage({
 
   // Renderizar la pieza 2D activa en el canvas principal
   useEffect(() => {
+    if (currentPanel === 'mold') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -157,22 +177,54 @@ export default function GarmentCanvas2DStage({
       </div>
 
       {/* 2. Escenario Central con Lienzo 2D de la Prenda */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-hidden relative">
-        <div
-          className="relative transition-transform duration-200 origin-center flex items-center justify-center max-h-[88%] max-w-[88%]"
-          style={{ transform: `scale(${zoomLevel})` }}
-        >
-          {/* Sombra y Relieve Textil de la Pieza */}
-          <div className="relative rounded-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-slate-700/60 bg-slate-950/40 backdrop-blur-xs">
-            <canvas
-              ref={canvasRef}
-              className="max-h-[62vh] max-w-[82vw] sm:max-w-[460px] object-contain block"
-            />
+      <div className="flex-1 flex items-center justify-center p-2 sm:p-6 overflow-hidden relative">
+        {currentPanel === 'mold' ? (
+          <div
+            className="w-full max-w-[920px] max-h-[75vh] overflow-y-auto rounded-3xl bg-slate-950/90 border border-slate-700/80 p-3 sm:p-5 shadow-2xl flex flex-col items-center custom-scrollbar"
+            style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center top' }}
+          >
+            <div className="flex items-center justify-between w-full pb-2 mb-2 border-b border-slate-800 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-black text-white uppercase tracking-wider text-[11px] sm:text-xs">
+                  Plantilla de Confección 2D • Escala 1:1 Oficial
+                </span>
+                <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+                  (Frente, Espalda, Cuello y Mangas)
+                </span>
+              </div>
+              {onOpenProductionMold && (
+                <button
+                  type="button"
+                  onClick={onOpenProductionMold}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>Pantalla Completa & Descargas</span>
+                </button>
+              )}
+            </div>
 
-            {/* Sutil brillo textil superior */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
+            <div
+              className="w-full [&>svg]:w-full [&>svg]:h-auto shadow-inner"
+              dangerouslySetInnerHTML={{ __html: moldSvgMarkup }}
+            />
           </div>
-        </div>
+        ) : (
+          <div
+            className="relative transition-transform duration-200 origin-center flex items-center justify-center max-h-[88%] max-w-[88%]"
+            style={{ transform: `scale(${zoomLevel})` }}
+          >
+            {/* Sombra y Relieve Textil de la Pieza */}
+            <div className="relative rounded-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] border border-slate-700/60 bg-slate-950/40 backdrop-blur-xs">
+              <canvas
+                ref={canvasRef}
+                className="max-h-[62vh] max-w-[82vw] sm:max-w-[460px] object-contain block"
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 3. Barra Flotante Inferior de Herramientas de Zoom */}
