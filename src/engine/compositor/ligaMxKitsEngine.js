@@ -8,6 +8,34 @@
  * comerciales registradas (Nike/Adidas/Puma) y patrocinadores para venta legal en Shopify.
  */
 
+import { resolveAssetUrl } from '../../utils/assetUrl';
+
+// Cache global de logotipos en alta resolución de Liga MX y Selecciones
+const CREST_IMAGES_CACHE = {};
+
+function getOrLoadCrestImage(clubId) {
+  if (typeof window === 'undefined') return null;
+  if (!clubId) return null;
+
+  const key = String(clubId).toLowerCase().trim();
+  if (CREST_IMAGES_CACHE[key]) return CREST_IMAGES_CACHE[key];
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.dataset.loaded = 'false';
+  img.onload = () => {
+    img.dataset.loaded = 'true';
+  };
+  img.onerror = () => {
+    img.dataset.failed = 'true';
+  };
+
+  const filename = key.startsWith('mx_') ? `${key}.png` : `mx_${key}.png`;
+  img.src = resolveAssetUrl(`assets/presets/ligamx/${filename}`);
+  CREST_IMAGES_CACHE[key] = img;
+  return img;
+}
+
 // Utilidad para aclarar/oscurecer colores hexadecimales
 function adjustColor(hex, amount) {
   const clean = String(hex).replace('#', '');
@@ -585,6 +613,14 @@ export function drawLigaMxGraphicMm(ctx, graphicId, wMm, hMm, design) {
 export function drawLigaMxCrestMm(ctx, clubId, wMm, hMm, design) {
   const r = Math.min(wMm, hMm) / 2;
   ctx.save();
+
+  // 1. Intentar renderizar el logotipo oficial en alta resolución si está cargado
+  const crestImg = getOrLoadCrestImage(clubId);
+  if (crestImg && crestImg.dataset?.loaded === 'true') {
+    ctx.drawImage(crestImg, -wMm / 2, -hMm / 2, wMm, hMm);
+    ctx.restore();
+    return;
+  }
 
   switch (clubId) {
     // 1. AMÉRICA

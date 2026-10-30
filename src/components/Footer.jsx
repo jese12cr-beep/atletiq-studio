@@ -15,7 +15,7 @@ export default function Footer({ onOpenShopifyGuide }) {
             </span>
           </div>
           <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
-            Plataforma líder en fabricación y diseño 3D de uniformes deportivos termorregulados para clubes profesionales, filiales y ligas universitarias.
+            Fabricación e indumentaria deportiva personalizada para clubes profesionales, filiales y ligas deportivas.
           </p>
           <div className="text-xs font-mono text-sky-600 font-bold uppercase tracking-wider">
             [ Homologado oficialmente RFEF / FEB / FIBA ]

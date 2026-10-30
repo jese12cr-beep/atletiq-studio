@@ -157,38 +157,38 @@ export default function ProductionMoldModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in select-none">
       <div className="relative w-full max-w-7xl h-[94vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
-        {/* ==================== HEADER ==================== */}
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xl">
+        {/* ==================== HEADER COMPACTO Y RESPONSIVO ==================== */}
+        <div className="px-3.5 sm:px-6 py-2.5 sm:py-4 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-base sm:text-xl shrink-0">
               📐
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-black tracking-tight text-white">
-                  Plantilla de Confección Textil
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h3 className="text-sm sm:text-base font-black tracking-tight text-white uppercase truncate">
+                  Plantilla de Confección 2D
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                  Previsualización • Escala 1:1
+                <span className="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                  Escala 1:1
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-slate-300 font-semibold">
+                <span className="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-slate-300 font-semibold hidden md:inline">
                   Talla M (1250 mm × 1200 mm)
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Previsualización técnica de los moldes físicos de corte y confección textil (Frente, Espalda, Tira de Cuello y Mangas).
+              <p className="text-[11px] text-slate-400 hidden sm:block truncate mt-0.5">
+                Moldes industriales de corte y confección textil (Frente, Espalda, Cuello y Mangas).
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               id="btn-close-production-mold"
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-lg font-bold"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-base sm:text-lg font-bold"
               title="Cerrar ventana"
             >
               ✕
@@ -197,7 +197,7 @@ export default function ProductionMoldModal({
         </div>
 
         {/* ==================== BARRA DE CONTROL & OPCIONES ==================== */}
-        <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0 text-xs">
+        <div className="px-3 sm:px-6 py-2 sm:py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
           {/* Selector de Jugador del Roster */}
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-700">Jugador del Equipo:</span>
@@ -288,18 +288,17 @@ export default function ProductionMoldModal({
         {/* ==================== VIEWPORT DE LA PLANTILLA 2D ==================== */}
         <div
           ref={containerRef}
-          className="flex-1 min-h-0 bg-slate-200/80 overflow-auto p-2 sm:p-4 flex items-center justify-center relative select-none"
+          className="flex-1 min-h-0 bg-slate-900/95 overflow-auto p-2 sm:p-4 flex items-center justify-center relative select-none"
         >
           <div
-            className="m-auto transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-3 flex items-center justify-center"
+            className="m-auto transition-transform duration-150 origin-center bg-white shadow-2xl rounded-2xl border border-slate-300 p-2 sm:p-4 flex items-center justify-center max-h-full max-w-full"
             style={{
-              width: zoomLevel === 1 ? 'auto' : `${Math.round(zoomLevel * 100)}%`,
-              height: zoomLevel === 1 ? '100%' : 'auto',
+              width: zoomLevel === 1 ? '100%' : `${Math.round(zoomLevel * 100)}%`,
+              height: '100%',
               maxWidth: zoomLevel === 1 ? '100%' : 'none',
               maxHeight: zoomLevel === 1 ? '100%' : 'none',
-              aspectRatio: '3543.31 / 3401.57',
               transform: zoomLevel !== 1 ? `scale(${zoomLevel})` : undefined,
-              transformOrigin: 'top center',
+              transformOrigin: 'center center',
             }}
           >
             <div
@@ -310,24 +309,24 @@ export default function ProductionMoldModal({
         </div>
 
         {/* ==================== FOOTER & ACCIONES DE DESCARGA ==================== */}
-        <div className="px-6 py-4 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
-          <div className="text-xs text-slate-500 flex items-center gap-2">
+        <div className="px-3.5 sm:px-6 py-2.5 sm:py-3.5 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 shrink-0">
+          <div className="text-[11px] text-slate-500 hidden sm:flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>
               Patrón listo para RIP de impresión textil • Sangrado perimetral de 10 mm incluido en cada pieza
             </span>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             {/* Botón Descargar PNG Alta Resolución */}
             <button
               type="button"
               onClick={handleDownloadPng}
               disabled={isExporting}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all cursor-pointer shadow-2xs hover:scale-102 flex items-center justify-center gap-1.5"
+              className="flex-1 sm:flex-initial px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
             >
               <span>🖼️</span>
-              <span>{isExporting ? 'Procesando...' : 'Descargar Imagen 300 DPI'}</span>
+              <span>{isExporting ? 'Generando...' : 'Descargar Imagen'}</span>
             </button>
 
             {/* Botón Principal: Descargar SVG 1:1 Vectorial */}
@@ -335,10 +334,10 @@ export default function ProductionMoldModal({
               type="button"
               id="btn-download-mold-svg"
               onClick={handleDownloadSvg}
-              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all cursor-pointer shadow-md hover:scale-102 flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5"
             >
               <span>⬇</span>
-              <span>Descargar Plantilla SVG 1:1 (Plotter / Illustrator)</span>
+              <span>Plantilla SVG 1:1</span>
             </button>
           </div>
         </div>

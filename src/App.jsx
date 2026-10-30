@@ -13,6 +13,8 @@ import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import ShopifyIntegrationGuide from './components/ShopifyIntegrationGuide';
 import OrderQuoteModal from './components/OrderQuoteModal';
+import UserDesignGalleryModal from './components/studio/UserDesignGalleryModal';
+import { loadUserGallery } from './utils/userGalleryStore';
 import {
   ENGINE_PRODUCTS,
   INITIAL_TEAM_ROSTER,
@@ -95,6 +97,37 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isShopifyGuideOpen, setIsShopifyGuideOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [isStorefrontGalleryOpen, setIsStorefrontGalleryOpen] = useState(false);
+  const [galleryCount, setGalleryCount] = useState(() => {
+    try {
+      return loadUserGallery().length;
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      try {
+        setGalleryCount(loadUserGallery().length);
+      } catch {}
+    };
+    window.addEventListener('atletiq_gallery_updated', handleUpdate);
+    return () => window.removeEventListener('atletiq_gallery_updated', handleUpdate);
+  }, []);
+
+  const handleLoadDesignFromStorefrontGallery = (item) => {
+    if (!item?.design) return;
+    if (item.productModelId) {
+      handleSwitchProduct(item.productModelId);
+    }
+    handleCommitDesign(item.design, true);
+    if (item.roster && item.roster.length > 0) {
+      setRoster(item.roster);
+    }
+    setIsStorefrontGalleryOpen(false);
+    switchMode('studio');
+  };
 
   const currentProduct =
     ENGINE_PRODUCTS.find((p) => p.id === design.productModelId) || ENGINE_PRODUCTS[0];
@@ -309,6 +342,8 @@ export default function App() {
             cartCount={cartItems.length}
             onOpenCart={() => setIsCartOpen(true)}
             onOpenStudio={() => switchMode('studio')}
+            galleryCount={galleryCount}
+            onOpenGallery={() => setIsStorefrontGalleryOpen(true)}
             onOpenShopifyGuide={() => setIsShopifyGuideOpen(true)}
             onOpenQuoteModal={() => setIsQuoteModalOpen(true)}
           />
@@ -367,6 +402,18 @@ export default function App() {
         isOpen={isQuoteModalOpen}
         onClose={() => setIsQuoteModalOpen(false)}
         items={cartItems}
+      />
+
+      <UserDesignGalleryModal
+        isOpen={isStorefrontGalleryOpen}
+        onClose={() => setIsStorefrontGalleryOpen(false)}
+        currentDesign={design}
+        currentProduct={currentProduct}
+        currentRoster={roster}
+        unitPrice={34}
+        totalUnits={roster.length}
+        totalPrice={34 * roster.length}
+        onLoadDesignFromGallery={handleLoadDesignFromStorefrontGallery}
       />
     </div>
   );

@@ -15,7 +15,7 @@ export default function AthleteProof() {
             </h2>
           </div>
           <p className="text-slate-600 text-sm max-w-md">
-            Más de 340 clubes y academias compiten semanalmente con indumentaria diseñada en nuestro estudio 3D.
+            Más de 340 clubes y academias compiten semanalmente con indumentaria oficial confeccionada por ATLETIQ.
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export default function AthleteProof() {
               ))}
             </div>
             <p className="text-slate-700 text-sm italic leading-relaxed">
-              "Cumplieron la entrega en exactamente 9 días laborales antes del playoff. El diseñador 3D nos evitó cualquier error en los nombres y números de las jugadoras."
+              "Cumplieron la entrega en exactamente 9 días laborales antes del playoff. El configurador interactivo nos evitó cualquier error en los nombres y números de las jugadoras."
             </p>
             <div className="pt-3 border-t border-slate-100">
               <span className="font-extrabold text-xs text-slate-900 block">LAURA M. // ENTRENADORA</span>

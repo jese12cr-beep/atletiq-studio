@@ -40,9 +40,22 @@ import {
   Redo2,
   Maximize2,
   Minimize2,
+  FolderHeart,
+  Layers,
 } from 'lucide-react';
 import Interactive2DLab from '../../engine/compositor/Interactive2DLab';
 import LayerStack25DViewer from '../../engine/compositor/LayerStack25DViewer';
+import GarmentCanvas2DStage from '../../engine/compositor/GarmentCanvas2DStage';
+import UserDesignGalleryModal from './UserDesignGalleryModal';
+import {
+  LIGA_MX_PRESETS,
+  WORLD_CUP_PRESETS,
+  LOGO_CATEGORIES,
+} from '../../data/sportPresetsRegistry';
+import {
+  loadUserGallery,
+  saveDesignToGallery,
+} from '../../utils/userGalleryStore';
 import {
   ENGINE_PRODUCTS,
   PANTONE_CM5_PALETTE,
@@ -260,6 +273,25 @@ export default function HybridStudioWorkspace({
   const [isMobilePanelCollapsed, setIsMobilePanelCollapsed] = useState(false);
   const [isMexicoKitsModalOpen, setIsMexicoKitsModalOpen] = useState(false);
   const [isProductionMoldModalOpen, setIsProductionMoldModalOpen] = useState(false);
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [activeLogoCategory, setActiveLogoCategory] = useState('ligamx'); // 'ligamx' | 'mundial' | 'vector'
+  const [galleryCount, setGalleryCount] = useState(() => {
+    try {
+      return loadUserGallery().length;
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    const handleGalleryUpdate = () => {
+      try {
+        setGalleryCount(loadUserGallery().length);
+      } catch {}
+    };
+    window.addEventListener('atletiq_gallery_updated', handleGalleryUpdate);
+    return () => window.removeEventListener('atletiq_gallery_updated', handleGalleryUpdate);
+  }, []);
   const [garmentMenuMenSection, setGarmentMenuMenSection] = useState('custom'); // 'custom' | 'ligamx'
   const [mexicoKitSearch, setMexicoKitSearch] = useState('');
   const [mexicoKitRegionFilter, setMexicoKitRegionFilter] = useState('all');
@@ -648,7 +680,8 @@ export default function HybridStudioWorkspace({
       id: `crest_${Date.now().toString(36)}`,
       type: 'PRESET_CREST',
       presetId: preset.id,
-      label: preset.label,
+      clubId: preset.id,
+      label: preset.name || preset.label || preset.shortName || 'Escudo Oficial',
       panel: validPanel,
       clampToZone: 'ALL',
       pinned: false,
@@ -668,6 +701,7 @@ export default function HybridStudioWorkspace({
     setSelectedDecalId(newDecal.id);
     setSelectedSlotKey(null);
     setIsEditingLogoDetail(true);
+    showToast(`Escudo añadido: ${preset.shortName || preset.name || preset.label}`);
     if (PANEL_TO_CAMERA[validPanel]) setCameraPreset(PANEL_TO_CAMERA[validPanel]);
   };
 
@@ -710,8 +744,28 @@ export default function HybridStudioWorkspace({
     if (PANEL_TO_CAMERA[validPanel]) setCameraPreset(PANEL_TO_CAMERA[validPanel]);
   };
 
-  // --- Guardado de Bocetos Locales (`Mis bocetos`) ---
+  // --- Guardado de Bocetos Locales & Galería Interna ---
   const handleSaveDraft = () => {
+    let thumb = null;
+    try {
+      if (canvasSnapshotRef?.current) {
+        thumb = canvasSnapshotRef.current();
+      }
+    } catch {}
+
+    saveDesignToGallery({
+      name: `Equipación ${currentProduct.shortName || currentProduct.name} - ${new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}`,
+      design,
+      productModelId: design.productModelId,
+      productName: currentProduct.name,
+      category: currentProduct.category || 'futbol',
+      roster,
+      unitPrice,
+      totalUnits,
+      totalPrice,
+      thumbnail: thumb,
+    });
+
     const entry = {
       draftId: `draft_${Date.now().toString(36)}`,
       savedAt: new Date().toLocaleString('es-MX', {
@@ -734,10 +788,20 @@ export default function HybridStudioWorkspace({
     setSavedDrafts(next);
     try {
       localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Ignorar cuota de almacenamiento excedida
+    } catch {}
+    showToast(`¡Diseño guardado en tu Galería Personal!`);
+  };
+
+  const handleLoadFromGallery = (galleryItem) => {
+    if (!galleryItem?.design) return;
+    if (galleryItem.productModelId && galleryItem.productModelId !== design.productModelId) {
+      onSwitchProduct(galleryItem.productModelId);
     }
-    showToast(`Boceto «${entry.productName}» guardado en Mis Bocetos`);
+    onCommitDesign(galleryItem.design, true);
+    if (galleryItem.roster && galleryItem.roster.length > 0) {
+      onUpdateRoster(galleryItem.roster);
+    }
+    showToast(`Diseño cargado: ${galleryItem.name}`);
   };
 
   const handleLoadDraft = (draft) => {
@@ -1085,8 +1149,48 @@ export default function HybridStudioWorkspace({
           )}
         </div>
 
-        {/* Carrito Desktop */}
+        {/* Selector de Modo CAD: 3D Real ↔ 2D Plano */}
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-2xs">
+          <button
+            id="btn-desktop-view-3d"
+            type="button"
+            onClick={() => setViewportMode('3d')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+              viewportMode === '3d'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+            }`}
+          >
+            <Box className="w-3.5 h-3.5 text-sky-400" />
+            <span>3D CAD</span>
+          </button>
+          <button
+            id="btn-desktop-view-2d"
+            type="button"
+            onClick={() => setViewportMode('2d')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+              viewportMode === '2d'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-emerald-400" />
+            <span>2D PLANO</span>
+          </button>
+        </div>
+
+        {/* Acciones Rápidas: Galería y Carrito Desktop */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsGalleryModalOpen(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Abrir galería de diseños guardados"
+          >
+            <FolderHeart className="w-4 h-4 text-rose-500" />
+            <span>Mis Diseños ({galleryCount})</span>
+          </button>
+
           <button
             type="button"
             onClick={onOpenCart}
@@ -1098,7 +1202,7 @@ export default function HybridStudioWorkspace({
         </div>
       </header>
 
-      {/* 1. CABECERA MOBILE COMPACTA (1 SOLA FILA LIMPIA DE 48PX) */}
+      {/* 1. CABECERA MOBILE COMPACTA (1 SOLA FILA LIMPIA DE 48PX CON TOGGLE 3D/2D) */}
       <header className="flex sm:hidden shrink-0 h-12 px-2.5 bg-white border-b border-slate-200 items-center justify-between z-30 shadow-2xs">
         <div className="flex items-center gap-1.5 min-w-0">
           <button
@@ -1113,11 +1217,39 @@ export default function HybridStudioWorkspace({
           <button
             type="button"
             onClick={() => setIsGarmentMenuOpen(true)}
-            className="px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-900 flex items-center gap-1 truncate cursor-pointer shadow-2xs max-w-[150px]"
+            className="px-2 py-1 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-900 flex items-center gap-1 truncate cursor-pointer shadow-2xs max-w-[130px]"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
             <span className="truncate">{currentProduct.shortName || currentProduct.name}</span>
             <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
+          </button>
+        </div>
+
+        {/* Toggle 3D / 2D en Móvil */}
+        <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-xl border border-slate-200 shrink-0">
+          <button
+            id="btn-mobile-view-3d"
+            type="button"
+            onClick={() => setViewportMode('3d')}
+            className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+              viewportMode === '3d'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            3D
+          </button>
+          <button
+            id="btn-mobile-view-2d"
+            type="button"
+            onClick={() => setViewportMode('2d')}
+            className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+              viewportMode === '2d'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            2D
           </button>
         </div>
 
@@ -1139,6 +1271,19 @@ export default function HybridStudioWorkspace({
             className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 disabled:opacity-25 cursor-pointer"
           >
             <Redo2 className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsGalleryModalOpen(true)}
+            title="Mi Galería de Diseños"
+            className="relative p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer"
+          >
+            <FolderHeart className="w-4 h-4 text-rose-500" />
+            {galleryCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
+                {galleryCount}
+              </span>
+            )}
           </button>
           <button
             type="button"
@@ -1174,7 +1319,7 @@ export default function HybridStudioWorkspace({
 
       {/* 2. CUERPO CENTRAL OWAYO EN 2 COLUMNAS: ESCENARIO INTERACTIVO (IZQ) + PANEL DE 4 PESTAÑAS (DER) */}
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-        {/* ESCENARIO 3D INTERACTIVO CON ILUMINACIÓN PROFESIONAL DE ESTUDIO */}
+        {/* ESCENARIO 3D INTERACTIVO / 2D PLANO CON ILUMINACIÓN PROFESIONAL DE ESTUDIO */}
         <main
           className={`relative bg-[radial-gradient(circle_at_50%_38%,#ffffff_0%,#f1f5f9_60%,#e2e8f0_100%)] overflow-hidden flex flex-col transition-all duration-300 ${
             isMobilePanelCollapsed
@@ -1182,7 +1327,16 @@ export default function HybridStudioWorkspace({
               : 'h-[44vh] sm:h-[48vh] lg:h-auto lg:flex-1 shrink-0 lg:shrink'
           }`}
         >
-          {isFaux3DAccessory ? (
+          {viewportMode === '2d' ? (
+            <GarmentCanvas2DStage
+              design={design}
+              activePlayer={activePlayer}
+              artworkRegistry={artworkRegistry}
+              selectedPanel={panel2D}
+              onChangePanel={setPanel2D}
+              onOpenProductionMold={() => setIsProductionMoldModalOpen(true)}
+            />
+          ) : isFaux3DAccessory ? (
             <LayerStack25DViewer
               design={design}
               product={currentProduct}
@@ -3052,26 +3206,106 @@ export default function HybridStudioWorkspace({
                       </div>
                     )}
 
-                    {/* Logoteca Deportiva Vectorial Integrada */}
-                    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
-                      <span className="text-xs font-black text-slate-900 block">
-                        Logoteca Deportiva Vectorial (300+ DPI)
-                      </span>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {VECTOR_CREST_PRESETS.map((preset) => (
+                    {/* Logoteca Deportiva Integrada con Presets Oficiales */}
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-slate-900 block uppercase tracking-wide">
+                          Logoteca de Escudos &amp; Presets
+                        </span>
+                        <span className="text-[10px] font-mono text-sky-600 font-bold">
+                          300+ DPI
+                        </span>
+                      </div>
+
+                      {/* Selector de Categorías de Logos */}
+                      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+                        {[
+                          { id: 'ligamx', label: `🇲🇽 Liga MX (${LIGA_MX_PRESETS.length})` },
+                          { id: 'mundial', label: `🏆 Selecciones` },
+                          { id: 'vector', label: `🛡️ Básicos Pro` },
+                        ].map((cat) => (
                           <button
-                            key={preset.id}
+                            key={cat.id}
                             type="button"
-                            onClick={() => handleAddPresetCrest(preset)}
-                            className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2 transition-colors cursor-pointer"
+                            onClick={() => setActiveLogoCategory(cat.id)}
+                            className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap ${
+                              activeLogoCategory === cat.id
+                                ? 'bg-slate-900 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                            }`}
                           >
-                            <Shield className="w-4 h-4 text-amber-500 shrink-0" />
-                            <span className="text-[11px] font-bold text-slate-800 truncate">
-                              {preset.label}
-                            </span>
+                            {cat.label}
                           </button>
                         ))}
                       </div>
+
+                      {/* 1. Categoría Liga MX Oficial (18 Clubes) */}
+                      {activeLogoCategory === 'ligamx' && (
+                        <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                          {LIGA_MX_PRESETS.map((preset) => (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => handleAddPresetCrest(preset)}
+                              className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-sky-400 text-left flex items-center gap-2 transition-all cursor-pointer group shadow-2xs"
+                              title={`Añadir escudo de ${preset.name} a la prenda activa`}
+                            >
+                              <img
+                                src={preset.url}
+                                alt={preset.name}
+                                className="w-7 h-7 object-contain shrink-0 group-hover:scale-110 transition-transform"
+                                loading="lazy"
+                              />
+                              <div className="min-w-0">
+                                <span className="text-[11px] font-black text-slate-900 truncate block leading-tight">
+                                  {preset.shortName}
+                                </span>
+                                <span className="text-[9px] text-slate-400 truncate block">
+                                  {preset.location}
+                                </span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* 2. Categoría Mundial & Selecciones */}
+                      {activeLogoCategory === 'mundial' && (
+                        <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                          {WORLD_CUP_PRESETS.map((preset) => (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => handleAddPresetCrest(preset)}
+                              className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-sky-400 text-left flex items-center gap-2 transition-all cursor-pointer group shadow-2xs"
+                            >
+                              <Shield className="w-5 h-5 text-sky-600 shrink-0 group-hover:scale-110 transition-transform" />
+                              <span className="text-[11px] font-bold text-slate-800 truncate">
+                                {preset.shortName}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* 3. Categoría Escudos Vectoriales Básicos */}
+                      {activeLogoCategory === 'vector' && (
+                        <div className="grid grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-1">
+                          {VECTOR_CREST_PRESETS.map((preset) => (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => handleAddPresetCrest(preset)}
+                              className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <Shield className="w-4 h-4 text-amber-500 shrink-0" />
+                              <span className="text-[11px] font-bold text-slate-800 truncate">
+                                {preset.label}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -3095,12 +3329,12 @@ export default function HybridStudioWorkspace({
 
               <button
                 type="button"
-                onClick={() => setIsDraftsModalOpen(true)}
+                onClick={() => setIsGalleryModalOpen(true)}
                 className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer group"
-                title="Abrir mis bocetos guardados"
+                title="Abrir mi galería de diseños guardados"
               >
-                <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 group-hover:text-slate-900 group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Bocetos</span>
+                <FolderHeart className="w-4 h-4 sm:w-5 sm:h-5 text-rose-500 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] sm:text-[10px] font-semibold tracking-tight text-slate-700 leading-none">Mi Galería</span>
               </button>
 
               <button
@@ -4102,6 +4336,20 @@ export default function HybridStudioWorkspace({
         design={design}
         roster={roster}
         artworkRegistry={artworkRegistry}
+      />
+
+      {/* ==================== MODAL 7: MI GALERÍA INTERNA DE DISEÑOS GUARDADOS ==================== */}
+      <UserDesignGalleryModal
+        isOpen={isGalleryModalOpen}
+        onClose={() => setIsGalleryModalOpen(false)}
+        currentDesign={design}
+        currentProduct={currentProduct}
+        currentRoster={roster}
+        unitPrice={unitPrice}
+        totalUnits={totalUnits}
+        totalPrice={totalPrice}
+        onLoadDesignFromGallery={handleLoadFromGallery}
+        canvasSnapshotRef={canvasSnapshotRef}
       />
     </div>
   );
