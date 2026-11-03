@@ -13,7 +13,7 @@ import { resolveAssetUrl } from '../../utils/assetUrl';
 // Cache global de logotipos en alta resolución de Liga MX y Selecciones
 const CREST_IMAGES_CACHE = {};
 
-function getOrLoadCrestImage(clubId) {
+export function getOrLoadCrestImage(clubId) {
   if (typeof window === 'undefined') return null;
   if (!clubId) return null;
 
@@ -25,6 +25,9 @@ function getOrLoadCrestImage(clubId) {
   img.dataset.loaded = 'false';
   img.onload = () => {
     img.dataset.loaded = 'true';
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('atletiq:crest-loaded', { detail: { clubId: key, type: 'ligamx' } }));
+    }
   };
   img.onerror = () => {
     img.dataset.failed = 'true';
@@ -34,6 +37,22 @@ function getOrLoadCrestImage(clubId) {
   img.src = resolveAssetUrl(`assets/presets/ligamx/${filename}`);
   CREST_IMAGES_CACHE[key] = img;
   return img;
+}
+
+export function preloadLigaMxCrest(clubId) {
+  return new Promise((resolve) => {
+    const img = getOrLoadCrestImage(clubId);
+    if (!img) return resolve(null);
+    if (img.dataset?.loaded === 'true' || (img.complete && img.naturalWidth > 0)) {
+      img.dataset.loaded = 'true';
+      return resolve(img);
+    }
+    img.addEventListener('load', () => {
+      img.dataset.loaded = 'true';
+      resolve(img);
+    }, { once: true });
+    img.addEventListener('error', () => resolve(null), { once: true });
+  });
 }
 
 // Utilidad para aclarar/oscurecer colores hexadecimales

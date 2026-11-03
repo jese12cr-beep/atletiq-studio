@@ -8,6 +8,54 @@
  * Recrea con exactitud matemática las franjas icónicas, hechter, mitades 50/50, escudos y detalles.
  */
 
+import { resolveAssetUrl } from '../../utils/assetUrl';
+
+// Cache global de logotipos oficiales en alta resolución de UEFA Champions League
+const UCL_CREST_CACHE = {};
+
+export function getOrLoadUclCrestImage(clubId) {
+  if (typeof window === 'undefined') return null;
+  if (!clubId) return null;
+
+  const key = String(clubId).toLowerCase().trim();
+  if (UCL_CREST_CACHE[key]) return UCL_CREST_CACHE[key];
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.dataset.loaded = 'false';
+  img.onload = () => {
+    img.dataset.loaded = 'true';
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('atletiq:crest-loaded', { detail: { clubId: key, type: 'ucl' } }));
+    }
+  };
+  img.onerror = () => {
+    img.dataset.failed = 'true';
+  };
+
+  const filename = key.startsWith('ucl_') ? `${key}.png` : `ucl_${key}.png`;
+  img.src = resolveAssetUrl(`assets/presets/ucl/${filename}`);
+  UCL_CREST_CACHE[key] = img;
+  return img;
+}
+
+export function preloadUclCrest(clubId) {
+  return new Promise((resolve) => {
+    const img = getOrLoadUclCrestImage(clubId);
+    if (!img) return resolve(null);
+    if (img.dataset?.loaded === 'true' || (img.complete && img.naturalWidth > 0)) {
+      img.dataset.loaded = 'true';
+      return resolve(img);
+    }
+    img.addEventListener('load', () => {
+      img.dataset.loaded = 'true';
+      resolve(img);
+    }, { once: true });
+    img.addEventListener('error', () => resolve(null), { once: true });
+  });
+}
+
+
 export function drawUclGraphicMm(ctx, graphicId, wMm, hMm, design) {
   if (!ctx || !graphicId) return;
 
@@ -259,6 +307,14 @@ export function drawUclCrestMm(ctx, clubId, wMm, hMm, design) {
 
   const r = Math.min(wMm, hMm) / 2;
   ctx.save();
+
+  // 1. Intentar renderizar el logotipo oficial en alta resolución si está cargado
+  const crestImg = getOrLoadUclCrestImage(clubId);
+  if (crestImg && crestImg.dataset?.loaded === 'true') {
+    ctx.drawImage(crestImg, -wMm / 2, -hMm / 2, wMm, hMm);
+    ctx.restore();
+    return;
+  }
 
   switch (clubId.toLowerCase()) {
     // 1. REAL MADRID

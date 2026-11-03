@@ -926,6 +926,21 @@ export default function GarmentCanvas3D({
     st.setTransition(true);
   }, [cameraPreset]);
 
+  // Re-componer de inmediato en 3D cuando un escudo o sponsor oficial en alta resolución termina de cargarse
+  useEffect(() => {
+    const handleAssetLoaded = () => {
+      setFishVersionTick((n) => n + 1);
+    };
+
+    window.addEventListener('atletiq:crest-loaded', handleAssetLoaded);
+    window.addEventListener('atletiq:sponsor-loaded', handleAssetLoaded);
+
+    return () => {
+      window.removeEventListener('atletiq:crest-loaded', handleAssetLoaded);
+      window.removeEventListener('atletiq:sponsor-loaded', handleAssetLoaded);
+    };
+  }, []);
+
   // 8. Selección y Arrastre Directo Raycast UV a 60 FPS (Decals + Slots Variables + Respeto a `Fijar objeto`)
   const handlePointerDown = (e) => {
     if (e.button !== 0 || !sceneStateRef.current) return;

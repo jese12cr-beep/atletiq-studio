@@ -86,6 +86,9 @@ import {
 import GarmentCanvas3D from '../../engine/viewer3d/GarmentCanvas3D';
 import { ATLETIQ_PRO_PATTERNS } from '../../data/atletiqProPatterns';
 import JerseyThumbnailMiniature from './JerseyThumbnailMiniature';
+import { preloadLigaMxCrest } from '../../engine/compositor/ligaMxKitsEngine';
+import { preloadUclCrest } from '../../engine/compositor/uclKitsEngine';
+import { preloadSponsorLogo } from '../../engine/compositor/sponsorLogosEngine';
 import ProductionMoldModal from './ProductionMoldModal';
 
 const OWAYO_TABS = [
@@ -877,8 +880,32 @@ export default function HybridStudioWorkspace({
   };
 
   // --- Aplicar Preset de la Colección México Pro (18 Clubes) ---
-  const handleApplyOfficialKit = (kit) => {
+  const handleApplyOfficialKit = async (kit) => {
     setActiveMexicoKitId(kit.id);
+
+    // Pre-cargar logotipos oficiales (escudo del club y patrocinador) de inmediato
+    const crestDecal = kit.decals?.find((d) => d.type === 'LIGAMX_CREST' || d.type === 'UCL_CREST');
+    const sponsorDecal = kit.decals?.find((d) => d.type === 'SPONSOR_LOGO');
+    const preloads = [];
+
+    if (crestDecal) {
+      const clubId = crestDecal.clubId || crestDecal.presetId;
+      if (crestDecal.type === 'UCL_CREST' || kit.id.startsWith('ucl_')) {
+        preloads.push(preloadUclCrest(clubId));
+      } else {
+        preloads.push(preloadLigaMxCrest(clubId));
+      }
+    }
+    if (sponsorDecal && sponsorDecal.sponsorId) {
+      preloads.push(preloadSponsorLogo(sponsorDecal.sponsorId, sponsorDecal.tintHex));
+    }
+
+    if (preloads.length > 0) {
+      await Promise.race([
+        Promise.all(preloads),
+        new Promise((resolve) => setTimeout(resolve, 200)),
+      ]);
+    }
 
     const baseDesign =
       designsByProduct?.['futbol_jersey_pro_vneck'] ||

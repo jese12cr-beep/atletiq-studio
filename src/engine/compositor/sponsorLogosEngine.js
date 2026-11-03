@@ -6,6 +6,76 @@
  * Coordenadas milimétricas exactas centradas en (0, 0), escalables sin pérdida.
  */
 
+import { resolveAssetUrl } from '../../utils/assetUrl';
+
+// Cache global de logotipos publicitarios en alta resolución
+const SPONSOR_IMAGE_CACHE = {};
+const TINT_CANVAS_CACHE = new Map();
+
+function getTintedSponsorDrawable(img, tintHex) {
+  if (!tintHex || typeof document === 'undefined') return img;
+  const cleanTint = tintHex.toLowerCase().trim();
+  const key = `${img.src}|${cleanTint}`;
+  if (TINT_CANVAS_CACHE.has(key)) return TINT_CANVAS_CACHE.get(key);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || 1200;
+  canvas.height = img.naturalHeight || 400;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = cleanTint;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  TINT_CANVAS_CACHE.set(key, canvas);
+  return canvas;
+}
+
+export function getOrLoadSponsorImage(sponsorId, tintHex = null) {
+  if (typeof window === 'undefined') return null;
+  if (!sponsorId) return null;
+
+  const cleanId = String(sponsorId).toLowerCase().trim();
+  const needsTint = Boolean(tintHex);
+  const cacheKey = `${cleanId}_${needsTint ? 'tinted' : 'color'}`;
+
+  if (SPONSOR_IMAGE_CACHE[cacheKey]) return SPONSOR_IMAGE_CACHE[cacheKey];
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.dataset.loaded = 'false';
+  img.onload = () => {
+    img.dataset.loaded = 'true';
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('atletiq:sponsor-loaded', { detail: { sponsorId: cleanId } }));
+    }
+  };
+  img.onerror = () => {
+    img.dataset.failed = 'true';
+  };
+
+  const filename = needsTint ? `${cleanId}_white.png` : `${cleanId}.png`;
+  img.src = resolveAssetUrl(`assets/sponsors/${filename}`);
+  SPONSOR_IMAGE_CACHE[cacheKey] = img;
+  return img;
+}
+
+export function preloadSponsorLogo(sponsorId, tintHex = null) {
+  return new Promise((resolve) => {
+    const img = getOrLoadSponsorImage(sponsorId, tintHex);
+    if (!img) return resolve(null);
+    if (img.dataset?.loaded === 'true' || (img.complete && img.naturalWidth > 0)) {
+      img.dataset.loaded = 'true';
+      return resolve(img);
+    }
+    img.addEventListener('load', () => {
+      img.dataset.loaded = 'true';
+      resolve(img);
+    }, { once: true });
+    img.addEventListener('error', () => resolve(null), { once: true });
+  });
+}
+
 export function drawSponsorLogoMm(ctx, sponsorId, wMm, hMm, tintHex = null) {
   if (!ctx || !sponsorId) return;
 
@@ -13,6 +83,28 @@ export function drawSponsorLogoMm(ctx, sponsorId, wMm, hMm, tintHex = null) {
   const halfH = hMm / 2;
 
   ctx.save();
+
+  // 1. Intentar renderizar el logotipo oficial en alta resolución si está cargado
+  const sponsorImg = getOrLoadSponsorImage(sponsorId, tintHex);
+  if (sponsorImg && sponsorImg.dataset?.loaded === 'true') {
+    const drawable = tintHex ? getTintedSponsorDrawable(sponsorImg, tintHex) : sponsorImg;
+    const imgW = sponsorImg.naturalWidth || 1200;
+    const imgH = sponsorImg.naturalHeight || 400;
+    const imgAspect = imgW / imgH;
+    const boxAspect = wMm / hMm;
+    let drawW = wMm;
+    let drawH = hMm;
+    if (imgAspect > boxAspect) {
+      drawW = wMm;
+      drawH = wMm / imgAspect;
+    } else {
+      drawH = hMm;
+      drawW = hMm * imgAspect;
+    }
+    ctx.drawImage(drawable, -drawW / 2, -drawH / 2, drawW, drawH);
+    ctx.restore();
+    return;
+  }
 
   switch (sponsorId.toLowerCase()) {
     // =========================================================================
