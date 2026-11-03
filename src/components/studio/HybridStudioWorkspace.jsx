@@ -1248,14 +1248,23 @@ export default function HybridStudioWorkspace({
   const menFootball = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Fútbol');
   const menJackets = ENGINE_PRODUCTS.filter((p) => p.gender === 'men' && p.sport === 'Chaquetas');
 
+  const womenFootball = ENGINE_PRODUCTS.filter((p) => p.gender === 'women' && p.sport === 'Fútbol');
   const womenBasketball = ENGINE_PRODUCTS.filter((p) => p.gender === 'women' && p.sport === 'Baloncesto');
   const womenJackets = ENGINE_PRODUCTS.filter((p) => p.gender === 'women' && p.sport === 'Chaquetas');
   const accessoryProducts = ENGINE_PRODUCTS.filter((p) => p.renderMode === 'FAUX_3D_LAYERED_WEBP');
 
   const currentSportProducts = useMemo(() => {
-    return ENGINE_PRODUCTS.filter(
+    const list = ENGINE_PRODUCTS.filter(
       (p) => p.gender === genderModule && p.sport === currentProduct.sport
     );
+    // Si es Dama y está en fútbol pero no hay short de dama exclusivo, incluir el short de fútbol de matchday
+    if (genderModule === 'women' && currentProduct.sport === 'Fútbol') {
+      const matchdayShort = ENGINE_PRODUCTS.find((p) => p.id === 'football_shorts_fp3');
+      if (matchdayShort && !list.some((p) => p.id === matchdayShort.id)) {
+        list.push(matchdayShort);
+      }
+    }
+    return list;
   }, [genderModule, currentProduct.sport]);
 
   return (
@@ -4597,6 +4606,75 @@ export default function HybridStudioWorkspace({
             <div className="space-y-5">
               <div className="p-3.5 rounded-2xl bg-fuchsia-50 border border-fuchsia-200 text-xs text-fuchsia-950 leading-relaxed">
                 <strong>Patronaje Anatómico Dama:</strong> Moldes independientes diseñados especialmente para la silueta femenina, con sisa adaptada, cintura entallada y costuras ergonómicas.
+              </div>
+
+              {/* Fútbol Dama */}
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    Fútbol Dama (Patronaje Entallado Femenino)
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {womenFootball.map((p) => {
+                    const isCur = design.productModelId === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => {
+                          onSwitchProduct(p.id);
+                          setIsGarmentMenuOpen(false);
+                        }}
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                          isCur
+                            ? 'bg-fuchsia-50 border-2 border-fuchsia-600 text-fuchsia-950 shadow-sm'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div>
+                          <span className="text-xs font-black text-slate-900 block">{p.name}</span>
+                          <span className="text-[11px] text-slate-500 block mt-0.5">{p.badge}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                          isCur ? 'bg-fuchsia-600 text-white' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {isCur ? 'Activo en 3D' : 'Cargar'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {/* Short Fútbol Matchday compatible */}
+                  {menFootball.filter((p) => p.garmentCategory === 'shorts').map((p) => {
+                    const isCur = design.productModelId === p.id;
+                    return (
+                      <button
+                        key={`w_short_${p.id}`}
+                        type="button"
+                        onClick={() => {
+                          onSwitchProduct(p.id);
+                          setIsGarmentMenuOpen(false);
+                        }}
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                          isCur
+                            ? 'bg-fuchsia-50 border-2 border-fuchsia-600 text-fuchsia-950 shadow-sm'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div>
+                          <span className="text-xs font-black text-slate-900 block">{p.name} (Corte Matchday Unisex)</span>
+                          <span className="text-[11px] text-slate-500 block mt-0.5">{p.badge}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                          isCur ? 'bg-fuchsia-600 text-white' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {isCur ? 'Activo en 3D' : 'Cargar'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Baloncesto Dama */}

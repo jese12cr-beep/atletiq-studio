@@ -10,6 +10,11 @@ import {
   Info,
   Check
 } from 'lucide-react';
+import { 
+  generateProductionMoldSvgString, 
+  composeDirect3DTextures, 
+  composeDirect3DTexturesAsync 
+} from '../../engine/compositor/moldFlatteningEngine';
 import { generateGarmentTailoringSvgString } from '../../engine/compositor/tailoringPliegosRegistry';
 
 export default function Interactive2DPliegoStage({
@@ -26,13 +31,54 @@ export default function Interactive2DPliegoStage({
 
   const productModelId = design?.productModelId || 'futbol_jersey_pro_vneck';
 
+  // Texturas 3D en alta resolución sincronizadas en tiempo real sobre las piezas de patronaje
+  const [directTextures, setDirectTextures] = useState(() => {
+    return composeDirect3DTextures(design, activePlayer, artworkRegistry);
+  });
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    // 1. Renderizado directo síncrono ultra-rápido (usa caché de máscaras y canvas en caliente)
+    const syncTex = composeDirect3DTextures(design, activePlayer, artworkRegistry);
+    if (syncTex) {
+      setDirectTextures(syncTex);
+    }
+
+    // 2. Renderizado asíncrono para precargar mapas de bits .fish, escudos y patrocinadores
+    composeDirect3DTexturesAsync(design, activePlayer, artworkRegistry)
+      .then((asyncTex) => {
+        if (!isCancelled && asyncTex) {
+          setDirectTextures(asyncTex);
+        }
+      })
+      .catch((err) => {
+        console.warn('[Interactive2DPliegoStage] async direct texture update warning:', err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [design, activePlayer, artworkRegistry, productModelId]);
+
   // Generar SVG enriquecido en tiempo real del pliego de confección
   const svgContent = useMemo(() => {
-    const raw = generateGarmentTailoringSvgString(productModelId, design, activePlayer, {
-      artworkRegistry,
-    });
+    let raw = '';
+    if (productModelId === 'futbol_jersey_pro_vneck') {
+      raw = generateProductionMoldSvgString(design, activePlayer, {
+        directTextures,
+        artworkRegistry,
+        showCutLines: true,
+        showLabels: true,
+      });
+    } else {
+      raw = generateGarmentTailoringSvgString(productModelId, design, activePlayer, {
+        directTextures,
+        artworkRegistry,
+      });
+    }
     return raw ? raw.replace(/^<\?xml[^>]*\?>\s*/i, '') : '';
-  }, [productModelId, design, activePlayer, artworkRegistry]);
+  }, [productModelId, design, activePlayer, artworkRegistry, directTextures]);
 
   const handleZoomIn = () => setScale((s) => Math.min(s * 1.25, 4));
   const handleZoomOut = () => setScale((s) => Math.max(s / 1.25, 0.5));

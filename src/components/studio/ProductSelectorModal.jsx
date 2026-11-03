@@ -14,15 +14,19 @@ import { ENGINE_PRODUCTS } from '../../engine/core/designStore';
 
 // Miniaturas fotorealistas o de alta definición para cada prenda
 const PRODUCT_IMAGES = {
-  futbol_jersey_pro_vneck: '/assets/catalog/futbol_f3_jersey.jpg',
-  futbol_jersey_f3w_women: '/assets/catalog/futbol_f3_jersey.jpg',
-  football_shorts_fp3: '/assets/catalog/shorts_fp3_matchday.jpg',
-  basketball_b6_hero: '/assets/catalog/basket_b6_men.jpg',
-  basketball_b7w_epic_women: '/assets/catalog/basket_b7w_women.jpg',
-  basketball_shorts_bp6: '/assets/catalog/shorts_fp3_matchday.jpg',
-  basketball_shorts_bp7w_women: '/assets/catalog/shorts_fp3_matchday.jpg',
-  jacket_softshell_601m_men: '/assets/catalog/jacket_601m_softshell.jpg',
-  jacket_softshell_601w_women: '/assets/catalog/jacket_601w_women.jpg',
+  futbol_jersey_pro_vneck: '/assets/showcase/futbol_f3_jersey.jpg',
+  futbol_jersey_f3w_women: '/assets/showcase/futbol_f3_jersey.jpg',
+  football_shorts_fp3: '/assets/showcase/shorts_fp3_matchday.jpg',
+  basketball_b6_hero: '/assets/showcase/basket_b6_men.jpg',
+  basketball_b7w_epic_women: '/assets/showcase/basket_b7w_women.jpg',
+  basketball_shorts_bp6: '/assets/showcase/shorts_fp3_matchday.jpg',
+  basketball_shorts_bp7w_women: '/assets/showcase/shorts_fp3_matchday.jpg',
+  jacket_softshell_601m_men: '/assets/showcase/jacket_601m_softshell.jpg',
+  jacket_softshell_601w_women: '/assets/showcase/jacket_601w_women.jpg',
+  esports_pro_jersey: '/assets/showcase/futbol_f3_jersey.jpg',
+  cap_snapback_6panel: '/assets/stitch/hero_banner.png',
+  bottle_inox_laser_750: '/assets/stitch/hero_banner.png',
+  shinguards_carbon_pro: '/assets/stitch/hero_banner.png',
 };
 
 const SPORT_OPTIONS = [
@@ -30,6 +34,7 @@ const SPORT_OPTIONS = [
   { id: 'Fútbol', label: 'Fútbol ⚽', icon: '⚽' },
   { id: 'Baloncesto', label: 'Baloncesto 🏀', icon: '🏀' },
   { id: 'Chaquetas', label: 'Chaquetas & Abrigos 🧥', icon: '🧥' },
+  { id: 'Accesorios', label: 'Accesorios & E-Sports 🎮', icon: '🎮' },
 ];
 
 const GENDER_OPTIONS = [
@@ -49,8 +54,32 @@ export default function ProductSelectorModal({
 
   const filteredProducts = useMemo(() => {
     return ENGINE_PRODUCTS.filter((prod) => {
-      if (selectedSport !== 'all' && prod.sport !== selectedSport) return false;
-      if (selectedGender !== 'all' && prod.gender !== selectedGender) return false;
+      // 1. Filtro Deporte
+      if (selectedSport !== 'all') {
+        if (selectedSport === 'Accesorios') {
+          if (prod.sport !== 'Accesorios' && prod.sport !== 'E-Sports' && prod.garmentCategory !== 'accessory') {
+            return false;
+          }
+        } else if (prod.sport !== selectedSport) {
+          return false;
+        }
+      }
+
+      // 2. Filtro Género
+      if (selectedGender !== 'all') {
+        // Accesorios y complementos son universales
+        if (prod.garmentCategory === 'accessory') {
+          return true;
+        }
+        // Shorts de fútbol de matchday compatibles con ambos
+        if (prod.id === 'football_shorts_fp3') {
+          return true;
+        }
+        if (prod.gender && prod.gender !== selectedGender) {
+          return false;
+        }
+      }
+
       return true;
     });
   }, [selectedSport, selectedGender]);
@@ -142,36 +171,46 @@ export default function ProductSelectorModal({
         <div className="flex-1 overflow-y-auto p-5 sm:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 bg-slate-100/60">
           {filteredProducts.map((prod) => {
             const isCurrent = activeProductId === prod.id;
-            const imgSrc = PRODUCT_IMAGES[prod.id] || '/assets/catalog/futbol_f3_jersey.jpg';
+            const imgSrc = PRODUCT_IMAGES[prod.id] || '/assets/showcase/futbol_f3_jersey.jpg';
             const isFeminine = prod.gender === 'women';
 
             return (
               <div
                 key={prod.id}
-                className={`group relative bg-white rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-xl hover:-translate-y-1 flex flex-col ${
+                onClick={() => handleChoose(prod.id)}
+                className={`group relative bg-white rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-xl hover:-translate-y-1 flex flex-col cursor-pointer ${
                   isCurrent
                     ? 'ring-2 ring-emerald-500 border-emerald-400 shadow-md'
                     : 'border-slate-200 hover:border-sky-300'
                 }`}
               >
-                {/* Imagen Preview */}
-                <div className="relative aspect-4/3 bg-slate-100 overflow-hidden flex items-center justify-center">
+                {/* Imagen Preview con contenedor garantizado */}
+                <div className="relative w-full h-44 sm:h-48 bg-gradient-to-b from-slate-100 to-slate-200 overflow-hidden flex items-center justify-center">
                   <img
                     src={imgSrc}
                     alt={prod.name}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
+                      const fb = e.currentTarget.nextElementSibling;
+                      if (fb) fb.classList.remove('hidden');
                     }}
                   />
 
+                  {/* Fallback visual estilizado si no carga la imagen */}
+                  <div className="hidden absolute inset-0 flex flex-col items-center justify-center p-4 bg-slate-900 text-white">
+                    <Shirt className="w-12 h-12 text-sky-400 mb-2 opacity-80" />
+                    <span className="text-xs font-black text-center">{prod.name}</span>
+                    <span className="text-[10px] text-slate-400 mt-1">{prod.sport}</span>
+                  </div>
+
                   {/* Badges superiores */}
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full bg-slate-900/85 backdrop-blur-xs text-white text-[10px] font-black uppercase tracking-wider">
+                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-900/85 backdrop-blur-xs text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
                       {prod.sport}
                     </span>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs ${
                         isFeminine
                           ? 'bg-fuchsia-600/90 text-white'
                           : 'bg-sky-600/90 text-white'
@@ -182,13 +221,13 @@ export default function ProductSelectorModal({
                   </div>
 
                   {isCurrent && (
-                    <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center gap-1 shadow-md">
+                    <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center gap-1 shadow-md z-10">
                       <Check className="w-3 h-3 stroke-[3]" />
                       <span>Activa</span>
                     </div>
                   )}
 
-                  <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-xs text-slate-900 text-xs font-black shadow-xs">
+                  <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-xs text-slate-900 text-xs font-black shadow-xs z-10">
                     ${prod.basePrice.toFixed(2)} USD
                   </div>
                 </div>
@@ -219,7 +258,10 @@ export default function ProductSelectorModal({
                   {/* Botón de Selección */}
                   <button
                     type="button"
-                    onClick={() => handleChoose(prod.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleChoose(prod.id);
+                    }}
                     className={`mt-4 w-full py-2.5 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 cursor-pointer transition-all shadow-xs ${
                       isCurrent
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'

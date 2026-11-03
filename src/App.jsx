@@ -364,12 +364,8 @@ export default function App() {
           />
           <main className="flex-1 w-full">
             <Hero
-              onStartDesigning={(productId) => {
-                if (productId) {
-                  handleSelectCatalogProduct(productId);
-                } else {
-                  setIsProductSelectorOpen(true);
-                }
+              onStartDesigning={() => {
+                setIsProductSelectorOpen(true);
               }}
             />
             <ProductCatalog

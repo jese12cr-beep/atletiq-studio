@@ -271,6 +271,7 @@ export function generateGarmentTailoringSvgString(
 ) {
   const spec = TAILORING_GARMENT_SPECS[productModelId] || TAILORING_GARMENT_SPECS.futbol_jersey_pro_vneck;
   const paths = TAILORING_SVG_PATHS[productModelId] || TAILORING_SVG_PATHS.futbol_jersey_pro_vneck;
+  const directTextures = options.directTextures || null;
 
   const primaryColor = design?.colorZones?.primary?.hex || '#FFF0B5';
   const secondaryColor = design?.colorZones?.secondary?.hex || '#0A1A3A';
@@ -281,9 +282,16 @@ export function generateGarmentTailoringSvgString(
   const playerName = (activePlayer?.name || design?.sampleName || 'ATLETIQ').toUpperCase();
   const playerNumber = String(activePlayer?.number || design?.sampleNumber || '10');
 
-  // Si es camiseta o playera
+  // Si es camiseta, playera o tank
   if (spec.category === 'jersey' || spec.category === 'tank' || spec.category === 'tank_women') {
     const isTank = spec.category.startsWith('tank');
+    const fBounds = isTank 
+      ? { x: 120, y: 650, width: 1560, height: 2580 }
+      : { x: 190, y: 1010, width: 1540, height: 2250 };
+    const bBounds = isTank
+      ? { x: 1720, y: 650, width: 1660, height: 2580 }
+      : { x: 1815, y: 985, width: 1540, height: 2250 };
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%" height="100%" viewBox="${MOLD_VIEWBOX}" preserveAspectRatio="xMidYMid meet">
   <defs>
@@ -308,21 +316,24 @@ export function generateGarmentTailoringSvgString(
     ${MOLD_BACKGROUND_MARKS}
   </g>
 
-  <!-- CAPA DE PRODUCCIÓN TEXTIL INDUSTRIAL -->
+  <!-- CAPA DE PRODUCCIÓN TEXTIL INDUSTRIAL EN VIVO -->
   <g id="DESIGN">
     <!-- PIEZA 1: DELANTERO / FRENTE -->
     <g id="PIECE_FRENTE">
       <g clip-path="url(#clip-frente)">
+        ${
+          directTextures?.front
+            ? `<image href="${directTextures.front}" xlink:href="${directTextures.front}" x="${fBounds.x}" y="${fBounds.y}" width="${fBounds.width}" height="${fBounds.height}" preserveAspectRatio="none" />`
+            : `
         <rect x="0" y="0" width="3600" height="3500" fill="${primaryColor}" />
-        <!-- Acento o Franja estilizada -->
-        <path d="M400,2100 Q950,2250 1500,2100 L1500,2400 Q950,2550 400,2400 Z" fill="${secondaryColor}" opacity="0.9" />
-        <path d="M400,2420 Q950,2570 1500,2420 L1500,2480 Q950,2630 400,2480 Z" fill="${accentColor}" />
         <!-- Escudo Frontal -->
         <circle cx="1160" cy="1540" r="95" fill="${secondaryColor}" />
         <circle cx="1160" cy="1540" r="85" fill="${primaryColor}" stroke="${secondaryColor}" stroke-width="4" />
         <text x="1160" y="1550" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="32" fill="${secondaryColor}">ATLETIQ</text>
         <!-- Dorsal Pecho -->
         <text x="740" y="1620" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="120" fill="${primaryColor}" stroke="${secondaryColor}" stroke-width="10" paint-order="stroke fill">${playerNumber}</text>
+        `
+        }
       </g>
       <path d="${paths.frente}" class="cut-line" />
       <text x="950" y="3280" text-anchor="middle" class="piece-tag">[ 1. FRENTE • ${spec.title.toUpperCase()} • TALLA M ]</text>
@@ -331,14 +342,17 @@ export function generateGarmentTailoringSvgString(
     <!-- PIEZA 2: TRASERO / ESPALDA -->
     <g id="PIECE_TRASERO">
       <g clip-path="url(#clip-trasero)">
+        ${
+          directTextures?.back
+            ? `<image href="${directTextures.back}" xlink:href="${directTextures.back}" x="${bBounds.x}" y="${bBounds.y}" width="${bBounds.width}" height="${bBounds.height}" preserveAspectRatio="none" />`
+            : `
         <rect x="0" y="0" width="3600" height="3500" fill="${primaryColor}" />
-        <!-- Franjas Traseras Coincidentes -->
-        <path d="M2000,2100 Q2600,2250 3200,2100 L3200,2400 Q2600,2550 2000,2400 Z" fill="${secondaryColor}" opacity="0.9" />
-        <path d="M2000,2420 Q2600,2570 3200,2420 L3200,2480 Q2600,2630 2000,2480 Z" fill="${accentColor}" />
         <!-- Nombre Jugador -->
         <text x="2600" y="1530" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="140" letter-spacing="6" fill="${secondaryColor}" stroke="#ffffff" stroke-width="12" paint-order="stroke fill">${playerName}</text>
         <!-- Dorsal Espalda Gigante -->
         <text x="2600" y="2060" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="620" fill="${secondaryColor}" stroke="#ffffff" stroke-width="30" paint-order="stroke fill">${playerNumber}</text>
+        `
+        }
       </g>
       <path d="${paths.trasero}" class="cut-line" />
       <text x="2600" y="3280" text-anchor="middle" class="piece-tag">[ 2. ESPALDA • ${spec.title.toUpperCase()} • TALLA M ]</text>
@@ -350,8 +364,14 @@ export function generateGarmentTailoringSvgString(
     <!-- PIEZA 3: MANGA IZQUIERDA -->
     <g id="PIECE_MANGA_IZQUIERDA">
       <g clip-path="url(#clip-manga-izq)">
+        ${
+          directTextures?.left_sleeve
+            ? `<image href="${directTextures.left_sleeve}" xlink:href="${directTextures.left_sleeve}" x="280" y="165" width="1335" height="745" preserveAspectRatio="none" />`
+            : `
         <rect x="0" y="0" width="1800" height="1000" fill="${sleevesColor}" />
-        <rect x="200" y="760" width="1200" height="90" fill="${collarColor}" />
+        <rect x="280" y="780" width="1335" height="90" fill="${collarColor}" />
+        `
+        }
       </g>
       <path d="${paths.manga_izq}" class="cut-line" />
       <text x="950" y="150" text-anchor="middle" class="piece-tag">[ 3. MANGA IZQUIERDA • TALLA M ]</text>
@@ -360,8 +380,14 @@ export function generateGarmentTailoringSvgString(
     <!-- PIEZA 4: MANGA DERECHA -->
     <g id="PIECE_MANGA_DERECHA">
       <g clip-path="url(#clip-manga-der)">
+        ${
+          directTextures?.right_sleeve
+            ? `<image href="${directTextures.right_sleeve}" xlink:href="${directTextures.right_sleeve}" x="1925" y="165" width="1335" height="745" preserveAspectRatio="none" />`
+            : `
         <rect x="1800" y="0" width="1800" height="1000" fill="${sleevesColor}" />
-        <rect x="2000" y="760" width="1200" height="90" fill="${collarColor}" />
+        <rect x="1925" y="780" width="1335" height="90" fill="${collarColor}" />
+        `
+        }
       </g>
       <path d="${paths.manga_der}" class="cut-line" />
       <text x="2600" y="150" text-anchor="middle" class="piece-tag">[ 4. MANGA DERECHA • TALLA M ]</text>
@@ -388,6 +414,12 @@ export function generateGarmentTailoringSvgString(
       .cut-line { stroke: #010101; stroke-width: 2.5; fill: none; stroke-miterlimit: 10; }
       .piece-tag { font-family: 'Arial Black', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 2px; fill: #334155; }
     </style>
+    <clipPath id="clip-pierna-izq">
+      <path d="${paths.pierna_izq || paths.delantero_izq}" />
+    </clipPath>
+    <clipPath id="clip-pierna-der">
+      <path d="${paths.pierna_der || paths.trasero_der || paths.delantero_der}" />
+    </clipPath>
   </defs>
 
   <g id="BACKGROUND">
@@ -397,24 +429,36 @@ export function generateGarmentTailoringSvgString(
   <g id="DESIGN">
     <!-- PIERNA IZQUIERDA -->
     <g id="PIECE_PIERNA_IZQUIERDA">
-      <path d="${paths.pierna_izq || paths.delantero_izq}" fill="${primaryColor}" stroke="#010101" stroke-width="2.5" />
-      <!-- Vivo lateral -->
-      <path d="M220,1200 L200,2800" stroke="${secondaryColor}" stroke-width="40" />
-      <path d="M270,1200 L250,2800" stroke="${accentColor}" stroke-width="15" />
-      <!-- Número Short -->
-      <text x="500" y="2600" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="220" fill="${secondaryColor}">${playerNumber}</text>
+      <g clip-path="url(#clip-pierna-izq)">
+        ${
+          directTextures?.left_leg
+            ? `<image href="${directTextures.left_leg}" xlink:href="${directTextures.left_leg}" x="150" y="800" width="1450" height="2100" preserveAspectRatio="none" />`
+            : `
+        <path d="${paths.pierna_izq || paths.delantero_izq}" fill="${primaryColor}" />
+        <!-- Número Short -->
+        <text x="500" y="2600" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="220" fill="${secondaryColor}">${playerNumber}</text>
+        `
+        }
+      </g>
+      <path d="${paths.pierna_izq || paths.delantero_izq}" class="cut-line" />
       <text x="850" y="3250" text-anchor="middle" class="piece-tag">[ 1. PIERNA IZQUIERDA • ${spec.title.toUpperCase()} ]</text>
     </g>
 
     <!-- PIERNA DERECHA -->
     <g id="PIECE_PIERNA_DERECHA">
-      <path d="${paths.pierna_der || paths.trasero_der || paths.delantero_der}" fill="${primaryColor}" stroke="#010101" stroke-width="2.5" />
-      <!-- Vivo lateral -->
-      <path d="M3200,1200 L3220,2800" stroke="${secondaryColor}" stroke-width="40" />
-      <path d="M3150,1200 L3170,2800" stroke="${accentColor}" stroke-width="15" />
-      <!-- Escudo Short -->
-      <circle cx="2800" cy="2550" r="90" fill="${secondaryColor}" />
-      <text x="2800" y="2560" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="${primaryColor}">ATLETIQ</text>
+      <g clip-path="url(#clip-pierna-der)">
+        ${
+          directTextures?.right_leg
+            ? `<image href="${directTextures.right_leg}" xlink:href="${directTextures.right_leg}" x="1850" y="800" width="1450" height="2100" preserveAspectRatio="none" />`
+            : `
+        <path d="${paths.pierna_der || paths.trasero_der || paths.delantero_der}" fill="${primaryColor}" />
+        <!-- Escudo Short -->
+        <circle cx="2800" cy="2550" r="90" fill="${secondaryColor}" />
+        <text x="2800" y="2560" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="${primaryColor}">ATLETIQ</text>
+        `
+        }
+      </g>
+      <path d="${paths.pierna_der || paths.trasero_der || paths.delantero_der}" class="cut-line" />
       <text x="2550" y="3250" text-anchor="middle" class="piece-tag">[ 2. PIERNA DERECHA • ${spec.title.toUpperCase()} ]</text>
     </g>
 
