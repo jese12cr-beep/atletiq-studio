@@ -1535,6 +1535,7 @@ export default function HybridStudioWorkspace({
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
         {/* ESCENARIO 3D INTERACTIVO / 2D PLANO CON ILUMINACIÓN PROFESIONAL DE ESTUDIO */}
         <main
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); return false; }}
           className={`relative bg-[radial-gradient(circle_at_50%_38%,#ffffff_0%,#f1f5f9_60%,#e2e8f0_100%)] overflow-hidden flex flex-col transition-all duration-300 ${
             isMobilePanelCollapsed
               ? 'flex-1 h-full'
@@ -2449,7 +2450,7 @@ export default function HybridStudioWorkspace({
                                     : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                                 }`}
                               >
-                                {f.name}
+                                {f.name || f.label}
                               </button>
                             ))}
                           </div>
@@ -2677,7 +2678,7 @@ export default function HybridStudioWorkspace({
                                       : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                                   }`}
                                 >
-                                  {f.name}
+                                  {f.name || f.label}
                                 </button>
                               ))}
                             </div>
@@ -2932,7 +2933,7 @@ export default function HybridStudioWorkspace({
                                   : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'
                               }`}
                             >
-                              {f.name}
+                              {f.name || f.label}
                             </button>
                           ))}
                         </div>

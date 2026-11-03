@@ -123,7 +123,12 @@ export default function Interactive2DPliegoStage({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      className="relative w-full h-full bg-[#0d131f] select-none overflow-hidden cursor-grab active:cursor-grabbing flex items-center justify-center"
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }}
+      className="relative w-full h-full bg-[#0d131f] select-none overflow-hidden cursor-grab active:cursor-grabbing flex items-center justify-center protected-graphics"
       style={{
         backgroundImage: `
           radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.4) 0%, rgba(13, 19, 31, 1) 100%),
@@ -153,9 +158,31 @@ export default function Interactive2DPliegoStage({
         }}
       >
         <div 
-          className="w-auto h-full max-h-[88%] aspect-[3543/3401] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 pointer-events-auto"
-          dangerouslySetInnerHTML={{ __html: svgContent }}
-        />
+          className="relative w-auto h-full max-h-[88%] aspect-[3543/3401] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 pointer-events-auto"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }}
+        >
+          <div 
+            className="w-full h-full"
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+          />
+          {/* Capa de protección invisible: anula click derecho sobre imágenes internas */}
+          <div 
+            className="absolute inset-0 z-10 select-none cursor-grab active:cursor-grabbing"
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }}
+            onDragStart={(e) => {
+              e.preventDefault();
+              return false;
+            }}
+          />
+        </div>
       </div>
 
       {/* Barra de Controles Inferior Izquierda */}

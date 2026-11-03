@@ -259,6 +259,49 @@ export const TAILORING_SVG_PATHS = {
   },
 };
 
+
+export const TAILORING_PIECE_BOUNDS = {
+  futbol_jersey_pro_vneck: {
+    frente: { x: 199.7, y: 1039.1, width: 1497.7, height: 2165.9 },
+    trasero: { x: 1845.8, y: 1015.8, width: 1497.8, height: 2189.4 },
+    manga_izq: { x: 310.1, y: 196.3, width: 1276.9, height: 686.3 },
+    manga_der: { x: 1956.3, y: 196.3, width: 1276.9, height: 686.3 },
+    cuello: { x: 1700, y: 200, width: 140, height: 1400 },
+  },
+  futbol_jersey_f3w_women: {
+    frente: { x: 290.0, y: 1095.0, width: 1580.0, height: 1600.3 },
+    trasero: { x: 1930.0, y: 1069.5, width: 1580.0, height: 1625.3 },
+    manga_izq: { x: 394.0, y: 224.3, width: 1146.0, height: 593.8 },
+    manga_der: { x: 2044.0, y: 224.3, width: 1146.0, height: 593.8 },
+    cuello: { x: 1700, y: 200, width: 140, height: 1400 },
+  },
+  football_shorts_fp3: {
+    pierna_izq: { x: 178.6, y: 846.1, width: 1464.7, height: 2148.9 },
+    pierna_der: { x: 1899.9, y: 846.1, width: 1464.7, height: 2148.9 },
+    pretina: { x: 250, y: 250, width: 3000, height: 380 },
+  },
+  basketball_b6_hero: {
+    frente: { x: 202.2, y: 651.9, width: 1492.6, height: 2553.1 },
+    trasero: { x: 1848.5, y: 651.9, width: 1492.6, height: 2553.1 },
+    cuello: { x: 1700, y: 200, width: 140, height: 1400 },
+  },
+  basketball_b7w_epic_women: {
+    frente: { x: 280.0, y: 720.0, width: 1420.0, height: 2420.0 },
+    trasero: { x: 1840.0, y: 720.0, width: 1420.0, height: 2420.0 },
+    cuello: { x: 1700, y: 200, width: 140, height: 1400 },
+  },
+  basketball_shorts_bp6: {
+    pierna_izq: { x: 165.0, y: 810.0, width: 1490.0, height: 2210.0 },
+    pierna_der: { x: 1885.0, y: 810.0, width: 1490.0, height: 2210.0 },
+    pretina: { x: 250, y: 250, width: 3000, height: 380 },
+  },
+  basketball_shorts_bp7w_women: {
+    pierna_izq: { x: 210.0, y: 860.0, width: 1410.0, height: 2090.0 },
+    pierna_der: { x: 1920.0, y: 860.0, width: 1410.0, height: 2090.0 },
+    pretina: { x: 250, y: 250, width: 3000, height: 380 },
+  },
+};
+
 // ============================================================================
 // 3. GENERADOR DE SVG DEL PLIEGO INDUSTRIAL MULTI-PRENDA
 // ============================================================================
@@ -297,6 +340,7 @@ export function generateGarmentTailoringSvgString(
   <defs>
     <style>
       ${MOLD_STYLE}
+      image { pointer-events: none; -webkit-user-drag: none; user-select: none; }
       .cut-line { stroke: #010101; stroke-width: 2.5; fill: none; stroke-miterlimit: 10; }
       .seam-line { stroke: #e11d48; stroke-width: 1.5; stroke-dasharray: 6 4; fill: none; }
       .piece-tag { font-family: 'Arial Black', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 2px; fill: #334155; }
@@ -366,7 +410,7 @@ export function generateGarmentTailoringSvgString(
       <g clip-path="url(#clip-manga-izq)">
         ${
           directTextures?.left_sleeve
-            ? `<image href="${directTextures.left_sleeve}" xlink:href="${directTextures.left_sleeve}" x="280" y="165" width="1335" height="745" preserveAspectRatio="none" />`
+            ? `<image href="${directTextures.left_sleeve}" xlink:href="${directTextures.left_sleeve}" x="${mIzqBounds.x}" y="${mIzqBounds.y}" width="${mIzqBounds.width}" height="${mIzqBounds.height}" preserveAspectRatio="none" />`
             : `
         <rect x="0" y="0" width="1800" height="1000" fill="${sleevesColor}" />
         <rect x="280" y="780" width="1335" height="90" fill="${collarColor}" />
@@ -382,7 +426,7 @@ export function generateGarmentTailoringSvgString(
       <g clip-path="url(#clip-manga-der)">
         ${
           directTextures?.right_sleeve
-            ? `<image href="${directTextures.right_sleeve}" xlink:href="${directTextures.right_sleeve}" x="1925" y="165" width="1335" height="745" preserveAspectRatio="none" />`
+            ? `<image href="${directTextures.right_sleeve}" xlink:href="${directTextures.right_sleeve}" x="${mDerBounds.x}" y="${mDerBounds.y}" width="${mDerBounds.width}" height="${mDerBounds.height}" preserveAspectRatio="none" />`
             : `
         <rect x="1800" y="0" width="1800" height="1000" fill="${sleevesColor}" />
         <rect x="1925" y="780" width="1335" height="90" fill="${collarColor}" />
@@ -432,7 +476,7 @@ export function generateGarmentTailoringSvgString(
       <g clip-path="url(#clip-pierna-izq)">
         ${
           directTextures?.left_leg
-            ? `<image href="${directTextures.left_leg}" xlink:href="${directTextures.left_leg}" x="150" y="800" width="1450" height="2100" preserveAspectRatio="none" />`
+            ? `<image href="${directTextures.left_leg}" xlink:href="${directTextures.left_leg}" x="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_izq || { x: 178, y: 846, width: 1465, height: 2150 }).x}" y="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_izq || { x: 178, y: 846, width: 1465, height: 2150 }).y}" width="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_izq || { x: 178, y: 846, width: 1465, height: 2150 }).width}" height="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_izq || { x: 178, y: 846, width: 1465, height: 2150 }).height}" preserveAspectRatio="none" />`
             : `
         <path d="${paths.pierna_izq || paths.delantero_izq}" fill="${primaryColor}" />
         <!-- Número Short -->
@@ -449,7 +493,7 @@ export function generateGarmentTailoringSvgString(
       <g clip-path="url(#clip-pierna-der)">
         ${
           directTextures?.right_leg
-            ? `<image href="${directTextures.right_leg}" xlink:href="${directTextures.right_leg}" x="1850" y="800" width="1450" height="2100" preserveAspectRatio="none" />`
+            ? `<image href="${directTextures.right_leg}" xlink:href="${directTextures.right_leg}" x="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_der || { x: 1900, y: 846, width: 1465, height: 2150 }).x}" y="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_der || { x: 1900, y: 846, width: 1465, height: 2150 }).y}" width="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_der || { x: 1900, y: 846, width: 1465, height: 2150 }).width}" height="${(TAILORING_PIECE_BOUNDS[productModelId]?.pierna_der || { x: 1900, y: 846, width: 1465, height: 2150 }).height}" preserveAspectRatio="none" />`
             : `
         <path d="${paths.pierna_der || paths.trasero_der || paths.delantero_der}" fill="${primaryColor}" />
         <!-- Escudo Short -->

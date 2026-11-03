@@ -1569,6 +1569,7 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
   <defs>
     <style>
       ${MOLDE_CAMISA_STYLE}
+      image { pointer-events: none; -webkit-user-drag: none; user-select: none; }
       .cut-line { stroke: #010101; stroke-width: 2.2; fill: none; stroke-miterlimit: 10; }
       .piece-tag { font-family: 'Arial Black', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 2px; fill: #475569; }
     </style>
@@ -1685,6 +1686,13 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
 
       <!-- Identificación -->
       ${showLabels ? `<text x="${traseroCenterX}" y="920" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.RIGHT_SLEEVE.tag}</text>` : ''}
+    </g>
+
+    <!-- ==================== PIEZA 5: TIRA DE CUELLO / RIBETE ==================== -->
+    <g id="PIECE_CUELLO">
+      <rect x="1700" y="200" width="140" height="1400" fill="${collarColor}" />
+      ${showCutLines ? `<rect x="1700" y="200" width="140" height="1400" class="cut-line" />` : ''}
+      ${showLabels ? `<text x="1770" y="900" text-anchor="middle" transform="rotate(-90 1770 900)" class="piece-tag">${MOLD_CONSTANTS.PIECES.COLLAR.tag}</text>` : ''}
     </g>
   </g>
 </svg>`;

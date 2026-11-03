@@ -342,3 +342,22 @@ dialog::backdrop {
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
 }
+
+/* 8. Bloqueo estricto contra copia no autorizada, arrastre y guardado de recursos de confección */
+.protected-graphics,
+.protected-graphics canvas,
+.protected-graphics svg,
+.protected-graphics img,
+.protected-graphics image {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+}
+
