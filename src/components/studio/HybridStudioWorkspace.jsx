@@ -1680,25 +1680,47 @@ export default function HybridStudioWorkspace({
                   /* Modo Normal: Todos los estilos de corte CAD (16 cortes) */
                   <>
                     {/* Banner de Acceso a Kits Oficiales Pro (Liga MX + Champions League) */}
-                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white shadow-md border border-indigo-800/40 flex items-center justify-between gap-2.5">
-                      <div className="min-w-0">
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white shadow-md border border-indigo-800/50 space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-black uppercase tracking-wider text-amber-300">
-                            ⭐ KITS OFICIALES PRO (60)
+                          <span className="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-1">
+                            <span>⭐</span>
+                            <span>Kits Oficiales Pro (60)</span>
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-300 font-medium truncate mt-0.5">
-                          🇲🇽 Liga MX (36) • 🏆 Champions League (24)
-                        </p>
+                        <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
+                          2026/27
+                        </span>
                       </div>
-                      <button
-                        id="btn-open-mexico-kits"
-                        type="button"
-                        onClick={() => setIsMexicoKitsModalOpen(true)}
-                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-black shrink-0 transition-all cursor-pointer shadow-md hover:scale-103"
-                      >
-                        Ver 60 Kits
-                      </button>
+                      <p className="text-[10px] text-slate-300 font-medium leading-tight">
+                        Colecciones completas con patrocinadores y escudos oficiales. Cárgalos directamente en el visor 3D:
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 pt-0.5">
+                        <button
+                          id="btn-open-ligamx-sidebar"
+                          type="button"
+                          onClick={() => {
+                            setProKitsCollectionTab('ligamx');
+                            setIsMexicoKitsModalOpen(true);
+                          }}
+                          className="px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all cursor-pointer shadow-xs hover:scale-102 flex items-center justify-center gap-1.5 border border-emerald-400/30"
+                        >
+                          <span>🇲🇽</span>
+                          <span>Liga MX (36)</span>
+                        </button>
+                        <button
+                          id="btn-open-ucl-sidebar"
+                          type="button"
+                          onClick={() => {
+                            setProKitsCollectionTab('ucl');
+                            setIsMexicoKitsModalOpen(true);
+                          }}
+                          className="px-2.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition-all cursor-pointer shadow-xs hover:scale-102 flex items-center justify-center gap-1.5 border border-blue-400/40 ring-2 ring-amber-400/60"
+                        >
+                          <span>⭐</span>
+                          <span>Champions (24)</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between pb-1 border-b border-slate-100">
@@ -4018,51 +4040,105 @@ export default function HybridStudioWorkspace({
                     </div>
                   </div>
 
-                  {/* Banner inferior para ir a Liga MX */}
-                  <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  {/* Banner inferior para ir a Kits Oficiales Pro */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white border border-indigo-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
                     <div className="space-y-0.5 text-center sm:text-left">
-                      <h5 className="text-xs font-black text-slate-900 flex items-center gap-1.5 justify-center sm:justify-start">
-                        <span>🇲🇽</span>
-                        <span>Colección de Fútbol México Pro (18 Clubes)</span>
+                      <h5 className="text-xs font-black text-amber-300 flex items-center gap-1.5 justify-center sm:justify-start">
+                        <span>⭐</span>
+                        <span>Kits Oficiales Pro (60 Uniformes)</span>
                       </h5>
-                      <p className="text-[11px] text-slate-600">
-                        Cortes y colores de la Primera División sin marcas comerciales para venta legal en Shopify.
+                      <p className="text-[11px] text-slate-300">
+                        🇲🇽 36 de Liga MX + 🏆 24 de Champions League (Locales y Visitantes con patrocinadores oficiales).
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setGarmentMenuMenSection('ligamx')}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-xs shrink-0 cursor-pointer transition-all"
-                    >
-                      Explorar 18 Kits →
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProKitsCollectionTab('ligamx');
+                          setGarmentMenuMenSection('ligamx');
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-xs cursor-pointer transition-all flex items-center gap-1"
+                      >
+                        <span>🇲🇽</span>
+                        <span>Liga MX (36)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProKitsCollectionTab('ucl');
+                          setGarmentMenuMenSection('ligamx');
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-xs cursor-pointer transition-all flex items-center gap-1 ring-2 ring-amber-400/50"
+                      >
+                        <span>⭐</span>
+                        <span>Champions (24)</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* VISTA 2: COLECCIÓN INSPIRADA EN LA LIGA MX (18 CLUBES) */}
+              {/* VISTA 2: COLECCIÓN KITS OFICIALES PRO (LIGA MX Y CHAMPIONS LEAGUE) */}
               {garmentMenuMenSection === 'ligamx' && (
                 <div className="space-y-4">
-                  {/* Banner explicativo legal */}
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  {/* Segmented Selector entre Liga MX y Champions League */}
+                  <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setProKitsCollectionTab('ligamx')}
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        proKitsCollectionTab === 'ligamx'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                      }`}
+                    >
+                      <span>🇲🇽</span>
+                      <span>Liga MX Pro (36 Uniformes)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProKitsCollectionTab('ucl')}
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        proKitsCollectionTab === 'ucl'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                      }`}
+                    >
+                      <span>⭐</span>
+                      <span>UEFA Champions League (24 Uniformes)</span>
+                    </button>
+                  </div>
+
+                  {/* Banner explicativo */}
+                  <div className={`p-3.5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                    proKitsCollectionTab === 'ligamx'
+                      ? 'bg-emerald-50 border-emerald-200'
+                      : 'bg-blue-50 border-blue-200'
+                  }`}>
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">🇲🇽</span>
-                        <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wide">
-                          18 Uniformes Inspirados en la Liga MX
+                        <span className="text-sm">{proKitsCollectionTab === 'ligamx' ? '🇲🇽' : '⭐'}</span>
+                        <h4 className={`text-xs font-black uppercase tracking-wide ${
+                          proKitsCollectionTab === 'ligamx' ? 'text-emerald-950' : 'text-blue-950'
+                        }`}>
+                          {proKitsCollectionTab === 'ligamx'
+                            ? 'Liga MX (18 Clubes • 36 Uniformes Locales y Visita)'
+                            : 'UEFA Champions League (12 Clubes Gigantes • 24 Uniformes)'}
                         </h4>
-                        <span className="text-[10px] font-bold bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-full">
-                          Shopify Legal
-                        </span>
                       </div>
-                      <p className="text-[11px] text-emerald-800 leading-relaxed">
-                        Inspiraciones clásicas sin marcas de fabricantes (Nike/Adidas/Puma) ni patrocinadores registrados. Carga cualquier kit y personalízalo con tu propio nombre, dorsal y logotipo.
+                      <p className={`text-[11px] leading-relaxed ${
+                        proKitsCollectionTab === 'ligamx' ? 'text-emerald-800' : 'text-blue-800'
+                      }`}>
+                        {proKitsCollectionTab === 'ligamx'
+                          ? 'Uniformes oficiales de Primera División con escudos vectoriales y patrocinadores auténticos (Caliente, Cemento Cruz Azul, DHL, Cemex, etc.).'
+                          : 'Los 12 gigantes de Europa (Real Madrid, Barca, Man City, Bayern, PSG, Arsenal, Liverpool, Inter, Juventus, Dortmund, Atlético, Milan) con patrocinadores oficiales.'}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setGarmentMenuMenSection('custom')}
-                      className="text-xs font-bold text-emerald-800 hover:text-emerald-950 underline shrink-0 cursor-pointer"
+                      className="text-xs font-bold text-slate-700 hover:text-slate-900 underline shrink-0 cursor-pointer"
                     >
                       ← Personaliza a tu gusto
                     </button>
@@ -4379,7 +4455,7 @@ export default function HybridStudioWorkspace({
                 }`}
               >
                 <span>🏠</span>
-                <span>Local (18)</span>
+                <span>Local ({proKitsCollectionTab === 'ligamx' ? '18' : '12'})</span>
               </button>
               <button
                 type="button"
@@ -4391,7 +4467,7 @@ export default function HybridStudioWorkspace({
                 }`}
               >
                 <span>✈️</span>
-                <span>Visitante (18)</span>
+                <span>Visitante ({proKitsCollectionTab === 'ligamx' ? '18' : '12'})</span>
               </button>
               <button
                 type="button"
@@ -4402,18 +4478,18 @@ export default function HybridStudioWorkspace({
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Todos (36)
+                Todos ({proKitsCollectionTab === 'ligamx' ? '36' : '24'})
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
-            {filteredMexicoKitsInMenu.map((kit) => (
+            {(proKitsCollectionTab === 'ligamx' ? filteredMexicoKitsInMenu : filteredUclKitsInMenu).map((kit) => (
               <button
                 key={kit.id}
                 id={`btn-kit-${kit.id}`}
                 type="button"
-                onClick={() => handleApplyMexicoKit(kit)}
+                onClick={() => handleApplyOfficialKit(kit)}
                 className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md transition-all text-left flex flex-col justify-between gap-3 shadow-xs cursor-pointer group"
               >
                 <div className="flex items-start gap-3">

@@ -459,6 +459,163 @@ export function renderClubCrestSvg(clubId, cx, cy, r, design) {
     `;
   }
 
+
+  // =========================================================================
+  // UEFA CHAMPIONS LEAGUE CLUB CRESTS
+  // =========================================================================
+
+  // UCL 1: REAL MADRID
+  if (cid.includes('real_madrid') || cid.includes('madrid')) {
+    return `
+      <g id="crest_real_madrid" transform="translate(${cx}, ${cy})">
+        <circle cx="0" cy="${r * 0.12}" r="${r * 0.78}" fill="#FFFFFF" stroke="#001A49" stroke-width="${r * 0.08}" />
+        <line x1="${-r * 0.5}" y1="${-r * 0.4}" x2="${r * 0.5}" y2="${r * 0.6}" stroke="#001A49" stroke-width="${r * 0.22}" />
+        <text x="0" y="${r * 0.16}" text-anchor="middle" dominant-baseline="middle" font-family="Georgia, serif" font-weight="900" font-size="${r * 0.45}" fill="#FEBE10">MCF</text>
+        <polygon points="${-r * 0.5},${-r * 0.65} ${-r * 0.25},${-r * 0.9} 0,${-r * 0.7} ${r * 0.25},${-r * 0.9} ${r * 0.5},${-r * 0.65} ${r * 0.4},${-r * 0.55} ${-r * 0.4},${-r * 0.55}" fill="#FEBE10" stroke="#001A49" stroke-width="${r * 0.04}" />
+      </g>
+    `;
+  }
+
+  // UCL 2: FC BARCELONA
+  if (cid.includes('barcelona') || cid.includes('barca')) {
+    return `
+      <g id="crest_barcelona" transform="translate(${cx}, ${cy})">
+        <path d="M${-r * 0.8},${-r * 0.8} L${r * 0.8},${-r * 0.8} L${r * 0.8},${r * 0.2} C${r * 0.8},${r * 0.7} 0,${r} 0,${r} C0,${r} ${-r * 0.8},${r * 0.7} ${-r * 0.8},${r * 0.2} Z" fill="#004D98" stroke="#EDBB00" stroke-width="${r * 0.08}" />
+        <rect x="${-r * 0.75}" y="${-r * 0.75}" width="${r * 0.75}" height="${r * 0.75}" fill="#FFFFFF" />
+        <line x1="${-r * 0.375}" y1="${-r * 0.75}" x2="${-r * 0.375}" y2="0" stroke="#A50044" stroke-width="${r * 0.15}" />
+        <line x1="${-r * 0.75}" y1="${-r * 0.375}" x2="0" y2="${-r * 0.375}" stroke="#A50044" stroke-width="${r * 0.15}" />
+        <rect x="0" y="${-r * 0.75}" width="${r * 0.75}" height="${r * 0.75}" fill="#EDBB00" />
+        <line x1="${r * 0.2}" y1="${-r * 0.75}" x2="${r * 0.2}" y2="0" stroke="#A50044" stroke-width="${r * 0.1}" />
+        <line x1="${r * 0.55}" y1="${-r * 0.75}" x2="${r * 0.55}" y2="0" stroke="#A50044" stroke-width="${r * 0.1}" />
+        <rect x="${-r * 0.8}" y="${-r * 0.1}" width="${r * 1.6}" height="${r * 0.2}" fill="#EDBB00" />
+        <text x="0" y="${r * 0.02}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.18}" fill="#004D98">FCB</text>
+        <rect x="${-r * 0.35}" y="${r * 0.1}" width="${r * 0.25}" height="${r * 0.75}" fill="#A50044" />
+        <rect x="${r * 0.1}" y="${r * 0.1}" width="${r * 0.25}" height="${r * 0.75}" fill="#A50044" />
+      </g>
+    `;
+  }
+
+  // UCL 3: MANCHESTER CITY
+  if (cid.includes('man_city') || cid.includes('mancity')) {
+    return `
+      <g id="crest_man_city" transform="translate(${cx}, ${cy})">
+        <circle cx="0" cy="0" r="${r * 0.9}" fill="#6CABDD" stroke="#00285E" stroke-width="${r * 0.12}" />
+        <circle cx="0" cy="0" r="${r * 0.7}" fill="#FFFFFF" stroke="#00285E" stroke-width="${r * 0.05}" />
+        <path d="M${-r * 0.4},${-r * 0.1} L${r * 0.4},${-r * 0.1} L${r * 0.25},${r * 0.15} L${-r * 0.25},${r * 0.15} Z" fill="#FEBE10" />
+        <text x="0" y="${r * 0.42}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.25}" fill="#00285E">CITY</text>
+      </g>
+    `;
+  }
+
+  // UCL 4: BAYERN MÚNICH
+  if (cid.includes('bayern') || cid.includes('munchen')) {
+    return `
+      <g id="crest_bayern" transform="translate(${cx}, ${cy})">
+        <circle cx="0" cy="0" r="${r * 0.92}" fill="#DC052D" stroke="#0066B2" stroke-width="${r * 0.1}" />
+        <circle cx="0" cy="0" r="${r * 0.6}" fill="#0066B2" stroke="#FFFFFF" stroke-width="${r * 0.06}" />
+        <polygon points="0,${-r * 0.4} ${r * 0.3},0 0,${r * 0.4} ${-r * 0.3},0" fill="#FFFFFF" />
+        <text x="0" y="${r * 0.02}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.22}" fill="#DC052D">FCB</text>
+      </g>
+    `;
+  }
+
+  // UCL 5: PARIS SAINT-GERMAIN
+  if (cid.includes('psg') || cid.includes('paris')) {
+    return `
+      <g id="crest_psg" transform="translate(${cx}, ${cy})">
+        <circle cx="0" cy="0" r="${r * 0.92}" fill="#004170" stroke="#FFFFFF" stroke-width="${r * 0.08}" />
+        <circle cx="0" cy="0" r="${r * 0.68}" fill="#FFFFFF" />
+        <polygon points="0,${-r * 0.55} ${r * 0.25},${r * 0.45} ${-r * 0.25},${r * 0.45}" fill="#DA291C" />
+        <path d="M${-r * 0.12},${r * 0.45} Q0,${r * 0.2} ${r * 0.12},${r * 0.45} Z" fill="#FFFFFF" />
+        <circle cx="0" cy="${r * 0.15}" r="${r * 0.08}" fill="#FEBE10" />
+      </g>
+    `;
+  }
+
+  // UCL 6: ARSENAL
+  if (cid.includes('arsenal') || cid.includes('gunners')) {
+    return `
+      <g id="crest_arsenal" transform="translate(${cx}, ${cy})">
+        <path d="M${-r * 0.8},${-r * 0.85} L${r * 0.8},${-r * 0.85} L${r * 0.8},${r * 0.2} C${r * 0.8},${r * 0.7} 0,${r} 0,${r} C0,${r} ${-r * 0.8},${r * 0.7} ${-r * 0.8},${r * 0.2} Z" fill="#EF0107" stroke="#9C824A" stroke-width="${r * 0.08}" />
+        <rect x="${-r * 0.5}" y="${r * 0.05}" width="${r}" height="${r * 0.16}" fill="#9C824A" rx="2" />
+        <circle cx="${-r * 0.25}" cy="${r * 0.18}" r="${r * 0.16}" fill="#023474" stroke="#9C824A" stroke-width="${r * 0.04}" />
+        <circle cx="${r * 0.25}" cy="${r * 0.18}" r="${r * 0.16}" fill="#023474" stroke="#9C824A" stroke-width="${r * 0.04}" />
+      </g>
+    `;
+  }
+
+  // UCL 7: LIVERPOOL
+  if (cid.includes('liverpool') || cid.includes('reds')) {
+    return `
+      <g id="crest_liverpool" transform="translate(${cx}, ${cy})">
+        <path d="M${-r * 0.8},${-r * 0.85} L${r * 0.8},${-r * 0.85} L${r * 0.8},${r * 0.2} C${r * 0.8},${r * 0.7} 0,${r} 0,${r} C0,${r} ${-r * 0.8},${r * 0.7} ${-r * 0.8},${r * 0.2} Z" fill="#C8102E" stroke="#00B2A9" stroke-width="${r * 0.08}" />
+        <polygon points="0,${-r * 0.45} ${r * 0.25},${-r * 0.1} ${r * 0.15},${r * 0.35} 0,${r * 0.45} ${-r * 0.15},${r * 0.35} ${-r * 0.25},${-r * 0.1}" fill="#F6EB61" />
+        <text x="0" y="${r * 0.75}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.22}" fill="#FFFFFF">L.F.C.</text>
+      </g>
+    `;
+  }
+
+  // UCL 8: INTER DE MILÁN
+  if (cid.includes('inter')) {
+    return `
+      <g id="crest_inter" transform="translate(${cx}, ${cy})">
+        <circle cx="0" cy="0" r="${r * 0.9}" fill="#001EA0" stroke="#000000" stroke-width="${r * 0.12}" />
+        <circle cx="0" cy="0" r="${r * 0.68}" fill="#000000" stroke="#FFFFFF" stroke-width="${r * 0.06}" />
+        <text x="0" y="${r * 0.05}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.6}" fill="#FFFFFF">IM</text>
+      </g>
+    `;
+  }
+
+  // UCL 9: JUVENTUS
+  if (cid.includes('juventus') || cid.includes('juve')) {
+    return `
+      <g id="crest_juventus" transform="translate(${cx}, ${cy})">
+        <rect x="${-r * 0.7}" y="${-r * 0.85}" width="${r * 1.4}" height="${r * 1.7}" fill="#FFFFFF" rx="${r * 0.3}" stroke="#000000" stroke-width="${r * 0.08}" />
+        <path d="M${-r * 0.35},${-r * 0.55} L${-r * 0.1},${-r * 0.55} L${-r * 0.1},${r * 0.25} C${-r * 0.1},${r * 0.45} ${-r * 0.3},${r * 0.45} ${-r * 0.35},${r * 0.45}" stroke="#000000" stroke-width="${r * 0.18}" stroke-linecap="round" fill="none" />
+        <path d="M${r * 0.15},${-r * 0.55} L${r * 0.4},${-r * 0.55} L${r * 0.4},${r * 0.25} C${r * 0.4},${r * 0.55} ${-r * 0.05},${r * 0.55} ${-r * 0.15},${r * 0.55}" stroke="#000000" stroke-width="${r * 0.18}" stroke-linecap="round" fill="none" />
+      </g>
+    `;
+  }
+
+  // UCL 10: BORUSSIA DORTMUND
+  if (cid.includes('dortmund') || cid.includes('bvb')) {
+    return `
+      <g id="crest_dortmund" transform="translate(${cx}, ${cy})">
+        <circle cx="0" cy="0" r="${r * 0.9}" fill="#FDE100" stroke="#000000" stroke-width="${r * 0.12}" />
+        <text x="0" y="${-r * 0.05}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.42}" fill="#000000">BVB</text>
+        <text x="0" y="${r * 0.45}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.3}" fill="#000000">09</text>
+      </g>
+    `;
+  }
+
+  // UCL 11: ATLÉTICO DE MADRID
+  if (cid.includes('atletico') || cid.includes('atleti')) {
+    return `
+      <g id="crest_atletico" transform="translate(${cx}, ${cy})">
+        <path d="M${-r * 0.8},${-r * 0.85} L${r * 0.8},${-r * 0.85} L${r * 0.8},${r * 0.2} C${r * 0.8},${r * 0.7} 0,${r} 0,${r} C0,${r} ${-r * 0.8},${r * 0.7} ${-r * 0.8},${r * 0.2} Z" fill="#CB3524" stroke="#272E61" stroke-width="${r * 0.08}" />
+        <rect x="${-r * 0.75}" y="${-r * 0.75}" width="${r * 0.75}" height="${r * 0.75}" fill="#272E61" />
+        <circle cx="${-r * 0.375}" cy="${-r * 0.375}" r="${r * 0.2}" fill="#FFFFFF" />
+        <rect x="${-r * 0.45}" y="${0}" width="${r * 0.2}" height="${r * 0.85}" fill="#FFFFFF" />
+        <rect x="${0}" y="${0}" width="${r * 0.2}" height="${r * 0.85}" fill="#FFFFFF" />
+        <rect x="${r * 0.45}" y="${0}" width="${r * 0.2}" height="${r * 0.85}" fill="#FFFFFF" />
+      </g>
+    `;
+  }
+
+  // UCL 12: AC MILAN
+  if (cid.includes('milan') || cid.includes('rossoneri')) {
+    return `
+      <g id="crest_milan" transform="translate(${cx}, ${cy})">
+        <ellipse cx="0" cy="0" rx="${r * 0.65}" ry="${r * 0.95}" fill="#FFFFFF" stroke="#000000" stroke-width="${r * 0.08}" />
+        <line x1="${-r * 0.15}" y1="${-r * 0.4}" x2="${-r * 0.15}" y2="${r * 0.4}" stroke="#FB090B" stroke-width="${r * 0.12}" />
+        <line x1="${r * 0.15}" y1="${-r * 0.4}" x2="${r * 0.15}" y2="${r * 0.4}" stroke="#000000" stroke-width="${r * 0.12}" />
+        <line x1="${-r * 0.45}" y1="${r * 0.05}" x2="${r * 0.45}" y2="${r * 0.05}" stroke="#FB090B" stroke-width="${r * 0.08}" />
+        <text x="0" y="${-r * 0.62}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.22}" fill="#000000">ACM</text>
+        <text x="0" y="${r * 0.68}" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="${r * 0.18}" fill="#000000">1899</text>
+      </g>
+    `;
+  }
+
   // 19. ESCUDO GENÉRICO DEPORTIVO (Para marcas o modelos sin escudo oficial)
   return `
     <g id="crest_custom_${cid || 'generic'}" transform="translate(${cx}, ${cy})">
