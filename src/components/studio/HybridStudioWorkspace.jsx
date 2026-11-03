@@ -72,6 +72,7 @@ import {
   createDefaultDesignForProduct,
 } from '../../engine/core/designStore';
 import { MEXICO_PRO_KITS } from '../../data/mexicoKitsData';
+import { UCL_PRO_KITS } from '../../data/uclKitsData';
 import { processUploadedArtwork, calculateEffectiveDpi } from '../../engine/core/dpiValidator';
 import {
   getDroppablePanelsForProduct,
@@ -339,6 +340,7 @@ export default function HybridStudioWorkspace({
   const [garmentMenuMenSection, setGarmentMenuMenSection] = useState('custom'); // 'custom' | 'ligamx'
   const [mexicoKitSearch, setMexicoKitSearch] = useState('');
   const [mexicoKitRegionFilter, setMexicoKitRegionFilter] = useState('all');
+  const [proKitsCollectionTab, setProKitsCollectionTab] = useState('ligamx'); // 'ligamx' | 'ucl'
   const [mexicoKitEditionFilter, setMexicoKitEditionFilter] = useState('local'); // 'local' | 'visitante' | 'all'
   const [activeMexicoKitId, setActiveMexicoKitId] = useState(design?.mexicoKitId || null);
   const [savedDrafts, setSavedDrafts] = useState(() => {
@@ -875,7 +877,7 @@ export default function HybridStudioWorkspace({
   };
 
   // --- Aplicar Preset de la Colección México Pro (18 Clubes) ---
-  const handleApplyMexicoKit = (kit) => {
+  const handleApplyOfficialKit = (kit) => {
     setActiveMexicoKitId(kit.id);
 
     const baseDesign =
@@ -907,7 +909,7 @@ export default function HybridStudioWorkspace({
         ...d,
         pinned: true,
         locked: true,
-        isPattern: d.type === 'LIGAMX_GRAPHIC',
+        isPattern: d.type === 'LIGAMX_GRAPHIC' || d.type === 'UCL_GRAPHIC',
       })),
       surfacePatternId: kit.surfacePatternId || 'none',
       surfacePatternOpacity: kit.surfacePatternOpacity ?? 0.16,
@@ -934,8 +936,11 @@ export default function HybridStudioWorkspace({
 
     setIsMexicoKitsModalOpen(false);
     setIsGarmentMenuOpen(false);
-    showToast(`Preset cargado en 3D: ${kit.name} (${kit.clubAlias})`);
+    showToast(`Kit oficial cargado en 3D: ${kit.name} (${kit.clubAlias})`);
   };
+
+  const handleApplyMexicoKit = (kit) => handleApplyOfficialKit(kit);
+  const handleApplyUclKit = (kit) => handleApplyOfficialKit(kit);
 
   // --- Importador Rápido CSV para `Ejemplares` ---
   const handleImportCsvRoster = () => {
@@ -1042,6 +1047,22 @@ export default function HybridStudioWorkspace({
     setIsGarmentMenuOpen(true);
   };
 
+  const filteredUclKitsInMenu = useMemo(() => {
+    return UCL_PRO_KITS.filter((kit) => {
+      if (mexicoKitEditionFilter !== 'all' && kit.edition !== mexicoKitEditionFilter) {
+        return false;
+      }
+      const q = mexicoKitSearch.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        kit.name.toLowerCase().includes(q) ||
+        kit.clubAlias.toLowerCase().includes(q) ||
+        kit.location.toLowerCase().includes(q) ||
+        kit.description.toLowerCase().includes(q)
+      );
+    });
+  }, [mexicoKitSearch, mexicoKitEditionFilter]);
+
   const filteredMexicoKitsInMenu = useMemo(() => {
     return MEXICO_PRO_KITS.filter((kit) => {
       // Filtro de Versión: Local / Visitante / Todos
@@ -1076,11 +1097,23 @@ export default function HybridStudioWorkspace({
   const activeMexicoClubKits = useMemo(() => {
     const kitId = design?.mexicoKitId || activeMexicoKitId;
     if (!kitId || design?.productModelId !== 'futbol_jersey_pro_vneck') return null;
-    const currentKit = MEXICO_PRO_KITS.find((k) => k.id === kitId);
+    
+    let currentKit = MEXICO_PRO_KITS.find((k) => k.id === kitId);
+    let pool = MEXICO_PRO_KITS;
+    let isUcl = false;
+
+    if (!currentKit) {
+      currentKit = UCL_PRO_KITS.find((k) => k.id === kitId);
+      if (currentKit) {
+        pool = UCL_PRO_KITS;
+        isUcl = true;
+      }
+    }
+
     if (!currentKit) return null;
     const baseClubId = currentKit.baseClubId;
-    const homeKit = MEXICO_PRO_KITS.find((k) => k.baseClubId === baseClubId && k.edition === 'local');
-    const awayKit = MEXICO_PRO_KITS.find((k) => k.baseClubId === baseClubId && k.edition === 'visitante');
+    const homeKit = pool.find((k) => k.baseClubId === baseClubId && k.edition === 'local');
+    const awayKit = pool.find((k) => k.baseClubId === baseClubId && k.edition === 'visitante');
     return {
       currentKit,
       homeKit,
@@ -1088,6 +1121,9 @@ export default function HybridStudioWorkspace({
       baseClubId,
       clubAlias: currentKit.clubAlias,
       location: currentKit.location,
+      isUcl,
+      flag: isUcl ? '⭐' : '🇲🇽',
+      leagueName: isUcl ? 'UEFA Champions League 2026/27' : 'Liga MX 2026/2027',
     };
   }, [design?.mexicoKitId, design?.productModelId, activeMexicoKitId]);
 
@@ -1498,7 +1534,7 @@ export default function HybridStudioWorkspace({
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-sm">🇲🇽</span>
+                            <span className="text-sm">{activeMexicoClubKits.flag}</span>
                             <span className="text-xs font-black uppercase tracking-wider text-emerald-700">
                               {activeMexicoClubKits.clubAlias}
                             </span>
@@ -1507,7 +1543,7 @@ export default function HybridStudioWorkspace({
                             </span>
                           </div>
                           <p className="text-[10px] text-slate-500 truncate mt-1 font-medium">
-                            Inspiración Liga MX 2025/2026 • 100% Libre de marcas
+                            {activeMexicoClubKits.leagueName} • Patrocinadores Oficiales
                           </p>
                         </div>
                         <button
@@ -1643,26 +1679,25 @@ export default function HybridStudioWorkspace({
                 ) : (
                   /* Modo Normal: Todos los estilos de corte CAD (16 cortes) */
                   <>
-                    {/* Banner de Acceso a Presets México Pro */}
-                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-rose-50 border border-slate-200 shadow-xs flex items-center justify-between gap-2.5">
+                    {/* Banner de Acceso a Kits Oficiales Pro (Liga MX + Champions League) */}
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white shadow-md border border-indigo-800/40 flex items-center justify-between gap-2.5">
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-base">🇲🇽</span>
-                          <span className="text-xs font-black text-slate-900 uppercase tracking-tight">
-                            Presets México Pro (36 Uniformes)
+                          <span className="text-xs font-black uppercase tracking-wider text-amber-300">
+                            ⭐ KITS OFICIALES PRO (60)
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
-                          18 Locales + 18 Visitantes • 100% legales para Shopify
+                        <p className="text-[10px] text-slate-300 font-medium truncate mt-0.5">
+                          🇲🇽 Liga MX (36) • 🏆 Champions League (24)
                         </p>
                       </div>
                       <button
                         id="btn-open-mexico-kits"
                         type="button"
                         onClick={() => setIsMexicoKitsModalOpen(true)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shrink-0 transition-all cursor-pointer shadow-xs hover:scale-102"
+                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-black shrink-0 transition-all cursor-pointer shadow-md hover:scale-103"
                       >
-                        Ver 36 Kits
+                        Ver 60 Kits
                       </button>
                     </div>
 
@@ -4122,7 +4157,7 @@ export default function HybridStudioWorkspace({
 
                   {/* Grid de Uniformes con Miniatura Realista 2D */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[58vh] overflow-y-auto pr-1">
-                    {filteredMexicoKitsInMenu.map((kit) => (
+                    {(proKitsCollectionTab === 'ligamx' ? filteredMexicoKitsInMenu : filteredUclKitsInMenu).map((kit) => (
                       <div
                         key={kit.id}
                         className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between gap-3 group"
@@ -4286,19 +4321,51 @@ export default function HybridStudioWorkspace({
         </div>
       </LightDismissModal>
 
-      {/* ==================== MODAL: COLECCIÓN PRESETS MÉXICO PRO (36 UNIFORMES) ==================== */}
+      {/* ==================== MODAL: COLECCIÓN KITS OFICIALES PRO (60 UNIFORMES) ==================== */}
       <LightDismissModal
         isOpen={isMexicoKitsModalOpen}
         onClose={() => setIsMexicoKitsModalOpen(false)}
         titleId="mexico-kits-modal-title"
-        subtitle="Colección Comercial Libre de Copyright • 36 Uniformes (18 Locales + 18 Visitantes)"
-        title="🇲🇽 Presets de Fútbol México Pro"
+        subtitle="Colección Pro Vectorial • 36 Liga MX + 24 UEFA Champions League (Locales y Visitantes)"
+        title="⭐ Colección de Kits Oficiales Pro (60 Uniformes)"
         maxWidthClass="max-w-5xl"
       >
         <div className="space-y-4">
+          {/* Segmented Tab: Liga MX vs Champions League */}
+          <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+            <button
+              type="button"
+              onClick={() => setProKitsCollectionTab('ligamx')}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                proKitsCollectionTab === 'ligamx'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+              }`}
+            >
+              <span>🇲🇽</span>
+              <span>Liga MX Pro (36 Kits)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setProKitsCollectionTab('ucl')}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                proKitsCollectionTab === 'ucl'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+              }`}
+            >
+              <span>⭐</span>
+              <span>UEFA Champions League (24 Kits)</span>
+            </button>
+          </div>
+
           <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <strong>100% Comercializable para Shopify:</strong> Plantillas de la Temporada 2026/2027 inspiradas en los 18 clubes de Primera División (versiones Local y Visitante). Libres de marcas de fabricantes (Nike/Adidas/Puma) y sin patrocinios.
+              {proKitsCollectionTab === 'ligamx' ? (
+                <><strong>Liga MX Temporada 2026/2027:</strong> Los 18 clubes de Primera División en versiones Local y Visitante con patrocinadores y escudos oficiales de alta definición.</>
+              ) : (
+                <><strong>UEFA Champions League 2026/2027:</strong> Los 12 clubes gigantes de Europa en versiones Local y Visitante (Real Madrid, Barca, Man City, Bayern, PSG, Arsenal, Liverpool, Inter, Juventus, Dortmund, Atlético, Milan).</>
+              )}
             </div>
             {/* Switcher Local vs Visitante en Modal */}
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-blue-200 shrink-0">

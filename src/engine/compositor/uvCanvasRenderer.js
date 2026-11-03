@@ -16,6 +16,8 @@ import {
 } from '../core/boundingBoxMath';
 import { computeOwayoAutoContrastHex } from '../core/designStore';
 import { drawLigaMxGraphicMm, drawLigaMxCrestMm } from './ligaMxKitsEngine';
+import { drawUclGraphicMm, drawUclCrestMm } from './uclKitsEngine';
+import { drawSponsorLogoMm } from './sponsorLogosEngine';
 
 export const UV_ATLAS_WIDTH = 2048;
 export const UV_ATLAS_HEIGHT = 1024;
@@ -325,8 +327,14 @@ export function renderGarmentPanel(
 
     if (decal.type === 'LIGAMX_GRAPHIC') {
       drawLigaMxGraphicMm(ctx, decal.graphicId, wPx, hPx, design);
+    } else if (decal.type === 'UCL_GRAPHIC') {
+      drawUclGraphicMm(ctx, decal.graphicId, wPx, hPx, design);
     } else if (decal.type === 'LIGAMX_CREST') {
       drawLigaMxCrestMm(ctx, decal.clubId || decal.presetId, wPx, hPx, design);
+    } else if (decal.type === 'UCL_CREST') {
+      drawUclCrestMm(ctx, decal.clubId || decal.presetId, wPx, hPx, design);
+    } else if (decal.type === 'SPONSOR_LOGO') {
+      drawSponsorLogoMm(ctx, decal.sponsorId, wPx, hPx, decal.tintHex || decal.color);
     } else if (decal.type === 'PRESET_CREST') {
       if (decal.presetId?.startsWith('mx_')) {
         drawLigaMxCrestMm(ctx, decal.presetId, wPx, hPx, design);

@@ -471,6 +471,117 @@ export function renderClubCrestSvg(clubId, cx, cy, r, design) {
 /**
  * Renderiza cualquier decal colocado en 3D (PNG subido, escudo, texto o marca) sobre la pieza 2D.
  */
+
+function renderSponsorSvg(sponsorId, cx, cy, w, h, tint) {
+  const sp = (sponsorId || '').toLowerCase();
+  const textColor = tint || '#FFFFFF';
+
+  if (sp.includes('caliente')) {
+    return `
+      <g id="sponsor_caliente" transform="translate(${cx}, ${cy})">
+        <ellipse cx="${-w * 0.35}" cy="0" rx="${h * 0.4}" ry="${h * 0.4}" fill="#C8102E" />
+        <circle cx="${-w * 0.35}" cy="0" r="${h * 0.25}" fill="#FFFFFF" />
+        <text x="${-w * 0.15}" y="${h * 0.15}" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.55}" fill="${textColor}">caliente<tspan fill="#C8102E" font-size="${h * 0.4}">.mx</tspan></text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('cruz_azul')) {
+    return `
+      <g id="sponsor_cruz_azul" transform="translate(${cx}, ${cy})">
+        <rect x="${-w * 0.45}" y="${-h * 0.45}" width="${h * 0.9}" height="${h * 0.9}" fill="#FFFFFF" rx="4" />
+        <rect x="${-w * 0.45 + h * 0.1}" y="${-h * 0.35}" width="${h * 0.7}" height="${h * 0.7}" fill="#002B7F" />
+        <line x1="${-w * 0.45 + h * 0.45}" y1="${-h * 0.25}" x2="${-w * 0.45 + h * 0.45}" y2="${h * 0.25}" stroke="#C8102E" stroke-width="${h * 0.15}" />
+        <line x1="${-w * 0.45 + h * 0.2}" y1="0" x2="${-w * 0.45 + h * 0.7}" y2="0" stroke="#C8102E" stroke-width="${h * 0.15}" />
+        <text x="${-w * 0.45 + h * 1.1}" y="${h * 0.15}" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.45}" fill="${textColor}">CEMENTO CRUZ AZUL</text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('dhl')) {
+    return `
+      <g id="sponsor_dhl" transform="translate(${cx}, ${cy})">
+        <polygon points="${-w * 0.45},${-h * 0.45} ${w * 0.45},${-h * 0.45} ${w * 0.38},${h * 0.45} ${-w * 0.52},${h * 0.45}" fill="#FFCC00" />
+        <text x="0" y="${h * 0.2}" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-style="italic" font-size="${h * 0.7}" fill="#D40511">DHL</text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('cemex')) {
+    return `
+      <g id="sponsor_cemex" transform="translate(${cx}, ${cy})">
+        <text x="0" y="${h * 0.2}" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.6}" fill="${textColor}" letter-spacing="3">CEMEX</text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('codere')) {
+    return `
+      <g id="sponsor_codere" transform="translate(${cx}, ${cy})">
+        <circle cx="${-w * 0.32}" cy="0" r="${h * 0.35}" fill="#00A3E0" />
+        <text x="${-w * 0.15}" y="${h * 0.18}" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.55}" fill="${textColor}">codere</text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('emirates') || sp.includes('fly')) {
+    return `
+      <g id="sponsor_emirates" transform="translate(${cx}, ${cy})">
+        <text x="0" y="${-h * 0.05}" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="${h * 0.35}" fill="${textColor}">Fly</text>
+        <text x="0" y="${h * 0.38}" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.5}" fill="${textColor}" letter-spacing="1">Emirates</text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('spotify')) {
+    return `
+      <g id="sponsor_spotify" transform="translate(${cx}, ${cy})">
+        <circle cx="${-w * 0.35}" cy="0" r="${h * 0.38}" fill="#1DB954" />
+        <path d="M${-w * 0.35 - h * 0.2},${-h * 0.1} Q${-w * 0.35},${-h * 0.22} ${-w * 0.35 + h * 0.2},${-h * 0.1}" stroke="#FFFFFF" stroke-width="${h * 0.08}" stroke-linecap="round" fill="none" />
+        <path d="M${-w * 0.35 - h * 0.16},0 Q${-w * 0.35},${-h * 0.1} ${-w * 0.35 + h * 0.16},0" stroke="#FFFFFF" stroke-width="${h * 0.08}" stroke-linecap="round" fill="none" />
+        <path d="M${-w * 0.35 - h * 0.12},${h * 0.1} Q${-w * 0.35},${h * 0.02} ${-w * 0.35 + h * 0.12},${h * 0.1}" stroke="#FFFFFF" stroke-width="${h * 0.08}" stroke-linecap="round" fill="none" />
+        <text x="${-w * 0.15}" y="${h * 0.2}" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.58}" fill="${textColor}">Spotify</text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('etihad')) {
+    return `
+      <g id="sponsor_etihad" transform="translate(${cx}, ${cy})">
+        <text x="0" y="${h * 0.1}" text-anchor="middle" font-family="Georgia, serif" font-weight="800" font-size="${h * 0.55}" fill="${textColor}" letter-spacing="4">ETIHAD</text>
+        <text x="0" y="${h * 0.4}" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="700" font-size="${h * 0.25}" fill="${textColor}" letter-spacing="2">AIRWAYS</text>
+      </g>
+    `;
+  }
+
+  if (sp.includes('telekom') || sp.includes('t_mobile')) {
+    return `
+      <g id="sponsor_telekom" transform="translate(${cx}, ${cy})">
+        <circle cx="${-w * 0.2}" cy="0" r="${h * 0.1}" fill="${textColor}" />
+        <text x="0" y="${h * 0.3}" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.9}" fill="${textColor}">T</text>
+        <circle cx="${w * 0.15}" cy="0" r="${h * 0.1}" fill="${textColor}" />
+        <circle cx="${w * 0.28}" cy="0" r="${h * 0.1}" fill="${textColor}" />
+      </g>
+    `;
+  }
+
+  if (sp.includes('jeep')) {
+    return `
+      <g id="sponsor_jeep" transform="translate(${cx}, ${cy})">
+        <text x="0" y="${h * 0.25}" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.75}" fill="${textColor}" letter-spacing="2">Jeep</text>
+      </g>
+    `;
+  }
+
+  // Fallback generic sponsor
+  const cleanName = sp.replace(/_/g, ' ').toUpperCase();
+  return `
+    <g id="sponsor_${sp}" transform="translate(${cx}, ${cy})">
+      <text x="0" y="${h * 0.2}" text-anchor="middle" font-family="'Arial Black', Impact, sans-serif" font-weight="900" font-size="${h * 0.5}" fill="${textColor}" letter-spacing="1">${cleanName}</text>
+    </g>
+  `;
+}
+
 export function renderDecalToSvg(decal, panelBounds, artworkRegistry, design) {
   if (!decal) return '';
 
@@ -518,9 +629,14 @@ export function renderDecalToSvg(decal, panelBounds, artworkRegistry, design) {
     `;
   }
 
-  // 3. ESCUDO DE CLUB O PRESET CREST
-  if (decal.type === 'LIGAMX_CREST' || decal.type === 'PRESET_CREST' || decal.clubId || decal.presetId) {
-    const club = decal.clubId || decal.presetId || design?.mexicoBaseClubId || '';
+  // 3. LOGOTIPO PATROCINADOR OFICIAL
+  if (decal.type === 'SPONSOR_LOGO') {
+    return renderSponsorSvg(decal.sponsorId, cx, cy, w, h, decal.tintHex || decal.color);
+  }
+
+  // 4. ESCUDO DE CLUB O PRESET CREST (LIGA MX / UCL)
+  if (decal.type === 'LIGAMX_CREST' || decal.type === 'UCL_CREST' || decal.type === 'PRESET_CREST' || decal.clubId || decal.presetId) {
+    const club = decal.clubId || decal.presetId || design?.mexicoBaseClubId || design?.uclBaseClubId || '';
     return renderClubCrestSvg(club, cx, cy, Math.min(w, h) / 2, design);
   }
 
@@ -535,7 +651,7 @@ function generateFrontAndBackGraphics(design, frenteCenterX, traseroCenterX, isA
   let graphicId = null;
 
   (design?.decals || []).forEach((d) => {
-    if (d.type === 'LIGAMX_GRAPHIC') graphicId = d.graphicId;
+    if (d.type === 'LIGAMX_GRAPHIC' || d.type === 'UCL_GRAPHIC') graphicId = d.graphicId;
   });
 
   const kitKey = String(design?.mexicoKitId || design?.mexicoBaseClubId || '').toLowerCase();

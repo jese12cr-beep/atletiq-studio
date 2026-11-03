@@ -598,6 +598,225 @@ export function drawLigaMxGraphicMm(ctx, graphicId, wMm, hMm, design) {
       }
       break;
     }
+    // -------------------------------------------------------------
+    // PUEBLA: FRANJA DIAGONAL ESPALDA (Invertida +32° para continuidad de costura)
+    // -------------------------------------------------------------
+    case 'mx_puebla_franja_sash_back': {
+      const navy = '#001A49';
+      const white = '#FFFFFF';
+      const angle = (32 * Math.PI) / 180; // +32° para empatar simetría con el frente (-32°) en el hombro derecho
+      ctx.save();
+      ctx.rotate(angle);
+      const sashWidth = wMm * 0.38;
+      ctx.fillStyle = navy;
+      ctx.fillRect(-sashWidth / 2, -hMm * 1.5, sashWidth, hMm * 3);
+      ctx.fillStyle = white;
+      ctx.fillRect(-sashWidth / 2, -hMm * 1.5, 3.5, hMm * 3);
+      ctx.fillRect(sashWidth / 2 - 3.5, -hMm * 1.5, 3.5, hMm * 3);
+      ctx.restore();
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // CRUZ AZUL: Franjas finas jacquard y detalles
+    // -------------------------------------------------------------
+    case 'mx_cruz_azul_stripes': {
+      const royalBlue = '#002B7F';
+      const darkerBlue = '#001D57';
+      const count = 11;
+      const sw = wMm / count;
+      for (let i = 0; i < count; i++) {
+        if (i % 2 === 1) {
+          ctx.fillStyle = darkerBlue;
+          ctx.fillRect(-halfW + i * sw, -halfH, sw, hMm);
+        }
+      }
+      break;
+    }
+
+    case 'mx_cruz_azul_away': {
+      const white = '#FFFFFF';
+      const royalBlue = '#002B7F';
+      ctx.fillStyle = white;
+      ctx.fillRect(-halfW, -halfH, wMm, hMm);
+      // Rayas sutiles azules
+      const count = 9;
+      const sw = wMm / count;
+      for (let i = 1; i < count; i += 2) {
+        ctx.fillStyle = '#F0F4F8';
+        ctx.fillRect(-halfW + i * sw, -halfH, sw, hMm);
+      }
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // CHIVAS: Away Bar Horizontal
+    // -------------------------------------------------------------
+    case 'mx_chivas_away_bar': {
+      const navy = '#001A49';
+      const red = '#C8102E';
+      ctx.fillStyle = navy;
+      ctx.fillRect(-halfW, -halfH * 0.25, wMm, hMm * 0.35);
+      ctx.fillStyle = red;
+      ctx.fillRect(-halfW, -halfH * 0.28, wMm, 4);
+      ctx.fillRect(-halfW, halfH * 0.1, wMm, 4);
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // RAYADOS: Cerro de la Silla Geométrico
+    // -------------------------------------------------------------
+    case 'mx_rayados_away_mountain': {
+      const navy = '#001A49';
+      const cyan = '#00A3E0';
+      ctx.beginPath();
+      ctx.moveTo(-halfW, halfH * 0.3);
+      ctx.lineTo(-halfW * 0.4, -halfH * 0.1);
+      ctx.lineTo(0, halfH * 0.1);
+      ctx.lineTo(halfW * 0.5, -halfH * 0.2);
+      ctx.lineTo(halfW, halfH * 0.3);
+      ctx.lineTo(halfW, halfH);
+      ctx.lineTo(-halfW, halfH);
+      ctx.closePath();
+      ctx.fillStyle = navy;
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = cyan;
+      ctx.stroke();
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // ATLAS: Franja Diagonal Rojinegra Away
+    // -------------------------------------------------------------
+    case 'mx_atlas_away_sash': {
+      const red = '#C8102E';
+      const black = '#0A0A0A';
+      const angle = (-35 * Math.PI) / 180;
+      ctx.save();
+      ctx.rotate(angle);
+      const sashW = wMm * 0.22;
+      ctx.fillStyle = red;
+      ctx.fillRect(-sashW, -hMm * 1.5, sashW, hMm * 3);
+      ctx.fillStyle = black;
+      ctx.fillRect(0, -hMm * 1.5, sashW, hMm * 3);
+      ctx.restore();
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // LEÓN: Garras de Fiera Esmeralda
+    // -------------------------------------------------------------
+    case 'mx_leon_claws': {
+      const darkGreen = '#004D25';
+      const gold = '#D4AF37';
+      // 3 garras dinámicas en el costado
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        const oy = -halfH * 0.3 + i * 50;
+        ctx.moveTo(-halfW + 30, oy);
+        ctx.quadraticCurveTo(-halfW + 110, oy + 20, -halfW + 140, oy + 70);
+        ctx.quadraticCurveTo(-halfW + 70, oy + 40, -halfW + 30, oy);
+        ctx.fillStyle = darkGreen;
+        ctx.fill();
+        ctx.strokeStyle = gold;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'mx_leon_away_stripes': {
+      const green = '#006837';
+      const count = 7;
+      const sw = wMm / count;
+      for (let i = 0; i < count; i++) {
+        if (i % 2 === 1) {
+          ctx.fillStyle = '#E6EFEA';
+          ctx.fillRect(-halfW + i * sw, -halfH, sw, hMm);
+          ctx.fillStyle = green;
+          ctx.fillRect(-halfW + i * sw, -halfH, 2, hMm);
+        }
+      }
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // TOLUCA: Llamas de Fuego Diablos Away
+    // -------------------------------------------------------------
+    case 'mx_toluca_away_flame': {
+      const red = '#C8102E';
+      ctx.beginPath();
+      ctx.moveTo(-halfW, halfH);
+      ctx.lineTo(-halfW, halfH * 0.4);
+      ctx.quadraticCurveTo(-halfW * 0.5, halfH * 0.1, -halfW * 0.3, halfH * 0.6);
+      ctx.quadraticCurveTo(0, halfH * 0.05, halfW * 0.3, halfH * 0.5);
+      ctx.quadraticCurveTo(halfW * 0.6, halfH * 0.2, halfW, halfH * 0.45);
+      ctx.lineTo(halfW, halfH);
+      ctx.closePath();
+      ctx.fillStyle = red;
+      ctx.fill();
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // NECAXA: Rayo Eléctrico Gigante Away
+    // -------------------------------------------------------------
+    case 'mx_necaxa_away_lightning': {
+      const red = '#C8102E';
+      const gold = '#FFC72C';
+      ctx.beginPath();
+      ctx.moveTo(-halfW * 0.3, -halfH * 0.8);
+      ctx.lineTo(halfW * 0.1, -halfH * 0.2);
+      ctx.lineTo(-halfW * 0.05, -halfH * 0.1);
+      ctx.lineTo(halfW * 0.35, halfH * 0.7);
+      ctx.lineTo(0, halfH * 0.15);
+      ctx.lineTo(halfW * 0.1, 0.05);
+      ctx.closePath();
+      ctx.fillStyle = gold;
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = red;
+      ctx.stroke();
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // XOLOS: Zarpazo Rojo y Negro
+    // -------------------------------------------------------------
+    case 'mx_xolos_away_claws': {
+      const red = '#C8102E';
+      const black = '#0A0A0A';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-halfW, -halfH, wMm, hMm);
+      // Gran franja roja y negra degradada en pecho
+      ctx.fillStyle = red;
+      ctx.fillRect(-halfW, -halfH * 0.2, wMm, hMm * 0.35);
+      ctx.fillStyle = black;
+      ctx.fillRect(-halfW, halfH * 0.15, wMm, 12);
+      break;
+    }
+
+    // -------------------------------------------------------------
+    // MAZATLÁN: Olas del Pacífico y Cañón Morado
+    // -------------------------------------------------------------
+    case 'mx_mazatlan_cannon':
+    case 'mx_mazatlan_away_waves': {
+      const purple = '#4B0082';
+      const cyan = '#00F5D4';
+      for (let i = 0; i < 5; i++) {
+        const y = -halfH * 0.4 + i * 55;
+        ctx.beginPath();
+        ctx.moveTo(-halfW, y);
+        ctx.bezierCurveTo(-halfW * 0.5, y - 25, 0, y + 25, halfW * 0.5, y - 20);
+        ctx.bezierCurveTo(halfW * 0.75, y - 35, halfW * 0.9, y - 10, halfW, y);
+        ctx.strokeStyle = i % 2 === 0 ? cyan : purple;
+        ctx.lineWidth = 5;
+        ctx.stroke();
+      }
+      break;
+    }
+
 
     default:
       break;
@@ -1127,7 +1346,7 @@ export function drawLigaMxCrestMm(ctx, clubId, wMm, hMm, design) {
       break;
     }
 
-    // 18. MAZATLÁN FC
+        // 18. MAZATLÁN FC
     case 'mx_mazatlan': {
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.92, 0, Math.PI * 2);
@@ -1142,136 +1361,6 @@ export function drawLigaMxCrestMm(ctx, clubId, wMm, hMm, design) {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('MZT', 0, 2);
-      break;
-    }
-
-    // -------------------------------------------------------------
-    // CHIVAS: 5 Franjas Verticales Rojas y 4 Blancas
-    // -------------------------------------------------------------
-    case 'mx_chivas_stripes': {
-      const red = '#C8102E';
-      const white = '#FFFFFF';
-      const stripeCount = 9;
-      const stripeW = wMm / stripeCount;
-
-      for (let i = 0; i < stripeCount; i++) {
-        const x = -halfW + i * stripeW;
-        ctx.fillStyle = i % 2 === 0 ? red : white;
-        ctx.fillRect(x, -halfH, stripeW + 0.5, hMm);
-      }
-      break;
-    }
-
-    // -------------------------------------------------------------
-    // RAYADOS: Franjas Verticales Azul Marino y Blanco
-    // -------------------------------------------------------------
-    case 'mx_rayados_stripes': {
-      const navy = '#001A49';
-      const white = '#FFFFFF';
-      // Fondo blanco
-      ctx.fillStyle = white;
-      ctx.fillRect(-halfW, -halfH, wMm, hMm);
-
-      // 3 franjas anchas azul marino (central y dos laterales)
-      const barW = wMm * 0.16;
-      [-wMm * 0.32, 0, wMm * 0.32].forEach((cx) => {
-        ctx.fillStyle = navy;
-        ctx.fillRect(cx - barW / 2, -halfH, barW, hMm);
-      });
-      break;
-    }
-
-    // -------------------------------------------------------------
-    // SANTOS LAGUNA: Franjas Horizontales Verdes y Blancas
-    // -------------------------------------------------------------
-    case 'mx_santos_hoops': {
-      const green = '#007A33';
-      const white = '#FFFFFF';
-      const hoopCount = 7;
-      const hoopH = hMm / hoopCount;
-
-      for (let i = 0; i < hoopCount; i++) {
-        const y = -halfH + i * hoopH;
-        ctx.fillStyle = i % 2 === 0 ? green : white;
-        ctx.fillRect(-halfW, y, wMm, hoopH + 0.5);
-      }
-      break;
-    }
-
-    // -------------------------------------------------------------
-    // PACHUCA: Franjas Verticales Azul Marino y Blanco Plata
-    // -------------------------------------------------------------
-    case 'mx_pachuca_stripes': {
-      const navy = '#0B1B3D';
-      const silver = '#FFFFFF';
-      const count = 7;
-      const sw = wMm / count;
-      for (let i = 0; i < count; i++) {
-        const x = -halfW + i * sw;
-        ctx.fillStyle = i % 2 === 0 ? navy : silver;
-        ctx.fillRect(x, -halfH, sw + 0.5, hMm);
-      }
-      break;
-    }
-
-    // -------------------------------------------------------------
-    // NECAXA: Franjas Rojas y Blancas con Rayos
-    // -------------------------------------------------------------
-    case 'mx_necaxa_stripes': {
-      const red = '#C8102E';
-      const white = '#FFFFFF';
-      const count = 7;
-      const sw = wMm / count;
-      for (let i = 0; i < count; i++) {
-        const x = -halfW + i * sw;
-        ctx.fillStyle = i % 2 === 0 ? red : white;
-        ctx.fillRect(x, -halfH, sw + 0.5, hMm);
-      }
-
-      // Rayo zig-zag sutil en el pecho
-      ctx.beginPath();
-      ctx.moveTo(-halfW * 0.6, -halfH * 0.2);
-      ctx.lineTo(-halfW * 0.1, -halfH * 0.05);
-      ctx.lineTo(-halfW * 0.3, 0);
-      ctx.lineTo(halfW * 0.2, halfH * 0.3);
-      ctx.lineWidth = 14;
-      ctx.strokeStyle = '#FFC72C';
-      ctx.stroke();
-      break;
-    }
-
-    // -------------------------------------------------------------
-    // QUERÉTARO: Franjas Azul y Negro con Filetes Blancos
-    // -------------------------------------------------------------
-    case 'mx_queretaro_stripes': {
-      const blue = '#003DA5';
-      const black = '#0A0A0A';
-      const white = '#FFFFFF';
-      const count = 6;
-      const sw = wMm / count;
-      for (let i = 0; i < count; i++) {
-        const x = -halfW + i * sw;
-        ctx.fillStyle = i % 2 === 0 ? blue : black;
-        ctx.fillRect(x, -halfH, sw, hMm);
-        ctx.fillStyle = white;
-        ctx.fillRect(x, -halfH, 2.5, hMm);
-      }
-      break;
-    }
-
-    // -------------------------------------------------------------
-    // SAN LUIS: Franjas Rojiblancas con Remates Azules
-    // -------------------------------------------------------------
-    case 'mx_san_luis_stripes': {
-      const red = '#C8102E';
-      const white = '#FFFFFF';
-      const count = 7;
-      const sw = wMm / count;
-      for (let i = 0; i < count; i++) {
-        const x = -halfW + i * sw;
-        ctx.fillStyle = i % 2 === 0 ? red : white;
-        ctx.fillRect(x, -halfH, sw + 0.5, hMm);
-      }
       break;
     }
 

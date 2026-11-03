@@ -14,6 +14,8 @@ import { getPartSpec, resolveMirlKeyForProduct, computeAutoCondenseScaleX } from
 import { getDesignsForProduct } from '../core/designStore';
 import { getFilteredArtworkDrawable } from '../core/dpiValidator';
 import { drawLigaMxGraphicMm, drawLigaMxCrestMm } from './ligaMxKitsEngine';
+import { drawUclGraphicMm, drawUclCrestMm } from './uclKitsEngine';
+import { drawSponsorLogoMm } from './sponsorLogosEngine';
 import { resolveAssetUrl } from '../../utils/assetUrl';
 
 // Caché de máscaras decodificadas `.fish`: key = `${fishUrl}` -> Promise<Map<partName, { width, height, zones: Uint8Array }>>
@@ -764,8 +766,14 @@ export function composeGarmentPartCanvas(
 
     if (decal.type === 'LIGAMX_GRAPHIC') {
       drawLigaMxGraphicMm(drawCtx, decal.graphicId, wMm, hMm, design);
+    } else if (decal.type === 'UCL_GRAPHIC') {
+      drawUclGraphicMm(drawCtx, decal.graphicId, wMm, hMm, design);
     } else if (decal.type === 'LIGAMX_CREST') {
       drawLigaMxCrestMm(drawCtx, decal.clubId || decal.presetId, wMm, hMm, design);
+    } else if (decal.type === 'UCL_CREST') {
+      drawUclCrestMm(drawCtx, decal.clubId || decal.presetId, wMm, hMm, design);
+    } else if (decal.type === 'SPONSOR_LOGO') {
+      drawSponsorLogoMm(drawCtx, decal.sponsorId, wMm, hMm, decal.tintHex || decal.color);
     } else if (decal.type === 'PRESET_CREST') {
       drawPresetVectorCrestMm(drawCtx, decal.presetId, wMm, hMm, design, decal.tintHex);
     } else if (decal.type === 'STATIC_TEXT') {
