@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <radialGradient id="lgbg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="70%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </radialGradient>
+    <linearGradient id="lgring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#006847"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ce1126"/>
+    </linearGradient>
+  </defs>
+  <circle cx="250" cy="250" r="240" fill="url(#lgbg)" stroke="url(#lgring)" stroke-width="16"/>
+  <circle cx="250" cy="250" r="215" fill="none" stroke="#0f172a" stroke-width="4" stroke-dasharray="6 4"/>
+  <path d="M250,75 L360,135 L360,265 C360,340 250,410 250,410 C250,410 140,340 140,265 L140,135 Z" fill="#006847" stroke="#ffffff" stroke-width="8"/>
+  <path d="M250,90 L345,145 L345,260 C345,325 250,388 250,388 C250,388 155,325 155,260 L155,145 Z" fill="#ce1126"/>
+  <path d="M250,105 L330,155 L330,255 C330,310 250,366 250,366 C250,366 170,310 170,255 L170,155 Z" fill="#ffffff"/>
+  <circle cx="250" cy="225" r="48" fill="#0f172a" stroke="#ffffff" stroke-width="4"/>
+  <polygon points="250,195 275,213 265,243 235,243 225,213" fill="#ffffff"/>
+  <text x="250" y="325" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="36" fill="#006847" letter-spacing="2">LIGA BBVA</text>
+  <text x="250" y="358" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="30" fill="#ce1126" letter-spacing="4">MX</text>
+</svg>

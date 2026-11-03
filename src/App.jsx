@@ -14,6 +14,7 @@ import CartDrawer from './components/CartDrawer';
 import ShopifyIntegrationGuide from './components/ShopifyIntegrationGuide';
 import OrderQuoteModal from './components/OrderQuoteModal';
 import UserDesignGalleryModal from './components/studio/UserDesignGalleryModal';
+import ProductSelectorModal from './components/studio/ProductSelectorModal';
 import { loadUserGallery } from './utils/userGalleryStore';
 import {
   ENGINE_PRODUCTS,
@@ -25,6 +26,7 @@ import {
 
 function createInitialKitSnapshot() {
   const fbJersey = createInitialMasterDesign();
+  const fbWJersey = createDefaultDesignForProduct('futbol_jersey_f3w_women', fbJersey.colorZones);
   const fbShorts = createDefaultDesignForProduct('football_shorts_fp3', fbJersey.colorZones);
   const bkJersey = createDefaultDesignForProduct('basketball_b6_hero');
   const bkShorts = createDefaultDesignForProduct('basketball_shorts_bp6', bkJersey.colorZones);
@@ -37,6 +39,7 @@ function createInitialKitSnapshot() {
     activeProductId: 'futbol_jersey_pro_vneck',
     designsByProduct: {
       futbol_jersey_pro_vneck: fbJersey,
+      futbol_jersey_f3w_women: fbWJersey,
       football_shorts_fp3: fbShorts,
       basketball_b6_hero: bkJersey,
       basketball_shorts_bp6: bkShorts,
@@ -50,7 +53,7 @@ function createInitialKitSnapshot() {
 
 export default function App() {
   const [appMode, setAppMode] = useState(() => {
-    if (typeof window !== 'undefined' && window.location.hash === '#studio') {
+    if (typeof window !== 'undefined' && window.location.hash.startsWith('#studio')) {
       return 'studio';
     }
     return 'storefront';
@@ -58,9 +61,11 @@ export default function App() {
 
   useEffect(() => {
     const handleHash = () => {
-      if (window.location.hash === '#studio') {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#studio')) {
         setAppMode('studio');
-      } else if (window.location.hash === '#storefront' || window.location.hash === '') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      } else if (hash === '#storefront' || hash === '') {
         setAppMode('storefront');
       }
     };
@@ -72,6 +77,9 @@ export default function App() {
     setAppMode(mode);
     if (typeof window !== 'undefined') {
       window.location.hash = mode === 'studio' ? '#studio' : '';
+      if (mode === 'studio') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
     }
   }, []);
 
@@ -98,6 +106,7 @@ export default function App() {
   const [isShopifyGuideOpen, setIsShopifyGuideOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [isStorefrontGalleryOpen, setIsStorefrontGalleryOpen] = useState(false);
+  const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
   const [galleryCount, setGalleryCount] = useState(() => {
     try {
       return loadUserGallery().length;
@@ -282,7 +291,13 @@ export default function App() {
 
   const handleSelectCatalogProduct = (engineId) => {
     handleSwitchProduct(engineId);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
     setAppMode('studio');
+    if (typeof window !== 'undefined') {
+      window.location.hash = '#studio';
+    }
   };
 
   const handleLaunch3DStudioFromKitLab = (engineId, kitData) => {
@@ -341,7 +356,7 @@ export default function App() {
           <Navbar
             cartCount={cartItems.length}
             onOpenCart={() => setIsCartOpen(true)}
-            onOpenStudio={() => switchMode('studio')}
+            onOpenStudio={() => setIsProductSelectorOpen(true)}
             galleryCount={galleryCount}
             onOpenGallery={() => setIsStorefrontGalleryOpen(true)}
             onOpenShopifyGuide={() => setIsShopifyGuideOpen(true)}
@@ -353,7 +368,7 @@ export default function App() {
                 if (productId) {
                   handleSelectCatalogProduct(productId);
                 } else {
-                  switchMode('studio');
+                  setIsProductSelectorOpen(true);
                 }
               }}
             />
@@ -362,7 +377,7 @@ export default function App() {
               onOpenQuote={() => setIsQuoteModalOpen(true)}
             />
             <HowItWorks
-              onOpenStudio={() => switchMode('studio')}
+              onOpenStudio={() => setIsProductSelectorOpen(true)}
               onOpenQuote={() => setIsQuoteModalOpen(true)}
             />
             <SizeGuideAndSamples />
@@ -414,6 +429,15 @@ export default function App() {
         totalUnits={roster.length}
         totalPrice={34 * roster.length}
         onLoadDesignFromGallery={handleLoadDesignFromStorefrontGallery}
+      />
+
+      <ProductSelectorModal
+        isOpen={isProductSelectorOpen}
+        onClose={() => setIsProductSelectorOpen(false)}
+        onSelectProduct={(id) => {
+          handleSelectCatalogProduct(id);
+        }}
+        activeProductId={activeProductId}
       />
     </div>
   );

@@ -90,6 +90,8 @@ import { preloadLigaMxCrest } from '../../engine/compositor/ligaMxKitsEngine';
 import { preloadUclCrest } from '../../engine/compositor/uclKitsEngine';
 import { preloadSponsorLogo } from '../../engine/compositor/sponsorLogosEngine';
 import ProductionMoldModal from './ProductionMoldModal';
+import Interactive2DPliegoStage from './Interactive2DPliegoStage';
+import SocialMediaMockupModal from './SocialMediaMockupModal';
 
 const OWAYO_TABS = [
   { id: 'design', label: 'Diseño', icon: Sparkles },
@@ -255,7 +257,8 @@ export default function HybridStudioWorkspace({
   onSwitchToStorefront,
 }) {
   const [activeTab, setActiveTab] = useState('design'); // 'design' | 'colors' | 'text' | 'logo'
-  const [viewportMode, setViewportMode] = useState('3d'); // '3d' (CAD 3D Textil PBR)
+  const [viewportMode, setViewportMode] = useState('3d'); // '3d' | '2d_pliego'
+  const [isSocialMediaModalOpen, setIsSocialMediaModalOpen] = useState(false);
   const [patternCategoryFilter, setPatternCategoryFilter] = useState('Todos');
   const [cameraPreset, setCameraPreset] = useState('three_quarter');
   const [autoRotate, setAutoRotate] = useState(false);
@@ -1120,6 +1123,93 @@ export default function HybridStudioWorkspace({
     });
   }, [mexicoKitSearch, mexicoKitRegionFilter, mexicoKitEditionFilter]);
 
+  // Insertar Parche Oficial de Manga (Liga MX / UEFA Champions League)
+  const handleAddSleeveBadge = (badgeType) => {
+    const badgeMap = {
+      mx_official: {
+        label: 'Parche Oficial Liga MX',
+        file: '/assets/badges/badge_ligamx_official.svg',
+        panel: 'right_sleeve',
+        size: 70,
+      },
+      mx_champion: {
+        label: 'Parche Campeón Liga MX',
+        file: '/assets/badges/badge_ligamx_champion.svg',
+        panel: 'right_sleeve',
+        size: 70,
+      },
+      ucl_starball: {
+        label: 'Starball Oficial UCL',
+        file: '/assets/badges/badge_ucl_starball.svg',
+        panel: 'right_sleeve',
+        size: 75,
+      },
+      ucl_foundation: {
+        label: 'UEFA Foundation for Children',
+        file: '/assets/badges/badge_ucl_foundation.svg',
+        panel: 'left_sleeve',
+        size: 70,
+      },
+    };
+
+    const b = badgeMap[badgeType];
+    if (!b) return;
+
+    const artId = `art_${badgeType}_${Date.now()}`;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      onRegisterArtwork?.(artId, {
+        artworkId: artId,
+        fileName: b.label,
+        previewUrl: b.file,
+        drawable: img,
+        widthPx: 500,
+        heightPx: 500,
+        aspectRatio: 1,
+        isVector: true,
+      });
+
+      const targetPanel = droppablePanels.some((p) => p.panelId === b.panel)
+        ? b.panel
+        : droppablePanels[0]?.panelId || 'front';
+
+      const sp = getPartSpec(design.productModelId, targetPanel);
+      const newDecal = {
+        id: `decal_${Date.now()}`,
+        type: 'UPLOADED_VECTOR',
+        artworkId: artId,
+        label: b.label,
+        panel: targetPanel,
+        centerMm: {
+          x: +(sp.widthMm * 0.5).toFixed(1),
+          y: +(sp.heightMm * 0.45).toFixed(1),
+        },
+        sizeMm: { width: b.size, height: b.size },
+        scale: 1,
+        rotationDeg: 0,
+        opacity: 1,
+        zIndex: 25,
+        removeWhiteBg: false,
+      };
+
+      onCommitDesign(
+        {
+          ...design,
+          decals: [...(design.decals || []), newDecal],
+        },
+        true
+      );
+
+      setSelectedDecalId(newDecal.id);
+      setIsEditingLogoDetail(true);
+      setPanel2D(targetPanel);
+      if (PANEL_TO_CAMERA[targetPanel]) setCameraPreset(PANEL_TO_CAMERA[targetPanel]);
+      showToast(`${b.label} colocado en manga`);
+    };
+    img.src = b.file;
+  };
+
   // Si hay un kit de la Liga MX activo, identificamos el club y sus 2 versiones oficiales (Local y Visitante)
   const activeMexicoClubKits = useMemo(() => {
     const kitId = design?.mexicoKitId || activeMexicoKitId;
@@ -1304,8 +1394,48 @@ export default function HybridStudioWorkspace({
           )}
         </div>
 
-        {/* Acciones Rápidas: Plantilla 2D y Galería Desktop */}
+        {/* Conmutador Dual Escenario: [ 🌐 3D CAD ] vs [ 📐 Plantilla 2D ] */}
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-300">
+          <button
+            type="button"
+            id="toggle-stage-3d"
+            onClick={() => setViewportMode('3d')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+              viewportMode === '3d'
+                ? 'bg-slate-900 text-emerald-400 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>3D CAD</span>
+          </button>
+          <button
+            type="button"
+            id="toggle-stage-2d"
+            onClick={() => setViewportMode('2d_pliego')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+              viewportMode === '2d_pliego'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Scissors className="w-3.5 h-3.5" />
+            <span>Plantilla 2D</span>
+          </button>
+        </div>
+
+        {/* Acciones Rápidas: Mockup Redes, Plantilla 2D y Galería Desktop */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsSocialMediaModalOpen(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-300 text-xs font-black text-sky-800 flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+            title="Generar mockup para redes sociales o compartir enlace"
+          >
+            <Share2 className="w-4 h-4 text-sky-600" />
+            <span>Mockup / Redes</span>
+          </button>
+
           <button
             type="button"
             id="btn-header-production-mold"
@@ -1314,7 +1444,7 @@ export default function HybridStudioWorkspace({
             title="Abrir plantilla técnica de confección y corte a escala real 1:1"
           >
             <Scissors className="w-4 h-4 text-emerald-600" />
-            <span>Plantilla 2D</span>
+            <span>Descarga RIP</span>
           </button>
 
           <button
@@ -1402,7 +1532,14 @@ export default function HybridStudioWorkspace({
               : 'h-[44vh] sm:h-[48vh] lg:h-auto lg:flex-1 shrink-0 lg:shrink'
           }`}
         >
-          {isFaux3DAccessory ? (
+          {viewportMode === '2d_pliego' ? (
+            <Interactive2DPliegoStage
+              design={design}
+              activePlayer={activePlayer}
+              artworkRegistry={artworkRegistry}
+              onOpenProductionModal={() => setIsProductionMoldModalOpen(true)}
+            />
+          ) : isFaux3DAccessory ? (
             <LayerStack25DViewer
               design={design}
               product={currentProduct}
@@ -1901,6 +2038,63 @@ export default function HybridStudioWorkspace({
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Opciones de Confección: Tipo de Cuello y Malla Técnica */}
+                <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-900 block uppercase tracking-wide">
+                      Estilo de Cuello (Patronaje)
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      Confección
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: 'v_neck', label: 'Cuello V Pro', desc: 'Ergonómico' },
+                      { id: 'round', label: 'Cuello Redondo', desc: 'Clásico' },
+                      { id: 'polo', label: 'Cuello Polo', desc: 'Con botón' },
+                    ].map((col) => {
+                      const isSel = (design.proCollar || 'v_neck') === col.id;
+                      return (
+                        <button
+                          key={col.id}
+                          type="button"
+                          onClick={() => {
+                            setProCollar(col.id);
+                            onCommitDesign({ ...design, proCollar: col.id }, true);
+                            showToast(`Estilo de cuello actualizado a ${col.label}`);
+                          }}
+                          className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                            isSel
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                              : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          <div className="text-xs font-black truncate">{col.label}</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">{col.desc}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Switch Malla Mesh Transpirable */}
+                  <label className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs text-slate-700 font-bold cursor-pointer">
+                    <div>
+                      <span>Inserciones de Malla Mesh Lateral</span>
+                      <p className="text-[10px] text-slate-400 font-normal">Microperforaciones para ventilación activa</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      {...{ switch: '' }}
+                      checked={Boolean(design.hasMeshPanels)}
+                      onChange={(e) => {
+                        onCommitDesign({ ...design, hasMeshPanels: e.target.checked }, true);
+                        showToast(e.target.checked ? 'Paneles de malla mesh activados' : 'Paneles de malla desactivados');
+                      }}
+                    />
+                  </label>
                 </div>
               </div>
             )}
@@ -3340,6 +3534,71 @@ export default function HybridStudioWorkspace({
                       </div>
                     )}
 
+                    {/* Parches Oficiales en Mangas (1-Clic) */}
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-slate-900 block uppercase tracking-wide flex items-center gap-1.5">
+                          <Award className="w-4 h-4 text-amber-500" />
+                          <span>Parches Oficiales en Mangas</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                          1 Clic
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        Insignias reglamentarias oficiales para mangas con escala y orientación preconfigurada.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleAddSleeveBadge('mx_official')}
+                          className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2 cursor-pointer transition-colors shadow-2xs"
+                        >
+                          <img src="/assets/badges/badge_ligamx_official.svg" alt="Liga MX" className="w-8 h-8 object-contain shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-xs font-black text-slate-900 truncate">Oficial Liga MX</div>
+                            <div className="text-[10px] text-slate-500">Manga Derecha</div>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleAddSleeveBadge('mx_champion')}
+                          className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2 cursor-pointer transition-colors shadow-2xs"
+                        >
+                          <img src="/assets/badges/badge_ligamx_champion.svg" alt="Campeón Liga MX" className="w-8 h-8 object-contain shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-xs font-black text-amber-800 truncate">Campeón Liga MX</div>
+                            <div className="text-[10px] text-slate-500">Manga Derecha • Oro</div>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleAddSleeveBadge('ucl_starball')}
+                          className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2 cursor-pointer transition-colors shadow-2xs"
+                        >
+                          <img src="/assets/badges/badge_ucl_starball.svg" alt="Starball UCL" className="w-8 h-8 object-contain shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-xs font-black text-slate-900 truncate">Starball UCL</div>
+                            <div className="text-[10px] text-slate-500">Manga Derecha • Balón</div>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleAddSleeveBadge('ucl_foundation')}
+                          className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left flex items-center gap-2 cursor-pointer transition-colors shadow-2xs"
+                        >
+                          <img src="/assets/badges/badge_ucl_foundation.svg" alt="UEFA Foundation" className="w-8 h-8 object-contain shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-xs font-black text-sky-900 truncate">UEFA Foundation</div>
+                            <div className="text-[10px] text-slate-500">Manga Izquierda</div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Logoteca Deportiva Integrada con Presets Oficiales */}
                     <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
                       <div className="flex items-center justify-between">
@@ -4586,6 +4845,16 @@ export default function HybridStudioWorkspace({
           setIsProductionMoldModalOpen(false);
           onOpenProductionModal?.();
         }}
+      />
+
+      {/* ==================== MODAL DE MOCKUPS REDES SOCIALES & COMPARTIR ==================== */}
+      <SocialMediaMockupModal
+        isOpen={isSocialMediaModalOpen}
+        onClose={() => setIsSocialMediaModalOpen(false)}
+        design={design}
+        product={currentProduct}
+        activePlayer={activePlayer}
+        canvasSnapshotRef={canvasSnapshotRef}
       />
 
       {/* ==================== MODAL 7: MI GALERÍA INTERNA DE DISEÑOS GUARDADOS ==================== */}

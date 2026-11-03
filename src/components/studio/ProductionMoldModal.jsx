@@ -7,6 +7,10 @@ import {
   preloadDesignArtworkImages,
   MOLD_CONSTANTS,
 } from '../../engine/compositor/moldFlatteningEngine';
+import { 
+  generateGarmentTailoringSvgString, 
+  TAILORING_GARMENT_SPECS 
+} from '../../engine/compositor/tailoringPliegosRegistry';
 import { useAuth } from '../../engine/auth/authManager';
 import UserAuthModal from '../auth/UserAuthModal';
 
@@ -88,6 +92,15 @@ export default function ProductionMoldModal({
   // Generar marcado SVG reactivo con decals y logos embebidos en base64
   const svgMarkup = useMemo(() => {
     if (!isOpen || !design) return '';
+    const pid = design.productModelId;
+    if (pid && pid !== 'futbol_jersey_pro_vneck' && TAILORING_GARMENT_SPECS[pid]) {
+      return generateGarmentTailoringSvgString(pid, design, activePlayer, {
+        showCutLines,
+        showRegistrationMarks,
+        showProductionLabels,
+        artworkRegistry,
+      });
+    }
     return generateProductionMoldSvgString(design, activePlayer, {
       showCutLines,
       showRegistrationMarks,
@@ -107,6 +120,17 @@ export default function ProductionMoldModal({
 
   // Descarga directa SVG 1:1 con logotipos PNG embebidos en base64
   const executeDownloadSvg = async () => {
+    const pid = design?.productModelId;
+    if (pid && pid !== 'futbol_jersey_pro_vneck' && TAILORING_GARMENT_SPECS[pid]) {
+      const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `PLIEGO_1-1_${pid.toUpperCase()}_TALLA_M.svg`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
     const textures = directTextures || (await composeDirect3DTexturesAsync(design, activePlayer, artworkRegistry));
     downloadProductionMoldSvg(design, activePlayer, null, {
       showCutLines,

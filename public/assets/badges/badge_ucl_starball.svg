@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <radialGradient id="uclbg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="70%" stop-color="#0a101d"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+  </defs>
+  <circle cx="250" cy="250" r="240" fill="url(#uclbg)" stroke="#94a3b8" stroke-width="10"/>
+  <circle cx="250" cy="250" r="222" fill="none" stroke="#38bdf8" stroke-width="3"/>
+  <g fill="#ffffff" stroke="#0a101d" stroke-width="2">
+    
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(0 250 250)"/>
+
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(45 250 250)"/>
+
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(90 250 250)"/>
+
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(135 250 250)"/>
+
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(180 250 250)"/>
+
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(225 250 250)"/>
+
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(270 250 250)"/>
+
+  <polygon points="250,150 258,172 282,172 263,186 270,208 250,195 230,208 237,186 218,172 242,172" transform="rotate(315 250 250)"/>
+
+  </g>
+  <circle cx="250" cy="250" r="38" fill="#ffffff" stroke="#020617" stroke-width="3"/>
+  <text x="250" y="258" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="20" fill="#020617">UCL</text>
+</svg>

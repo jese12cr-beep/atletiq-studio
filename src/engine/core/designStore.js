@@ -48,6 +48,25 @@ export const ENGINE_PRODUCTS = [
     badge: '38,319 Vértices • 16 Diseños .fish',
   },
   {
+    id: 'futbol_jersey_f3w_women',
+    name: 'Playera Fútbol F3W Dama Entallada',
+    shortName: 'Playera Dama F3W',
+    sport: 'Fútbol',
+    gender: 'women',
+    garmentCategory: 'jersey',
+    pairedProductId: 'football_shorts_fp3',
+    renderMode: 'WEBGL_3D_PBR',
+    garmentShape: 'jersey_short',
+    mirlUrl: '/models/football_f3_ka.mirl',
+    mirlKey: 'football_f3_ka',
+    owayoCutCode: '204w_Basic_KA',
+    defaultFabricId: 'ts_tex_football',
+    defaultDesignId: 'tackle',
+    basePrice: 34.0,
+    shopifyVariantBase: 44901234567002,
+    badge: '38,319 Vértices • Corte Dama Entallado • 16 Diseños .fish',
+  },
+  {
     id: 'football_shorts_fp3',
     name: 'Short Fútbol FP3 Basic',
     shortName: 'Short Fútbol',
@@ -253,6 +272,8 @@ export function getDesignsForProduct(productModelId = 'futbol_jersey_pro_vneck')
       return JACKET_WOMEN_FISH_DESIGNS;
     case 'football_shorts_fp3':
       return FOOTBALL_SHORTS_FISH_DESIGNS;
+    case 'futbol_jersey_f3w_women':
+    case 'futbol_jersey_pro_vneck':
     default:
       return FOOTBALL_FISH_DESIGNS;
   }
