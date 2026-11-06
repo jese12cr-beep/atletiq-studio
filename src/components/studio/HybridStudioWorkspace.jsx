@@ -44,6 +44,7 @@ import {
   FolderHeart,
   Layers,
   RotateCw,
+  Award,
 } from 'lucide-react';
 import Interactive2DLab from '../../engine/compositor/Interactive2DLab';
 import LayerStack25DViewer from '../../engine/compositor/LayerStack25DViewer';

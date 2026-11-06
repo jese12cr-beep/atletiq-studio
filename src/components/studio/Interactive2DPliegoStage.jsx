@@ -8,7 +8,8 @@ import {
   Download, 
   Sparkles,
   Info,
-  Check
+  Check,
+  Ruler
 } from 'lucide-react';
 import { 
   generateProductionMoldSvgString, 
@@ -16,6 +17,10 @@ import {
   composeDirect3DTexturesAsync 
 } from '../../engine/compositor/moldFlatteningEngine';
 import { generateGarmentTailoringSvgString } from '../../engine/compositor/tailoringPliegosRegistry';
+import { 
+  GRADING_SIZES, 
+  getGarmentGradingData 
+} from '../../engine/compositor/patternGradingEngine';
 
 export default function Interactive2DPliegoStage({
   design,
@@ -30,6 +35,21 @@ export default function Interactive2DPliegoStage({
   const containerRef = useRef(null);
 
   const productModelId = design?.productModelId || 'futbol_jersey_pro_vneck';
+
+  // Talla activa para el escalado de patronaje 2D (Base M por defecto)
+  const [selectedSize, setSelectedSize] = useState(() => activePlayer?.size || 'M');
+
+  // Sincronizar automáticamente si cambia el jugador activo en el Roster
+  useEffect(() => {
+    if (activePlayer?.size && activePlayer.size !== selectedSize) {
+      setSelectedSize(activePlayer.size);
+    }
+  }, [activePlayer?.size]);
+
+  // Datos técnicos de escalado para la prenda y talla actual
+  const gradingData = useMemo(() => {
+    return getGarmentGradingData(productModelId, selectedSize);
+  }, [productModelId, selectedSize]);
 
   // Texturas 3D en alta resolución sincronizadas en tiempo real sobre las piezas de patronaje
   const [directTextures, setDirectTextures] = useState(() => {
@@ -61,7 +81,7 @@ export default function Interactive2DPliegoStage({
     };
   }, [design, activePlayer, artworkRegistry, productModelId]);
 
-  // Generar SVG enriquecido en tiempo real del pliego de confección
+  // Generar SVG enriquecido en tiempo real del pliego de confección con la talla seleccionada
   const svgContent = useMemo(() => {
     let raw = '';
     if (productModelId === 'futbol_jersey_pro_vneck') {
@@ -70,15 +90,17 @@ export default function Interactive2DPliegoStage({
         artworkRegistry,
         showCutLines: true,
         showLabels: true,
+        size: selectedSize,
       });
     } else {
       raw = generateGarmentTailoringSvgString(productModelId, design, activePlayer, {
         directTextures,
         artworkRegistry,
+        size: selectedSize,
       });
     }
     return raw ? raw.replace(/^<\?xml[^>]*\?>\s*/i, '') : '';
-  }, [productModelId, design, activePlayer, artworkRegistry, directTextures]);
+  }, [productModelId, design, activePlayer, artworkRegistry, directTextures, selectedSize]);
 
   const handleZoomIn = () => setScale((s) => Math.min(s * 1.25, 4));
   const handleZoomOut = () => setScale((s) => Math.max(s / 1.25, 0.5));
@@ -138,15 +160,66 @@ export default function Interactive2DPliegoStage({
         backgroundSize: '100% 100%, 40px 40px, 40px 40px',
       }}
     >
-      {/* Badge Superior: Modo Plantilla 2D */}
-      <div className="pointer-events-none absolute top-3 left-3 z-20 flex items-center gap-2">
+      {/* Badge Superior Izquierdo: Modo Plantilla 2D */}
+      <div className="pointer-events-none absolute top-3 left-3 z-20 flex flex-col gap-1.5">
         <div className="px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-md shadow-lg flex items-center gap-2 text-xs font-black text-white">
           <Scissors className="w-3.5 h-3.5 text-emerald-400" />
           <span>PLIEGO 2D CONFECCIÓN TEXTIL (1:1 RIP)</span>
           <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[10px] uppercase font-bold border border-emerald-400/30">
-            En Vivo
+            Talla {selectedSize}
           </span>
         </div>
+
+        {/* Ficha rápida de medidas antropométricas y escala del patrón */}
+        <div className="px-2.5 py-1 rounded-lg bg-slate-900/85 border border-slate-800 backdrop-blur-md text-[11px] text-slate-300 font-semibold flex items-center gap-2 shadow-md w-fit">
+          <Ruler className="w-3 h-3 text-emerald-400 shrink-0" />
+          <span className="text-emerald-300 font-bold">Escala: {Math.round(gradingData.scaleX * 100)}% X · {Math.round(gradingData.scaleY * 100)}% Y</span>
+          {gradingData.measurements.chestWidth && (
+            <>
+              <span className="text-slate-600">•</span>
+              <span>Pecho: <strong className="text-white">{gradingData.measurements.chestWidth} cm</strong></span>
+            </>
+          )}
+          {gradingData.measurements.totalLength && (
+            <>
+              <span className="text-slate-600">•</span>
+              <span>Largo: <strong className="text-white">{gradingData.measurements.totalLength} cm</strong></span>
+            </>
+          )}
+          {gradingData.measurements.outseamLength && (
+            <>
+              <span className="text-slate-600">•</span>
+              <span>Largo Short: <strong className="text-white">{gradingData.measurements.outseamLength} cm</strong></span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Selector de Tallas con Escalado de Patronaje en Vivo (Superior Derecho) */}
+      <div className="pointer-events-auto absolute top-3 right-3 z-20 flex items-center gap-1 p-1 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-md shadow-xl text-white">
+        <div className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-black uppercase text-slate-400 border-r border-slate-700/60 mr-0.5">
+          <span>Talla:</span>
+        </div>
+        {GRADING_SIZES.map((sz) => {
+          const isActive = sz === selectedSize;
+          const isBase = sz === 'M';
+          return (
+            <button
+              key={sz}
+              type="button"
+              onClick={() => setSelectedSize(sz)}
+              className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                isActive
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30 scale-105'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+              title={`Escalar pliego industrial a Talla ${sz}${isBase ? ' (Base Central 100%)' : ''}`}
+            >
+              <span>{sz}</span>
+              {isBase && <span className="text-[9px] opacity-75 font-normal">(Base)</span>}
+            </button>
+          );
+        })}
       </div>
 
       {/* Contenedor del SVG con Pan y Zoom */}

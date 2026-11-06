@@ -126,7 +126,7 @@ export default function ProductionMoldModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `PLIEGO_1-1_${pid.toUpperCase()}_TALLA_M.svg`;
+      a.download = `PLIEGO_1-1_${pid.toUpperCase()}_TALLA_${activePlayer.size || "M"}.svg`;
       a.click();
       URL.revokeObjectURL(url);
       return;

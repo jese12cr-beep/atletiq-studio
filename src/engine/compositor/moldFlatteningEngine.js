@@ -16,6 +16,11 @@ import {
   resolvedFishMasksCache,
 } from './fishPartCompositor';
 import { resolveAssetUrl } from '../../utils/assetUrl';
+import {
+  getGarmentGradingData,
+  generateDynamicSizeBadgeSvg,
+  GRADING_SIZES,
+} from './patternGradingEngine';
 
 // ============================================================================
 // CONSTANTES Y TRAZOS MAESTROS DE "MOLDE CAMISA.SVG"
@@ -1453,6 +1458,13 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     artworkRegistry = {},
   } = options;
 
+  // Escalado anatómico de patronaje industrial
+  const targetSize = options.size || activePlayer?.size || "M";
+  const grading = getGarmentGradingData(design?.productModelId || "futbol_jersey_pro_vneck", targetSize);
+  const activeSize = grading.size;
+  const scaleX = grading.scaleX;
+  const scaleY = grading.scaleY;
+
   const directTextures =
     options.directTextures ||
     (typeof document !== 'undefined' ? composeDirect3DTextures(design, activePlayer, artworkRegistry) : null);
@@ -1590,12 +1602,13 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
   <!-- 1. CAPA MASTER DE PATRONAJE (FONDO ORIGINAL ADOBE ILLUSTRATOR) -->
   <g id="BACKGROUND">
     ${MOLDE_CAMISA_BACKGROUND_INNER}
+    ${generateDynamicSizeBadgeSvg(activeSize)}
   </g>
 
   <!-- 2. CAPA DE PRODUCCIÓN TEXTIL 1:1 (DISEÑO Y PIEZAS APLANADAS DIRECTO DE 3D) -->
   <g id="DESIGN">
     <!-- ==================== PIEZA 1: DELANTERO / FRENTE ==================== -->
-    <g id="PIECE_FRENTE">
+    <g id="PIECE_FRENTE" transform="translate(${frenteCenterX}, 2122.1) scale(${scaleX}, ${scaleY}) translate(-${frenteCenterX}, -2122.1)">
       <g clip-path="url(#clip-frente)">
         ${
           directTextures?.front
@@ -1615,11 +1628,11 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
       ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.FRENTE}" />` : ''}
 
       <!-- Identificación de Pieza -->
-      ${showLabels ? `<text x="${frenteCenterX}" y="3255" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.FRONT.tag}</text>` : ''}
+      ${showLabels ? `<text x="${frenteCenterX}" y="3255" text-anchor="middle" class="piece-tag">[ 1. DELANTERO / FRENTE • TALLA ${activeSize} ]</text>` : ''}
     </g>
 
     <!-- ==================== PIEZA 2: TRASERO / ESPALDA ==================== -->
-    <g id="PIECE_TRASERO">
+    <g id="PIECE_TRASERO" transform="translate(${traseroCenterX}, 2110.53) scale(${scaleX}, ${scaleY}) translate(-${traseroCenterX}, -2110.53)">
       <g clip-path="url(#clip-trasero)">
         ${
           directTextures?.back
@@ -1641,11 +1654,11 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
       ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.TRASERO}" />` : ''}
 
       <!-- Identificación de Pieza -->
-      ${showLabels ? `<text x="${traseroCenterX}" y="3255" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.BACK.tag}</text>` : ''}
+      ${showLabels ? `<text x="${traseroCenterX}" y="3255" text-anchor="middle" class="piece-tag">[ 2. TRASERO / ESPALDA • TALLA ${activeSize} ]</text>` : ''}
     </g>
 
     <!-- ==================== PIEZA 3: MANGA IZQUIERDA ==================== -->
-    <g id="PIECE_MANGA_IZQUIERDA">
+    <g id="PIECE_MANGA_IZQUIERDA" transform="translate(${frenteCenterX}, 539.51) scale(${scaleX}, ${scaleY}) translate(-${frenteCenterX}, -539.51)">
       <g clip-path="url(#clip-manga-izq)">
         ${
           directTextures?.left_sleeve
@@ -1663,11 +1676,11 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
       ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.MANGA_IZQUIERDA}" />` : ''}
 
       <!-- Identificación -->
-      ${showLabels ? `<text x="${frenteCenterX}" y="920" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.LEFT_SLEEVE.tag}</text>` : ''}
+      ${showLabels ? `<text x="${frenteCenterX}" y="920" text-anchor="middle" class="piece-tag">[ 3. MANGA IZQUIERDA • TALLA ${activeSize} ]</text>` : ''}
     </g>
 
     <!-- ==================== PIEZA 4: MANGA DERECHA ==================== -->
-    <g id="PIECE_MANGA_DERECHA">
+    <g id="PIECE_MANGA_DERECHA" transform="translate(${traseroCenterX}, 539.51) scale(${scaleX}, ${scaleY}) translate(-${traseroCenterX}, -539.51)">
       <g clip-path="url(#clip-manga-der)">
         ${
           directTextures?.right_sleeve
@@ -1685,14 +1698,14 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
       ${showCutLines ? `<path class="cut-line" d="${MOLDE_PATHS.MANGA_DERECHA}" />` : ''}
 
       <!-- Identificación -->
-      ${showLabels ? `<text x="${traseroCenterX}" y="920" text-anchor="middle" class="piece-tag">${MOLD_CONSTANTS.PIECES.RIGHT_SLEEVE.tag}</text>` : ''}
+      ${showLabels ? `<text x="${traseroCenterX}" y="920" text-anchor="middle" class="piece-tag">[ 4. MANGA DERECHA • TALLA ${activeSize} ]</text>` : ''}
     </g>
 
     <!-- ==================== PIEZA 5: TIRA DE CUELLO / RIBETE ==================== -->
-    <g id="PIECE_CUELLO">
+    <g id="PIECE_CUELLO" transform="translate(1771.64, 895.15) scale(${scaleX}, ${scaleY}) translate(-1771.64, -895.15)">
       <rect x="1700" y="200" width="140" height="1400" fill="${collarColor}" />
       ${showCutLines ? `<rect x="1700" y="200" width="140" height="1400" class="cut-line" />` : ''}
-      ${showLabels ? `<text x="1770" y="900" text-anchor="middle" transform="rotate(-90 1770 900)" class="piece-tag">${MOLD_CONSTANTS.PIECES.COLLAR.tag}</text>` : ''}
+      ${showLabels ? `<text x="1770" y="900" text-anchor="middle" transform="rotate(-90 1770 900)" class="piece-tag">[ 5. TIRA DE CUELLO • TALLA ${activeSize} ]</text>` : ''}
     </g>
   </g>
 </svg>`;
@@ -1708,7 +1721,8 @@ export function downloadProductionMoldSvg(design, activePlayer = {}, filename = 
   const a = document.createElement('a');
   a.href = url;
   const safeName = (design?.clubAlias || design?.mexicoKitId || 'PLANTILLA').replace(/\s+/g, '_').toUpperCase();
-  a.download = filename || `${safeName}_PLANTILLA_CONFECCION_TALLA_M_1A1.svg`;
+  const activeSize = options.size || activePlayer?.size || "M";
+  a.download = filename || `${safeName}_PLANTILLA_CONFECCION_TALLA_${activeSize}_1A1.svg`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

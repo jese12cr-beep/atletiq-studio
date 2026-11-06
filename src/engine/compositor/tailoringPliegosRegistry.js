@@ -13,6 +13,12 @@
  * 8. Chaquetas Softshell J5 Pro (`jacket_softshell_601m_men` / `601w`)
  */
 
+import {
+  getGarmentGradingData,
+  generateDynamicSizeBadgeSvg,
+  GRADING_SIZES,
+} from './patternGradingEngine';
+
 const MOLD_VIEWBOX = '0 0 3543.31 3401.57';
 
 const MOLD_STYLE = `
@@ -316,6 +322,13 @@ export function generateGarmentTailoringSvgString(
   const paths = TAILORING_SVG_PATHS[productModelId] || TAILORING_SVG_PATHS.futbol_jersey_pro_vneck;
   const directTextures = options.directTextures || null;
 
+  // Escalado anatómico de patronaje industrial
+  const targetSize = options.size || activePlayer?.size || 'M';
+  const grading = getGarmentGradingData(productModelId, targetSize);
+  const activeSize = grading.size;
+  const scaleX = grading.scaleX;
+  const scaleY = grading.scaleY;
+
   const primaryColor = design?.colorZones?.primary?.hex || '#FFF0B5';
   const secondaryColor = design?.colorZones?.secondary?.hex || '#0A1A3A';
   const accentColor = design?.colorZones?.accent?.hex || '#DC2626';
@@ -358,12 +371,13 @@ export function generateGarmentTailoringSvgString(
   <!-- CAPA MASTER DE PATRONAJE Y MARCAS RIP 1:1 -->
   <g id="BACKGROUND">
     ${MOLD_BACKGROUND_MARKS}
+    ${generateDynamicSizeBadgeSvg(activeSize)}
   </g>
 
   <!-- CAPA DE PRODUCCIÓN TEXTIL INDUSTRIAL EN VIVO -->
   <g id="DESIGN">
     <!-- PIEZA 1: DELANTERO / FRENTE -->
-    <g id="PIECE_FRENTE">
+    <g id="PIECE_FRENTE" transform="translate(950, 2120) scale(${scaleX}, ${scaleY}) translate(-950, -2120)">
       <g clip-path="url(#clip-frente)">
         ${
           directTextures?.front
@@ -380,11 +394,11 @@ export function generateGarmentTailoringSvgString(
         }
       </g>
       <path d="${paths.frente}" class="cut-line" />
-      <text x="950" y="3280" text-anchor="middle" class="piece-tag">[ 1. FRENTE • ${spec.title.toUpperCase()} • TALLA M ]</text>
+      <text x="950" y="3280" text-anchor="middle" class="piece-tag">[ 1. FRENTE • ${spec.title.toUpperCase()} • TALLA ${activeSize} ]</text>
     </g>
 
     <!-- PIEZA 2: TRASERO / ESPALDA -->
-    <g id="PIECE_TRASERO">
+    <g id="PIECE_TRASERO" transform="translate(2600, 2120) scale(${scaleX}, ${scaleY}) translate(-2600, -2120)">
       <g clip-path="url(#clip-trasero)">
         ${
           directTextures?.back
@@ -399,18 +413,18 @@ export function generateGarmentTailoringSvgString(
         }
       </g>
       <path d="${paths.trasero}" class="cut-line" />
-      <text x="2600" y="3280" text-anchor="middle" class="piece-tag">[ 2. ESPALDA • ${spec.title.toUpperCase()} • TALLA M ]</text>
+      <text x="2600" y="3280" text-anchor="middle" class="piece-tag">[ 2. ESPALDA • ${spec.title.toUpperCase()} • TALLA ${activeSize} ]</text>
     </g>
 
     ${
       !isTank && paths.manga_izq
         ? `
     <!-- PIEZA 3: MANGA IZQUIERDA -->
-    <g id="PIECE_MANGA_IZQUIERDA">
+    <g id="PIECE_MANGA_IZQUIERDA" transform="translate(950, 540) scale(${scaleX}, ${scaleY}) translate(-950, -540)">
       <g clip-path="url(#clip-manga-izq)">
         ${
           directTextures?.left_sleeve
-            ? `<image href="${directTextures.left_sleeve}" xlink:href="${directTextures.left_sleeve}" x="${mIzqBounds.x}" y="${mIzqBounds.y}" width="${mIzqBounds.width}" height="${mIzqBounds.height}" preserveAspectRatio="none" />`
+            ? `<image href="${directTextures.left_sleeve}" xlink:href="${directTextures.left_sleeve}" x="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_izq || { x: 310, y: 196, width: 1277, height: 686 }).x}" y="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_izq || { x: 310, y: 196, width: 1277, height: 686 }).y}" width="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_izq || { x: 310, y: 196, width: 1277, height: 686 }).width}" height="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_izq || { x: 310, y: 196, width: 1277, height: 686 }).height}" preserveAspectRatio="none" />`
             : `
         <rect x="0" y="0" width="1800" height="1000" fill="${sleevesColor}" />
         <rect x="280" y="780" width="1335" height="90" fill="${collarColor}" />
@@ -418,15 +432,15 @@ export function generateGarmentTailoringSvgString(
         }
       </g>
       <path d="${paths.manga_izq}" class="cut-line" />
-      <text x="950" y="150" text-anchor="middle" class="piece-tag">[ 3. MANGA IZQUIERDA • TALLA M ]</text>
+      <text x="950" y="150" text-anchor="middle" class="piece-tag">[ 3. MANGA IZQUIERDA • TALLA ${activeSize} ]</text>
     </g>
 
     <!-- PIEZA 4: MANGA DERECHA -->
-    <g id="PIECE_MANGA_DERECHA">
+    <g id="PIECE_MANGA_DERECHA" transform="translate(2600, 540) scale(${scaleX}, ${scaleY}) translate(-2600, -540)">
       <g clip-path="url(#clip-manga-der)">
         ${
           directTextures?.right_sleeve
-            ? `<image href="${directTextures.right_sleeve}" xlink:href="${directTextures.right_sleeve}" x="${mDerBounds.x}" y="${mDerBounds.y}" width="${mDerBounds.width}" height="${mDerBounds.height}" preserveAspectRatio="none" />`
+            ? `<image href="${directTextures.right_sleeve}" xlink:href="${directTextures.right_sleeve}" x="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_der || { x: 1956, y: 196, width: 1277, height: 686 }).x}" y="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_der || { x: 1956, y: 196, width: 1277, height: 686 }).y}" width="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_der || { x: 1956, y: 196, width: 1277, height: 686 }).width}" height="${(TAILORING_PIECE_BOUNDS[productModelId]?.manga_der || { x: 1956, y: 196, width: 1277, height: 686 }).height}" preserveAspectRatio="none" />`
             : `
         <rect x="1800" y="0" width="1800" height="1000" fill="${sleevesColor}" />
         <rect x="1925" y="780" width="1335" height="90" fill="${collarColor}" />
@@ -434,16 +448,16 @@ export function generateGarmentTailoringSvgString(
         }
       </g>
       <path d="${paths.manga_der}" class="cut-line" />
-      <text x="2600" y="150" text-anchor="middle" class="piece-tag">[ 4. MANGA DERECHA • TALLA M ]</text>
+      <text x="2600" y="150" text-anchor="middle" class="piece-tag">[ 4. MANGA DERECHA • TALLA ${activeSize} ]</text>
     </g>
     `
         : ''
     }
 
     <!-- PIEZA CUELLO / RIBETES -->
-    <g id="PIECE_CUELLO">
+    <g id="PIECE_CUELLO" transform="translate(1770, 900) scale(${scaleX}, ${scaleY}) translate(-1770, -900)">
       <rect x="1700" y="200" width="140" height="1400" fill="${collarColor}" class="cut-line" />
-      <text x="1770" y="900" text-anchor="middle" transform="rotate(-90 1770 900)" class="piece-tag">[ CUELLO / RIBETE • TALLA M ]</text>
+      <text x="1770" y="900" text-anchor="middle" transform="rotate(-90 1770 900)" class="piece-tag">[ CUELLO / RIBETE • TALLA ${activeSize} ]</text>
     </g>
   </g>
 </svg>`;
@@ -468,11 +482,12 @@ export function generateGarmentTailoringSvgString(
 
   <g id="BACKGROUND">
     ${MOLD_BACKGROUND_MARKS}
+    ${generateDynamicSizeBadgeSvg(activeSize)}
   </g>
 
   <g id="DESIGN">
     <!-- PIERNA IZQUIERDA -->
-    <g id="PIECE_PIERNA_IZQUIERDA">
+    <g id="PIECE_PIERNA_IZQUIERDA" transform="translate(850, 1900) scale(${scaleX}, ${scaleY}) translate(-850, -1900)">
       <g clip-path="url(#clip-pierna-izq)">
         ${
           directTextures?.left_leg
@@ -485,11 +500,11 @@ export function generateGarmentTailoringSvgString(
         }
       </g>
       <path d="${paths.pierna_izq || paths.delantero_izq}" class="cut-line" />
-      <text x="850" y="3250" text-anchor="middle" class="piece-tag">[ 1. PIERNA IZQUIERDA • ${spec.title.toUpperCase()} ]</text>
+      <text x="850" y="3250" text-anchor="middle" class="piece-tag">[ 1. PIERNA IZQUIERDA • ${spec.title.toUpperCase()} • TALLA ${activeSize} ]</text>
     </g>
 
     <!-- PIERNA DERECHA -->
-    <g id="PIECE_PIERNA_DERECHA">
+    <g id="PIECE_PIERNA_DERECHA" transform="translate(2550, 1900) scale(${scaleX}, ${scaleY}) translate(-2550, -1900)">
       <g clip-path="url(#clip-pierna-der)">
         ${
           directTextures?.right_leg
@@ -503,13 +518,13 @@ export function generateGarmentTailoringSvgString(
         }
       </g>
       <path d="${paths.pierna_der || paths.trasero_der || paths.delantero_der}" class="cut-line" />
-      <text x="2550" y="3250" text-anchor="middle" class="piece-tag">[ 2. PIERNA DERECHA • ${spec.title.toUpperCase()} ]</text>
+      <text x="2550" y="3250" text-anchor="middle" class="piece-tag">[ 2. PIERNA DERECHA • ${spec.title.toUpperCase()} • TALLA ${activeSize} ]</text>
     </g>
 
     <!-- PRETINA -->
-    <g id="PIECE_PRETINA">
+    <g id="PIECE_PRETINA" transform="translate(1750, 440) scale(${scaleX}, 1) translate(-1750, -440)">
       <rect x="250" y="250" width="3000" height="380" fill="${secondaryColor}" class="cut-line" />
-      <text x="1750" y="450" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="#ffffff" letter-spacing="4">[ 3. PRETINA ELÁSTICA CON CORDÓN INTERNO • TALLA M ]</text>
+      <text x="1750" y="450" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="#ffffff" letter-spacing="4">[ 3. PRETINA ELÁSTICA CON CORDÓN INTERNO • TALLA ${activeSize} ]</text>
     </g>
   </g>
 </svg>`;
