@@ -19,7 +19,7 @@ import {
   GRADING_SIZES,
 } from './patternGradingEngine';
 
-const MOLD_VIEWBOX = '0 0 3543.31 3401.57';
+const MOLD_VIEWBOX = '0 0 4400 3800';
 
 const MOLD_STYLE = `
   .st0 { fill: #333333; }
@@ -38,7 +38,7 @@ const MOLD_STYLE = `
 
 const MOLD_BACKGROUND_MARKS = `
     <!-- 1. ICONO Y TEXTO: SCALE 1:1 -->
-    <g id="MARK_SCALE">
+    <g id="MARK_SCALE" transform="translate(120, 360)">
       <g>
         <path class="st0" d="M694.96,3313.86c2.14,1.15,5.5,2.25,8.95,2.25,3.71,0,5.68-1.54,5.68-3.89,0-2.2-1.7-3.49-5.98-5-5.96-2.11-9.85-5.36-9.85-10.57,0-6.09,5.11-10.72,13.51-10.72,4.07,0,7.01.8,9.12,1.79l-1.79,6.48c-1.41-.68-3.98-1.7-7.45-1.7s-5.2,1.63-5.2,3.46c0,2.27,1.98,3.27,6.61,5.02,6.33,2.36,9.26,5.65,9.26,10.69,0,5.97-4.57,11.09-14.4,11.09-4.05,0-8.1-1.11-10.09-2.22L694.96,3313.86Z"/>
         <path class="st0" d="M750.21,3321.22c-1.45.71-4.83,1.54-9.13,1.54-12.37,0-18.75-7.73-18.75-17.91,0-12.18,8.73-18.92,19.51-18.92,4.2,0,7.39.81,8.8,1.58l-1.65,6.38c-1.61-.7-3.9-1.34-6.79-1.34-6.37,0-11.36,3.89-11.36,11.83,0,7.16,4.22,11.66,11.41,11.66,2.48,0,5.15-.49,6.75-1.16L750.21,3321.22Z"/>
@@ -56,7 +56,7 @@ const MOLD_BACKGROUND_MARKS = `
     </g>
 
     <!-- 2. ICONO Y TEXTO: CMYK COLOR -->
-    <g id="MARK_CMYK">
+    <g id="MARK_CMYK" transform="translate(500, 360)">
       <g>
         <path class="st0" d="M1696.11,3310.12q-.59,3.02-1.86,5.45t-3.21,4.19-4.47,2.71-5.62.95q-3.45,0-6.44-1.17-3-1.16-5.17-3.5-2.17-2.33-3.42-5.75-1.24-3.41-1.24-7.97,0-4.46,1.14-8.03,1.14-3.58,3.26-6.04,2.12-2.47,5.16-3.79,3.05-1.33,6.81-1.33,3.29,0,5.97.98,2.67.98,4.61,2.71,1.93,1.72,3.07,4.05,1.14,2.33,1.41,4.98h-7.37q-.74-3.02-2.86-4.69-2.12-1.67-4.77-1.67-4.61,0-6.79,3.31-2.17,3.32-2.17,9.09,0,5.89,2.15,9.15,2.14,3.26,6.44,3.26,3.28,0,5.27-1.78,1.99-1.77,2.73-5.11H1696.11Z"/>
         <path class="st0" d="M1726.62,3322.2v-24.12l-6.57,24.12h-7.31l-6.52-24.01v24.01h-6.84v-35.19h10.81l6.36,25.81,6.36-25.81h10.6v35.19H1726.62Z"/>
@@ -371,13 +371,13 @@ export function generateGarmentTailoringSvgString(
   <!-- CAPA MASTER DE PATRONAJE Y MARCAS RIP 1:1 -->
   <g id="BACKGROUND">
     ${MOLD_BACKGROUND_MARKS}
-    ${generateDynamicSizeBadgeSvg(activeSize)}
+    ${generateDynamicSizeBadgeSvg(activeSize, 4150, 160)}
   </g>
 
   <!-- CAPA DE PRODUCCIÓN TEXTIL INDUSTRIAL EN VIVO -->
   <g id="DESIGN">
     <!-- PIEZA 1: DELANTERO / FRENTE -->
-    <g id="PIECE_FRENTE" transform="translate(950, 2120) scale(${scaleX}, ${scaleY}) translate(-950, -2120)">
+    <g id="PIECE_FRENTE" transform="translate(1050, 2260) scale(${scaleX}, ${scaleY}) translate(-950, -2120)">
       <g clip-path="url(#clip-frente)">
         ${
           directTextures?.front
@@ -398,7 +398,7 @@ export function generateGarmentTailoringSvgString(
     </g>
 
     <!-- PIEZA 2: TRASERO / ESPALDA -->
-    <g id="PIECE_TRASERO" transform="translate(2600, 2120) scale(${scaleX}, ${scaleY}) translate(-2600, -2120)">
+    <g id="PIECE_TRASERO" transform="translate(3350, 2260) scale(${scaleX}, ${scaleY}) translate(-2600, -2120)">
       <g clip-path="url(#clip-trasero)">
         ${
           directTextures?.back
@@ -420,7 +420,7 @@ export function generateGarmentTailoringSvgString(
       !isTank && paths.manga_izq
         ? `
     <!-- PIEZA 3: MANGA IZQUIERDA -->
-    <g id="PIECE_MANGA_IZQUIERDA" transform="translate(950, 540) scale(${scaleX}, ${scaleY}) translate(-950, -540)">
+    <g id="PIECE_MANGA_IZQUIERDA" transform="translate(1050, 520) scale(${scaleX}, ${scaleY}) translate(-950, -540)">
       <g clip-path="url(#clip-manga-izq)">
         ${
           directTextures?.left_sleeve
@@ -436,7 +436,7 @@ export function generateGarmentTailoringSvgString(
     </g>
 
     <!-- PIEZA 4: MANGA DERECHA -->
-    <g id="PIECE_MANGA_DERECHA" transform="translate(2600, 540) scale(${scaleX}, ${scaleY}) translate(-2600, -540)">
+    <g id="PIECE_MANGA_DERECHA" transform="translate(3350, 520) scale(${scaleX}, ${scaleY}) translate(-2600, -540)">
       <g clip-path="url(#clip-manga-der)">
         ${
           directTextures?.right_sleeve
@@ -455,7 +455,7 @@ export function generateGarmentTailoringSvgString(
     }
 
     <!-- PIEZA CUELLO / RIBETES -->
-    <g id="PIECE_CUELLO" transform="translate(1770, 900) scale(${scaleX}, ${scaleY}) translate(-1770, -900)">
+    <g id="PIECE_CUELLO" transform="translate(2200, 950) scale(${scaleX}, ${scaleY}) translate(-1770, -900)">
       <rect x="1700" y="200" width="140" height="1400" fill="${collarColor}" class="cut-line" />
       <text x="1770" y="900" text-anchor="middle" transform="rotate(-90 1770 900)" class="piece-tag">[ CUELLO / RIBETE • TALLA ${activeSize} ]</text>
     </g>
@@ -482,12 +482,12 @@ export function generateGarmentTailoringSvgString(
 
   <g id="BACKGROUND">
     ${MOLD_BACKGROUND_MARKS}
-    ${generateDynamicSizeBadgeSvg(activeSize)}
+    ${generateDynamicSizeBadgeSvg(activeSize, 4150, 160)}
   </g>
 
   <g id="DESIGN">
     <!-- PIERNA IZQUIERDA -->
-    <g id="PIECE_PIERNA_IZQUIERDA" transform="translate(850, 1900) scale(${scaleX}, ${scaleY}) translate(-850, -1900)">
+    <g id="PIECE_PIERNA_IZQUIERDA" transform="translate(1100, 2100) scale(${scaleX}, ${scaleY}) translate(-850, -1900)">
       <g clip-path="url(#clip-pierna-izq)">
         ${
           directTextures?.left_leg
@@ -504,7 +504,7 @@ export function generateGarmentTailoringSvgString(
     </g>
 
     <!-- PIERNA DERECHA -->
-    <g id="PIECE_PIERNA_DERECHA" transform="translate(2550, 1900) scale(${scaleX}, ${scaleY}) translate(-2550, -1900)">
+    <g id="PIECE_PIERNA_DERECHA" transform="translate(3300, 2100) scale(${scaleX}, ${scaleY}) translate(-2550, -1900)">
       <g clip-path="url(#clip-pierna-der)">
         ${
           directTextures?.right_leg
@@ -522,7 +522,7 @@ export function generateGarmentTailoringSvgString(
     </g>
 
     <!-- PRETINA -->
-    <g id="PIECE_PRETINA" transform="translate(1750, 440) scale(${scaleX}, 1) translate(-1750, -440)">
+    <g id="PIECE_PRETINA" transform="translate(2200, 480) scale(${scaleX}, 1) translate(-1750, -440)">
       <rect x="250" y="250" width="3000" height="380" fill="${secondaryColor}" class="cut-line" />
       <text x="1750" y="450" text-anchor="middle" dominant-baseline="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="28" fill="#ffffff" letter-spacing="4">[ 3. PRETINA ELÁSTICA CON CORDÓN INTERNO • TALLA ${activeSize} ]</text>
     </g>

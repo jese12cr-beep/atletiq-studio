@@ -2445,13 +2445,13 @@ export default function HybridStudioWorkspace({
                                 type="button"
                                 style={{ fontFamily: f.family }}
                                 onClick={() => updateDecal(selectedTextDecal.id, { fontFamily: f.family }, true)}
-                                className={`px-2.5 py-1.5 rounded-xl border text-sm tracking-wide transition-all ${
+                                className={`px-2.5 py-2 rounded-xl border text-xs font-black tracking-wide transition-all flex items-center justify-center cursor-pointer shadow-xs ${
                                   selectedTextDecal.fontFamily === f.family
-                                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-xs'
-                                    : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+                                    ? 'bg-amber-400 text-slate-950 border-amber-500 font-black ring-2 ring-amber-400/40'
+                                    : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-300 hover:border-slate-400'
                                 }`}
                               >
-                                {f.name || f.label}
+                                <span className="truncate">{f.name || f.label || 'Fuente'}</span>
                               </button>
                             ))}
                           </div>
@@ -2673,13 +2673,13 @@ export default function HybridStudioWorkspace({
                                   onClick={() =>
                                     updateVariableSlot(selectedSlotKey, { ...slot, fontFamily: f.family }, true)
                                   }
-                                  className={`px-2.5 py-1.5 rounded-xl border text-sm transition-all ${
+                                  className={`px-2.5 py-2 rounded-xl border text-xs font-black tracking-wide transition-all flex items-center justify-center cursor-pointer shadow-xs ${
                                     slot.fontFamily === f.family
-                                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-xs'
-                                      : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+                                      ? 'bg-amber-400 text-slate-950 border-amber-500 font-black ring-2 ring-amber-400/40'
+                                      : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-300 hover:border-slate-400'
                                   }`}
                                 >
-                                  {f.name || f.label}
+                                  <span className="truncate">{f.name || f.label || 'Fuente'}</span>
                                 </button>
                               ))}
                             </div>
@@ -2928,13 +2928,13 @@ export default function HybridStudioWorkspace({
                                 updateVariableSlot('playerNumberBack', { ...design.variableSlots?.playerNumberBack, fontFamily: f.family }, true);
                                 updateVariableSlot('playerNameBack', { ...design.variableSlots?.playerNameBack, fontFamily: f.family }, true);
                               }}
-                              className={`py-2 px-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer truncate ${
+                              className={`py-2 px-1 rounded-xl text-xs font-black border transition-all cursor-pointer truncate shadow-xs ${
                                 design.variableSlots?.playerNumberBack?.fontFamily === f.family
-                                  ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                                  : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'
+                                  ? 'bg-amber-400 text-slate-950 border-amber-500 ring-2 ring-amber-400/40'
+                                  : 'bg-white text-slate-900 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
                               }`}
                             >
-                              {f.name || f.label}
+                              <span className="truncate">{f.name || f.label || 'Fuente'}</span>
                             </button>
                           ))}
                         </div>

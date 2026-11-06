@@ -231,7 +231,7 @@ export default function Interactive2DPliegoStage({
         }}
       >
         <div 
-          className="relative w-auto h-full max-h-[88%] aspect-[3543/3401] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 pointer-events-auto"
+          className="relative w-auto h-full max-h-[88%] aspect-[4400/3800] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-300 pointer-events-auto"
           onContextMenu={(e) => {
             e.preventDefault();
             e.stopPropagation();

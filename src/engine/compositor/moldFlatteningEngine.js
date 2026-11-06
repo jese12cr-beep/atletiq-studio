@@ -27,7 +27,7 @@ import {
 // ============================================================================
 
 export const MOLD_CONSTANTS = {
-  VIEWBOX: '0 0 3543.31 3401.57',
+  VIEWBOX: '0 0 4400 3800',
   CANVAS_WIDTH_MM: 1250,
   CANVAS_HEIGHT_MM: 1200,
   DPI: 72,
@@ -115,7 +115,7 @@ export const MOLDE_CAMISA_STYLE = `
 
 export const MOLDE_CAMISA_BACKGROUND_INNER = `
     <!-- 1. ICONO Y TEXTO: SCALE 1:1 -->
-    <g id="MARK_SCALE">
+    <g id="MARK_SCALE" transform="translate(120, 360)">
       <g>
         <path class="st0" d="M694.96,3313.86c2.14,1.15,5.5,2.25,8.95,2.25,3.71,0,5.68-1.54,5.68-3.89,0-2.2-1.7-3.49-5.98-5-5.96-2.11-9.85-5.36-9.85-10.57,0-6.09,5.11-10.72,13.51-10.72,4.07,0,7.01.8,9.12,1.79l-1.79,6.48c-1.41-.68-3.98-1.7-7.45-1.7s-5.2,1.63-5.2,3.46c0,2.27,1.98,3.27,6.61,5.02,6.33,2.36,9.26,5.65,9.26,10.69,0,5.97-4.57,11.09-14.4,11.09-4.05,0-8.1-1.11-10.09-2.22L694.96,3313.86Z"/>
         <path class="st0" d="M750.21,3321.22c-1.45.71-4.83,1.54-9.13,1.54-12.37,0-18.75-7.73-18.75-17.91,0-12.18,8.73-18.92,19.51-18.92,4.2,0,7.39.81,8.8,1.58l-1.65,6.38c-1.61-.7-3.9-1.34-6.79-1.34-6.37,0-11.36,3.89-11.36,11.83,0,7.16,4.22,11.66,11.41,11.66,2.48,0,5.15-.49,6.75-1.16L750.21,3321.22Z"/>
@@ -133,7 +133,7 @@ export const MOLDE_CAMISA_BACKGROUND_INNER = `
     </g>
 
     <!-- 2. ICONO Y TEXTO: CMYK COLOR -->
-    <g id="MARK_CMYK">
+    <g id="MARK_CMYK" transform="translate(500, 360)">
       <g>
         <path class="st0" d="M1696.11,3310.12q-.59,3.02-1.86,5.45t-3.21,4.19-4.47,2.71-5.62.95q-3.45,0-6.44-1.17-3-1.16-5.17-3.5-2.17-2.33-3.42-5.75-1.24-3.41-1.24-7.97,0-4.46,1.14-8.03,1.14-3.58,3.26-6.04,2.12-2.47,5.16-3.79,3.05-1.33,6.81-1.33,3.29,0,5.97.98,2.67.98,4.61,2.71,1.93,1.72,3.07,4.05,1.14,2.33,1.41,4.98h-7.37q-.74-3.02-2.86-4.69-2.12-1.67-4.77-1.67-4.61,0-6.79,3.31-2.17,3.32-2.17,9.09,0,5.89,2.15,9.15,2.14,3.26,6.44,3.26,3.28,0,5.27-1.78,1.99-1.77,2.73-5.11H1696.11Z"/>
         <path class="st0" d="M1726.62,3322.2v-24.12l-6.57,24.12h-7.31l-6.52-24.01v24.01h-6.84v-35.19h10.81l6.36,25.81,6.36-25.81h10.6v35.19H1726.62Z"/>
@@ -155,7 +155,7 @@ export const MOLDE_CAMISA_BACKGROUND_INNER = `
     </g>
 
     <!-- 3. ICONO Y TEXTO: READY TO PRINT -->
-    <g id="MARK_READY_TO_PRINT">
+    <g id="MARK_READY_TO_PRINT" transform="translate(700, 360)">
       <g>
         <path class="st0" d="M2642.96,3322.2v-9.06q0-2.55-1.17-3.63t-4.34-1.09h-7.85v13.78h-7.15v-35.19h17.86q2.44,0,4.42.77,1.99.76,3.42,2.12,1.43,1.35,2.2,3.23.77,1.88.77,4.05,0,2.87-1.35,5.06-1.35,2.2-3.9,3.11,2.33.74,3.31,2.27.99,1.54.99,4.62v9.96H2642.96ZM2629.6,3293.1v9.38h9.22q2.97,0,4.19-1.32,1.22-1.33,1.22-3.34,0-2.07-1.19-3.39-1.2-1.33-3.95-1.33H2629.6Z"/>
         <path class="st0" d="M2655.05,3322.2v-35.19h25.87v6.15h-18.71v7.52h17.22v6.2h-17.22v9.07h19.55v6.25H2655.05Z"/>
@@ -177,17 +177,8 @@ export const MOLDE_CAMISA_BACKGROUND_INNER = `
       </g>
     </g>
 
-    <!-- 4. SELLO SUPERIOR: SIZE M PREMIUM QUALITY (5 ESTRELLAS) -->
-    <g id="MARK_SIZE_M_PREMIUM">
-      <path class="st10" d="M3313.49,124.51q0-.77-.23-1.38t-.82-1.16-1.62-.97-2.61-.8q-3.19-.72-5.37-1.26-2.18-.54-3.97-1.36-2.77-1.23-4.24-3.2-1.46-1.98-1.46-5.21,0-2.31.77-4.24.77-1.92,2.34-3.31,1.56-1.38,3.9-2.15,2.33-.77,5.46-.77,3.23,0,5.75.82,2.51.82,4.23,2.31,1.72,1.49,2.67,3.54.95,2.05,1.05,4.52h-6.77q-.26-2.62-1.9-3.9-1.64-1.29-4.88-1.29-3.02,0-4.56,1.03-1.54,1.03-1.54,2.98,0,1.64,1.2,2.61,1.21.98,4.08,1.7,2.93.72,5.57,1.41,2.64.69,4.54,1.56,1.13.52,2.11,1.18.97.67,1.69,1.65.72.97,1.13,2.3.41,1.34.41,3.13,0,2.83-1,4.85-1,2.03-2.82,3.37-1.83,1.33-4.31,1.97-2.49.64-5.47.64-3.18,0-5.8-.69-2.61-.69-4.51-2.13-1.9-1.44-2.98-3.57-1.08-2.13-1.13-5h6.88q.1,2.62,2.13,4.13,2.02,1.52,5.46,1.52,3.18,0,4.9-1.26Q3313.49,126.82,3313.49,124.51ZM3332.64,99.83h-7.14v34.07h7.14V99.83ZM3364.01,127.85h-17.81l17.81-22.43v-5.59h-26.12v5.95h17.19l-17.7,22.07v6.05h26.63V127.85ZM3375.88,127.85v-8.78h16.68v-6h-16.68v-7.29h18.11v-5.95h-25.04v34.07h25.87v-6.05H3375.88ZM3343.93,221.24l-19.09-77.44h-32.44v105.59h20.52v-72.04l19.56,72.04h21.94l19.72-72.36v72.36h20.68v-105.59h-31.81L3343.93,221.24Z"/>
-      <g>
-        <polygon class="st9" points="3284.43 288.36 3282.46 283.29 3280.48 288.36 3275.05 288.68 3279.26 292.12 3277.88 297.39 3282.46 294.45 3287.04 297.39 3285.66 292.12 3289.87 288.68 3284.43 288.36"/>
-        <polygon class="st9" points="3314.64 288.36 3312.66 283.29 3310.68 288.36 3305.25 288.68 3309.46 292.12 3308.08 297.39 3312.66 294.45 3317.24 297.39 3315.86 292.12 3320.07 288.68 3314.64 288.36"/>
-        <polygon class="st9" points="3410.68 288.68 3405.25 288.36 3403.27 283.29 3401.29 288.36 3395.86 288.68 3400.07 292.12 3398.69 297.39 3403.27 294.45 3407.85 297.39 3406.47 292.12 3410.68 288.68"/>
-        <polygon class="st9" points="3375.04 288.36 3373.07 283.29 3371.09 288.36 3365.66 288.68 3369.87 292.12 3368.49 297.39 3373.07 294.45 3377.65 297.39 3376.26 292.12 3380.48 288.68 3375.04 288.36"/>
-        <polygon class="st9" points="3344.84 288.36 3342.86 283.29 3340.89 288.36 3335.45 288.68 3339.67 292.12 3338.28 297.39 3342.86 294.45 3347.44 297.39 3346.06 292.12 3350.27 288.68 3344.84 288.36"/>
-      </g>
-    </g>
+    <!-- 4. SELLO SUPERIOR: ESPACIO RESERVADO PARA SELLO DINÁMICO DE TALLA (SIN GHOSTING) -->
+    <g id="MARK_SIZE_M_PREMIUM"></g>
 
     <!-- 5. FRANJAS SLASH SUPERIORES ///////// (GUÍAS DE ALINEACIÓN DE MANGAS) -->
     <g id="MARK_SLEEVE_SLASHES">
@@ -1602,13 +1593,13 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
   <!-- 1. CAPA MASTER DE PATRONAJE (FONDO ORIGINAL ADOBE ILLUSTRATOR) -->
   <g id="BACKGROUND">
     ${MOLDE_CAMISA_BACKGROUND_INNER}
-    ${generateDynamicSizeBadgeSvg(activeSize)}
+    ${generateDynamicSizeBadgeSvg(activeSize, 4150, 160)}
   </g>
 
   <!-- 2. CAPA DE PRODUCCIÓN TEXTIL 1:1 (DISEÑO Y PIEZAS APLANADAS DIRECTO DE 3D) -->
   <g id="DESIGN">
     <!-- ==================== PIEZA 1: DELANTERO / FRENTE ==================== -->
-    <g id="PIECE_FRENTE" transform="translate(${frenteCenterX}, 2122.1) scale(${scaleX}, ${scaleY}) translate(-${frenteCenterX}, -2122.1)">
+    <g id="PIECE_FRENTE" transform="translate(1050, 2260) scale(${scaleX}, ${scaleY}) translate(-948.54, -2122.1)">
       <g clip-path="url(#clip-frente)">
         ${
           directTextures?.front
@@ -1632,7 +1623,7 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     </g>
 
     <!-- ==================== PIEZA 2: TRASERO / ESPALDA ==================== -->
-    <g id="PIECE_TRASERO" transform="translate(${traseroCenterX}, 2110.53) scale(${scaleX}, ${scaleY}) translate(-${traseroCenterX}, -2110.53)">
+    <g id="PIECE_TRASERO" transform="translate(3350, 2260) scale(${scaleX}, ${scaleY}) translate(-2594.73, -2110.53)">
       <g clip-path="url(#clip-trasero)">
         ${
           directTextures?.back
@@ -1658,7 +1649,7 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     </g>
 
     <!-- ==================== PIEZA 3: MANGA IZQUIERDA ==================== -->
-    <g id="PIECE_MANGA_IZQUIERDA" transform="translate(${frenteCenterX}, 539.51) scale(${scaleX}, ${scaleY}) translate(-${frenteCenterX}, -539.51)">
+    <g id="PIECE_MANGA_IZQUIERDA" transform="translate(1050, 520) scale(${scaleX}, ${scaleY}) translate(-948.54, -539.51)">
       <g clip-path="url(#clip-manga-izq)">
         ${
           directTextures?.left_sleeve
@@ -1680,7 +1671,7 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     </g>
 
     <!-- ==================== PIEZA 4: MANGA DERECHA ==================== -->
-    <g id="PIECE_MANGA_DERECHA" transform="translate(${traseroCenterX}, 539.51) scale(${scaleX}, ${scaleY}) translate(-${traseroCenterX}, -539.51)">
+    <g id="PIECE_MANGA_DERECHA" transform="translate(3350, 520) scale(${scaleX}, ${scaleY}) translate(-2594.73, -539.51)">
       <g clip-path="url(#clip-manga-der)">
         ${
           directTextures?.right_sleeve
@@ -1702,7 +1693,7 @@ export function generateProductionMoldSvgString(design, activePlayer = {}, optio
     </g>
 
     <!-- ==================== PIEZA 5: TIRA DE CUELLO / RIBETE ==================== -->
-    <g id="PIECE_CUELLO" transform="translate(1771.64, 895.15) scale(${scaleX}, ${scaleY}) translate(-1771.64, -895.15)">
+    <g id="PIECE_CUELLO" transform="translate(2200, 950) scale(${scaleX}, ${scaleY}) translate(-1771.64, -895.15)">
       <rect x="1700" y="200" width="140" height="1400" fill="${collarColor}" />
       ${showCutLines ? `<rect x="1700" y="200" width="140" height="1400" class="cut-line" />` : ''}
       ${showLabels ? `<text x="1770" y="900" text-anchor="middle" transform="rotate(-90 1770 900)" class="piece-tag">[ 5. TIRA DE CUELLO • TALLA ${activeSize} ]</text>` : ''}
